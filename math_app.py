@@ -2,7 +2,7 @@ import streamlit as st
 import random
 
 # ==========================================
-# 1. 內嵌視覺圖庫 (SVG Assets) - 擴充版
+# 1. 內嵌視覺圖庫 (SVG Assets)
 # ==========================================
 SVG_ASSETS = {
     # --- 原有圖庫 ---
@@ -12,15 +12,13 @@ SVG_ASSETS = {
     "parallel_lines": """<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg"><line x1="20" y1="50" x2="280" y2="50" stroke="black" stroke-width="2"/><text x="290" y="55">L1</text><line x1="20" y1="150" x2="280" y2="150" stroke="black" stroke-width="2"/><text x="290" y="155">L2</text><line x1="80" y1="20" x2="220" y2="180" stroke="red" stroke-width="2"/><text x="120" y="65" font-size="14">∠1</text><text x="170" y="140" font-size="14" fill="blue" font-weight="bold">∠2 = ?</text><text x="20" y="20" fill="gray">若 L1 // L2</text></svg>""",
     "parabola_visual": """<svg width="300" height="300" viewBox="-10 -10 20 20" xmlns="http://www.w3.org/2000/svg"><line x1="-9" y1="0" x2="9" y2="0" stroke="gray" stroke-width="0.5"/><line x1="0" y1="9" x2="0" y2="-9" stroke="gray" stroke-width="0.5"/><path d="M -3,5 Q 0,-4 3,5" stroke="blue" stroke-width="1" fill="none"/><circle cx="0" cy="-4" r="0.8" fill="red"/><text x="1" y="-4" fill="red" font-size="2">頂點</text><text x="-8" y="8" font-size="2">y = ax² + k</text></svg>""",
     "circle_tangent": """<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg"><circle cx="150" cy="150" r="80" stroke="black" stroke-width="2" fill="none"/><circle cx="150" cy="150" r="3" fill="black"/><text x="140" y="145">O</text><line x1="50" y1="250" x2="250" y2="50" stroke="red" stroke-width="2"/><text x="260" y="60" fill="red">L (切線)</text><line x1="150" y1="150" x2="206.5" y2="93.5" stroke="blue" stroke-width="2" stroke-dasharray="5,5"/><circle cx="206.5" cy="93.5" r="5" fill="red"/><text x="215" y="100">P (切點)</text><text x="170" y="130" fill="blue">半徑 r</text><text x="20" y="30" fill="gray">請問 OP 與 L 的夾角？</text></svg>""",
-    
-    # --- 新增圖庫 ---
     "linear_graph": """<svg width="300" height="300" viewBox="-10 -10 20 20" xmlns="http://www.w3.org/2000/svg"><line x1="-10" y1="0" x2="10" y2="0" stroke="black" stroke-width="0.5"/><line x1="0" y1="10" x2="0" y2="-10" stroke="black" stroke-width="0.5"/><text x="9" y="-1">x</text><text x="1" y="9">y</text><line x1="-5" y1="-8" x2="8" y2="5" stroke="blue" stroke-width="1.5"/><circle cx="0" cy="-3" r="0.5" fill="red"/><text x="1" y="-3" font-size="2">y截距(0, b)</text><circle cx="3" cy="0" r="0.5" fill="red"/><text x="3" y="-1" font-size="2">x截距</text></svg>""",
     "similar_triangles": """<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg"><polygon points="20,180 100,180 60,100" fill="none" stroke="blue" stroke-width="2"/><text x="60" y="195" text-anchor="middle">小三角形</text><text x="35" y="140">1</text><polygon points="120,180 280,180 200,20" fill="none" stroke="red" stroke-width="2"/><text x="200" y="195" text-anchor="middle">大三角形 (放大2倍)</text><text x="150" y="100">2</text></svg>""",
     "circle_angles": """<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg"><circle cx="150" cy="150" r="100" stroke="black" fill="none"/><circle cx="150" cy="150" r="3" fill="black"/><text x="140" y="160">O(圓心)</text><path d="M 50,150 L 150,150 L 100,63.4" stroke="red" stroke-width="2" fill="none"/><text x="120" y="130" fill="red">圓心角</text><path d="M 50,150 L 250,150 L 100,63.4" stroke="blue" stroke-width="2" fill="none" stroke-dasharray="5,5"/><text x="200" y="130" fill="blue">圓周角</text><text x="100" y="40">對同一弧</text></svg>"""
 }
 
 # ==========================================
-# 2. 海量題庫 (已擴充圖形標記)
+# 2. 海量題庫
 # ==========================================
 MATH_DB = {
     # ---------------- 國一 (七年級) ----------------
@@ -28,19 +26,19 @@ MATH_DB = {
         {"q": "計算 $(-15) + 8 - (-5)$ 的值？", "options": ["-2", "-12", "2", "-28"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "負負得正：$-15 + 8 + 5 = -15 + 13 = -2$"},
         {"q": "【圖解題】參考數線圖，-4 到 3 的距離？", "options": ["1", "7", "-1", "-7"], "ans": 1, "diff": "簡單", "type": "單選", "svg": "number_line_dist", "expl": "距離 = 大減小 = $3 - (-4) = 7$。"},
         {"q": "若 $|a| = 5$，在數線上表示 a 的點與原點距離為何？", "options": ["5", "-5", "0", "25"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "number_line_dist", "expl": "絕對值的幾何意義就是與原點的距離。"},
-        {"q": "計算 $12 \div (-3) \times 4$？", "options": ["-16", "-1", "16", "1"], "ans": 0, "diff": "中等", "type": "單選", "expl": "由左而右運算：$-4 \times 4 = -16$ (不能先算後面乘法！)"}
+        {"q": "計算 $12 \\div (-3) \\times 4$？", "options": ["-16", "-1", "16", "1"], "ans": 0, "diff": "中等", "type": "單選", "expl": "由左而右運算：$-4 \\times 4 = -16$ (不能先算後面乘法！)"}
     ],
     "七上：分數與指數律": [
         {"q": "計算 $\\frac{2}{3} + (-\\frac{1}{4})$？", "options": ["5/12", "3/7", "1/12", "11/12"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "通分母為 12：$\\frac{8}{12} - \\frac{3}{12} = \\frac{5}{12}$。"},
-        {"q": "下列何者錯誤？", "options": ["$2^3 \times 2^2 = 2^5$", "$(2^3)^2 = 2^6$", "$2^0 = 1$", "$2^3 + 2^3 = 2^6$"], "ans": 3, "diff": "中等", "type": "單選", "expl": "$2^3 + 2^3 = 2 \times 2^3 = 2^4 \ne 2^6$ (相加不能指數相加)。"}
+        {"q": "下列何者錯誤？", "options": ["$2^3 \\times 2^2 = 2^5$", "$(2^3)^2 = 2^6$", "$2^0 = 1$", "$2^3 + 2^3 = 2^6$"], "ans": 3, "diff": "中等", "type": "單選", "expl": "$2^3 + 2^3 = 2 \\times 2^3 = 2^4 \\ne 2^6$ (相加不能指數相加)。"}
     ],
     "七上：一元一次方程式": [
         {"q": "化簡 $5(x-2) - 2(2x+1)$？", "options": ["$x-12$", "$x-8$", "$9x-12$", "$x+8$"], "ans": 0, "diff": "中等", "type": "單選", "expl": "$5x - 10 - 4x - 2 = x - 12$。"},
-        {"q": "解方程式 $\\frac{x}{3} + 1 = x - 3$？", "options": ["6", "4", "2", "-6"], "ans": 0, "diff": "中等", "type": "單選", "expl": "同乘 3：$x + 3 = 3x - 9 \Rightarrow 12 = 2x \Rightarrow x = 6$。"},
-        {"q": "父親今年 40 歲，兒子 10 歲，幾年後父親年齡是兒子的 3 倍？", "options": ["5", "8", "10", "15"], "ans": 0, "diff": "中等", "type": "單選", "expl": "設 x 年後：$40+x = 3(10+x) \Rightarrow 40+x = 30+3x \Rightarrow 10=2x \Rightarrow x=5$。"}
+        {"q": "解方程式 $\\frac{x}{3} + 1 = x - 3$？", "options": ["6", "4", "2", "-6"], "ans": 0, "diff": "中等", "type": "單選", "expl": "同乘 3：$x + 3 = 3x - 9 \\Rightarrow 12 = 2x \\Rightarrow x = 6$。"},
+        {"q": "父親今年 40 歲，兒子 10 歲，幾年後父親年齡是兒子的 3 倍？", "options": ["5", "8", "10", "15"], "ans": 0, "diff": "中等", "type": "單選", "expl": "設 x 年後：$40+x = 3(10+x) \\Rightarrow 40+x = 30+3x \\Rightarrow 10=2x \\Rightarrow x=5$。"}
     ],
     "七下：二元一次聯立方程式": [
-        {"q": "解 $\\begin{cases} x+y=5 \\\\ x-y=1 \\end{cases}$，$(x, y)$？", "options": ["(3, 2)", "(2, 3)", "(4, 1)", "(1, 4)"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "相加：$2x=6 \Rightarrow x=3$。代回 $y=2$。"}
+        {"q": "解 $\\begin{cases} x+y=5 \\\\ x-y=1 \\end{cases}$，$(x, y)$？", "options": ["(3, 2)", "(2, 3)", "(4, 1)", "(1, 4)"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "相加：$2x=6 \\Rightarrow x=3$。代回 $y=2$。"}
     ],
     "七下：坐標與函數圖形": [
         {"q": "【圖解題】點 P 在第三象限，其坐標特性？", "options": ["(+,+)", "(-,+)", "(-,-)", "(+,-)"], "ans": 2, "diff": "簡單", "type": "單選", "svg": "coordinate_q2", "expl": "左(-)、下(-)。"},
@@ -50,25 +48,25 @@ MATH_DB = {
 
     # ---------------- 國二 (八年級) ----------------
     "八上：乘法公式與多項式": [
-        {"q": "展開 $(a-b)^2$？", "options": ["$a^2-b^2$", "$a^2+b^2$", "$a^2-2ab+b^2$", "$a^2+2ab+b^2$"], "ans": 2, "diff": "簡單", "type": "單選", "expl": "差平方公式。"},
+        {"q": "展開 $(a-b)^2$？", "options": ["$a^2-b^2$", "$a^2+b^2$", "$a^2-2ab+b^2$", "$a^2+2ab+b^2$"], "ans": 2, "diff": "簡單", "type": "單選", "expl": "差平方公式：$(a-b)^2 = a^2 - 2ab + b^2$"},
         {"q": "計算 $199^2$？", "options": ["39601", "39999", "39901", "39801"], "ans": 0, "diff": "中等", "type": "單選", "expl": "$(200-1)^2 = 40000 - 400 + 1 = 39601$。"}
     ],
     "八上：平方根與畢氏定理": [
-        {"q": "【圖解題】直角三角形兩股為 5, 12，斜邊？", "options": ["13", "17", "10", "15"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "pythagoras_visual", "expl": "$\sqrt{5^2+12^2} = 13$。"},
-        {"q": "【圖解題】若直角三角形斜邊為 10，一股為 6，參考圖形概念，另一股為？", "options": ["8", "4", "2", "12"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "pythagoras_visual", "expl": "$\sqrt{10^2-6^2} = \sqrt{64} = 8$。"},
-        {"q": "計算 $\sqrt{20}$ 化簡後？", "options": ["$2\sqrt{5}$", "$5\sqrt{2}$", "$4\sqrt{5}$", "10"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "$20 = 4 \times 5$，4 開出來是 2。"}
+        {"q": "【圖解題】直角三角形兩股為 5, 12，斜邊？", "options": ["13", "17", "10", "15"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "pythagoras_visual", "expl": "$\\sqrt{5^2+12^2} = 13$。"},
+        {"q": "【圖解題】若直角三角形斜邊為 10，一股為 6，參考圖形概念，另一股為？", "options": ["8", "4", "2", "12"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "pythagoras_visual", "expl": "$\\sqrt{10^2-6^2} = \\sqrt{64} = 8$。"},
+        {"q": "計算 $\\sqrt{20}$ 化簡後？", "options": ["$2\\sqrt{5}$", "$5\\sqrt{2}$", "$4\\sqrt{5}$", "10"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "$20 = 4 \\times 5$，4 開出來是 2。"}
     ],
     "八上：因式分解": [
         {"q": "分解 $x^2 - 25$？", "options": ["$(x-5)^2$", "$(x+5)(x-5)$", "$(x+25)(x-1)$", "無法分解"], "ans": 1, "diff": "簡單", "type": "單選", "expl": "平方差：$a^2-b^2 = (a+b)(a-b)$。"},
-        {"q": "分解 $x^2 + 5x + 6$？", "options": ["$(x+2)(x+3)$", "$(x+1)(x+6)$", "$(x-2)(x-3)$", "$(x-1)(x-6)$"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "積 6 和 5 $\Rightarrow$ 2, 3。"}
+        {"q": "分解 $x^2 + 5x + 6$？", "options": ["$(x+2)(x+3)$", "$(x+1)(x+6)$", "$(x-2)(x-3)$", "$(x-1)(x-6)$"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "積 6 和 5 $\\Rightarrow$ 2, 3。"}
     ],
     "八下：等差數列與級數": [
-        {"q": "數列 2, 5, 8, ... 第 20 項？", "options": ["59", "60", "62", "57"], "ans": 0, "diff": "中等", "type": "單選", "expl": "$a_{20} = 2 + 19 \times 3 = 59$。"},
-        {"q": "級數 1+2+...+100？", "options": ["5050", "5000", "5100", "10100"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "梯形公式：$(1+100) \times 100 \div 2 = 5050$。"}
+        {"q": "數列 2, 5, 8, ... 第 20 項？", "options": ["59", "60", "62", "57"], "ans": 0, "diff": "中等", "type": "單選", "expl": "$a_{20} = 2 + 19 \\times 3 = 59$。"},
+        {"q": "級數 1+2+...+100？", "options": ["5050", "5000", "5100", "10100"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "梯形公式：$\\frac{(1+100) \\times 100}{2} = 5050$。"}
     ],
     "八下：幾何圖形與性質": [
         {"q": "【圖解題】L1//L2，內錯角 ∠1, ∠2 關係？", "options": ["相等", "互補", "互餘", "無關"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "parallel_lines", "expl": "平行線內錯角相等。"},
-        {"q": "正五邊形的「內角和」度數？", "options": ["540", "720", "360", "180"], "ans": 0, "diff": "中等", "type": "單選", "expl": "$(5-2) \times 180 = 540$。"}
+        {"q": "正五邊形的「內角和」度數？", "options": ["540", "720", "360", "180"], "ans": 0, "diff": "中等", "type": "單選", "expl": "$(5-2) \\times 180 = 540$。"}
     ],
 
     # ---------------- 國三 (九年級) ----------------
@@ -78,7 +76,7 @@ MATH_DB = {
     ],
     "九上：圓的性質": [
         {"q": "【圖解題】切線 L 與半徑 OP 的夾角？", "options": ["90度", "60度", "45度", "180度"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "circle_tangent", "expl": "切線垂直半徑。"},
-        {"q": "【圖解題】參考圖形，對同一個弧，圓心角是圓周角的幾倍？", "options": ["2倍", "1/2倍", "相等", "3倍"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "circle_angles", "expl": "圓心角度數 = 所對弧度數 = 2 * 圓周角度數。"},
+        {"q": "【圖解題】參考圖形，對同一個弧，圓心角是圓周角的幾倍？", "options": ["2倍", "1/2倍", "相等", "3倍"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "circle_angles", "expl": "圓心角度數 = 所對弧度數 = 2 $\\times$ 圓周角度數。"},
         {"q": "圓內接四邊形對角關係？", "options": ["互補", "相等", "互餘", "無關"], "ans": 0, "diff": "中等", "type": "單選", "expl": "對角和 180 度。"}
     ],
     "九上：三角形三心": [
@@ -117,7 +115,7 @@ def main():
     
     unit_options = list(MATH_DB.keys())
     selected_unit = st.sidebar.selectbox("選擇單元", unit_options, on_change=reset_exam)
-    st.sidebar.info("💡 此版本增加了更多幾何觀念的視覺輔助圖形。")
+    st.sidebar.info("💡 此版本修正了詳解顯示亂碼的問題，數學符號現在能完美顯示了。")
 
     st.title("📐 國中數學：視覺增強版")
     st.markdown(f"#### 目前單元：{selected_unit}")
@@ -156,6 +154,7 @@ def main():
                     st.markdown(SVG_ASSETS[q["svg"]], unsafe_allow_html=True)
                     st.caption("👆 請參考圖形作答")
                 
+                # 題目使用 markdown 顯示數學
                 st.markdown(f"### {q['q']}")
                 st.radio("選項", q['options'], key=f"q_{idx}", index=None, label_visibility="collapsed")
                 st.divider()
@@ -196,7 +195,10 @@ def main():
                     st.write(f"**題目**：{q_data['q']}")
                     st.write(f"**正解**：{item['correct']}")
                     st.markdown(f"**💡 解析**：")
-                    st.latex(q_data['expl'])
+                    
+                    # === 核心修正點：使用 st.markdown 來正確顯示中文混和數學 ===
+                    st.markdown(q_data['expl']) 
+                    # =========================================================
 
             col1, col2 = st.columns(2)
             with col1:
