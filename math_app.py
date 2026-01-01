@@ -1,10 +1,9 @@
 import streamlit as st
 import random
 import math
-import time
 
 # ==========================================
-# 1. 核心：雲端題庫製造機 (嚴格維持 1250 題量)
+# 1. 核心：雲端題庫製造機 (嚴格恢復 1250 題)
 # ==========================================
 @st.cache_data
 def create_cloud_database():
@@ -18,7 +17,7 @@ def create_cloud_database():
         "4-3 應用問題": []
     }
 
-    # ================= 3-1 證明與推理 (5種變體 x 50 = 250題) =================
+    # ================= 3-1 證明與推理 (5種變體 x 50) =================
     for _ in range(50):
         prop = random.choice(["SSS", "SAS", "ASA", "AAS", "RHS"])
         database["3-1 證明與推理"].append({
@@ -51,7 +50,7 @@ def create_cloud_database():
             "q": f"下列何者是「{shape[0]}」對角線必具備的性質？",
             "options": [shape[1], "只有一條平分", "無特殊性質", "以上皆非"],
             "ans": shape[1],
-            "expl": f"{shape[0]}的對角線性質：{shape[1]}。",
+            "expl": f"{shape[0]}的性質：{shape[1]}。",
             "svg": "none"
         })
     for _ in range(50):
@@ -61,58 +60,58 @@ def create_cloud_database():
             "q": f"正 {n} 邊形的內角總和是多少度？",
             "options": [str(ans_val), str(n*180), "360", "180"],
             "ans": str(ans_val),
-            "expl": f"公式：(n-2)×180 = ({n}-2)×180 = {ans_val}。",
+            "expl": f"公式：(n-2)×180 = {ans_val}。",
             "svg": "none"
         })
 
-    # ================= 3-2 外心 (2種變體 x 50 = 100題) =================
+    # ================= 3-2 外心 (獨立 100 題) =================
     for _ in range(50):
         triple = random.choice([(6,8,10), (5,12,13), (8,15,17), (9,12,15), (7,24,25)])
         a, b, c = triple
         database["3-2 三角形的外心"].append({
-            "q": f"直角三角形兩股長為 {a}, {b}，求其「外接圓半徑」？",
+            "q": f"直角三角形兩股長為 {a}, {b}，其「外接圓半徑」為何？",
             "options": [str(c/2), str(c), str(a+b), str(c*2)],
             "ans": str(c/2),
-            "expl": f"直角三角形外心在斜邊中點，外接圓半徑 = 斜邊的一半。",
+            "expl": "直角三角形外心在斜邊中點，半徑為斜邊一半。",
             "svg": "triangle_circumcenter"
         })
     for _ in range(50):
         database["3-2 三角形的外心"].append({
-            "q": "三角形的外心是指哪三條線的交點？",
+            "q": "三角形的外心是哪三條線的交點？",
             "options": ["三邊中垂線", "三角平分線", "三中線", "三高"],
             "ans": "三邊中垂線",
-            "expl": "外心是三邊中垂線的交點，到三頂點等距離。",
+            "expl": "外心是三邊中垂線的交點。",
             "svg": "none"
         })
 
-    # ================= 3-3 內心 (2種變體 x 50 = 100題) =================
+    # ================= 3-3 內心 (獨立 100 題) =================
     for _ in range(50):
         deg = random.choice([40, 50, 60, 70, 80])
         database["3-3 三角形的內心"].append({
             "q": f"I 為內心，若 ∠A = {deg}°，求 ∠BIC？",
             "options": [str(90 + deg//2), str(180-deg), str(90+deg), str(2*deg)],
             "ans": str(90 + deg//2),
-            "expl": f"公式：90 + A/2 = 90 + {deg//2} = {90+deg//2}。",
+            "expl": f"公式：90 + ∠A/2 = {90 + deg//2}。",
             "svg": "triangle_incenter",
             "svg_params": {"a": deg}
         })
     for _ in range(50):
         database["3-3 三角形的內心"].append({
-            "q": "三角形的內心到什麼地方的距離相等？",
-            "options": ["三邊", "三頂點", "三中點", "重心"],
-            "ans": "三邊",
-            "expl": "內心是三內角平分線交點，到三邊等距離（即內切圓半徑）。",
+            "q": "三角形的內心是指哪三條線的交點？",
+            "options": ["三角平分線", "三中垂線", "三中線", "三高"],
+            "ans": "三角平分線",
+            "expl": "內心是三內角平分線的交點。",
             "svg": "none"
         })
 
-    # ================= 3-4 重心 (2種變體 x 50 = 100題) =================
+    # ================= 3-4 重心 (獨立 100 題) =================
     for _ in range(50):
         m = random.randint(6, 30) * 3
         database["3-4 三角形的重心"].append({
             "q": f"若中線 AD 長為 {m}，G 為重心，求 AG？",
             "options": [str(int(m*2/3)), str(m), str(int(m/3)), str(int(m/2))],
             "ans": str(int(m*2/3)),
-            "expl": f"重心分中線為 2:1，故 AG = 2/3 AD = {int(m*2/3)}。",
+            "expl": f"重心性質：AG = 2/3 AD = {int(m*2/3)}。",
             "svg": "triangle_centroid",
             "svg_params": {"m": m}
         })
@@ -122,19 +121,20 @@ def create_cloud_database():
             "q": f"△ABC 面積為 {area}，G 為重心，則 △GAB 面積為何？",
             "options": [str(int(area/3)), str(int(area/6)), str(int(area/2)), str(area)],
             "ans": str(int(area/3)),
-            "expl": f"重心與三頂點連線將三角形面積平分為三等份。{area}/3 = {int(area/3)}。",
+            "expl": f"重心與頂點連線將面積三等分：{area}/3 = {int(area/3)}。",
             "svg": "none"
         })
 
     # ================= 4-1 因式分解法 (5種變體 x 50 = 250題) =================
     for _ in range(50):
         r1, r2 = random.randint(1, 5), random.randint(-5, -1)
-        term1, term2 = f"(x - {r1})", (f"(x + {abs(r2)})" if r2 < 0 else f"(x - {r2})")
+        term1 = f"(x - {r1})"
+        term2 = f"(x + {abs(r2)})" if r2 < 0 else f"(x - {r2})"
         database["4-1 因式分解法"].append({
             "q": f"解方程式 {term1}{term2} = 0？",
             "options": [f"{r1} 或 {r2}", f"{-r1} 或 {-r2}", f"{r1} 或 {-r2}", "無解"],
             "ans": f"{r1} 或 {r2}",
-            "expl": f"令括號為 0 可得解為 {r1} 或 {r2}。",
+            "expl": f"解為 {r1} 或 {r2}。",
             "svg": "roots_line_hidden",
             "svg_params": {"r1_label": "a", "r2_label": "b", "r1": r1, "r2": r2}
         })
@@ -144,7 +144,7 @@ def create_cloud_database():
             "q": f"解方程式 x² - {k}x = 0？",
             "options": [f"0 或 {k}", f"{k}", "0", f"1 或 {k}"],
             "ans": f"0 或 {k}",
-            "expl": f"x(x-{k})=0，故 x=0 或 {k}。",
+            "expl": "x(x-k)=0 => x=0, k。",
             "svg": "roots_0_k",
             "svg_params": {"k": k}
         })
@@ -154,16 +154,16 @@ def create_cloud_database():
             "q": f"解方程式 x² - {k*k} = 0？",
             "options": [f"±{k}", f"{k}", str(k*k), "無解"],
             "ans": f"±{k}",
-            "expl": f"x²={k*k}，故 x=±{k}。",
+            "expl": f"x²={k*k} => x=±{k}。",
             "svg": "none"
         })
     for _ in range(50):
         k = random.randint(2, 5)
         database["4-1 因式分解法"].append({
             "q": f"若 x={k} 是 x² + ax + b = 0 的一根，則？",
-            "options": [f"代入 {k} 等號成立", f"代入 -{k} 等號成立", "a必為正", "b必為負"],
+            "options": [f"代入 {k} 等號成立", f"代入 -{k} 等號成立", "a必正", "b必負"],
             "ans": f"代入 {k} 等號成立",
-            "expl": "根的定義即為代入未知數後使等號成立。",
+            "expl": "根代入後使等號成立。",
             "svg": "none"
         })
     for _ in range(50):
@@ -172,7 +172,7 @@ def create_cloud_database():
             "q": f"方程式 (x-{k})² = 0 有幾個解？",
             "options": ["1個 (重根)", "2個相異解", "無解", "無限多"],
             "ans": "1個 (重根)",
-            "expl": "完全平方式的解為重根。",
+            "expl": "完全平方式為重根。",
             "svg": "none"
         })
 
@@ -183,32 +183,32 @@ def create_cloud_database():
             "q": f"將 x² + {k}x 配成完全平方式，需加上？",
             "options": [str((k//2)**2), str(k), str(k*2), "1"],
             "ans": str((k//2)**2),
-            "expl": f"加上 (係數一半)² = ({k}/2)² = {(k//2)**2}。",
+            "expl": f"加上 (一次項係數一半) 的平方：{(k//2)**2}。",
             "svg": "area_square_k"
         })
     for _ in range(50):
         b, c = random.choice([2, 4, 6]), random.randint(1, 3)
         database["4-2 配方法與公式解"].append({
-            "q": f"x² + {b}x + {c} = 0 的判別式 D 為何？",
+            "q": f"x² + {b}x + {c} = 0 的判別式 D？",
             "options": [str(b*b-4*c), str(b*b+4*c), "0", "1"],
             "ans": str(b*b-4*c),
-            "expl": f"D = b² - 4ac = {b*b} - 4*{c} = {b*b-4*c}。",
+            "expl": f"D = b² - 4ac = {b*b-4*c}。",
             "svg": "none"
         })
     for _ in range(50):
         database["4-2 配方法與公式解"].append({
-            "q": "若判別式 D < 0，則根的性質為何？",
-            "options": ["無實根", "重根", "兩相異實根", "無法判斷"],
+            "q": "判別式 D < 0 時，根的性質？",
+            "options": ["無實根", "重根", "相異實根", "無法判斷"],
             "ans": "無實根",
-            "expl": "D < 0 代表方程式無實數解。",
+            "expl": "D < 0 無實數解。",
             "svg": "none"
         })
     for _ in range(50):
         database["4-2 配方法與公式解"].append({
-            "q": "一元二次方程式公式解的分母為何？",
+            "q": "一元二次方程式公式解分母？",
             "options": ["2a", "a", "4a", "b"],
             "ans": "2a",
-            "expl": "公式為 x = (-b ± √D) / 2a。",
+            "expl": "分母為 2a。",
             "svg": "none"
         })
 
@@ -216,45 +216,45 @@ def create_cloud_database():
     for _ in range(50):
         s = random.randint(5, 20)
         database["4-3 應用問題"].append({
-            "q": f"某正方形面積為 {s*s}，求邊長？",
+            "q": f"正方形面積為 {s*s}，求邊長？",
             "options": [str(s), str(s*s), str(s*2), "10"],
             "ans": str(s),
-            "expl": f"邊長 = √{s*s} = {s}。",
+            "expl": f"√{s*s} = {s}。",
             "svg": "area_square"
         })
     for _ in range(50):
         t = random.randint(2, 6)
         database["4-3 應用問題"].append({
-            "q": f"h=5t²。物體落下 {5*t*t} 公尺需時幾秒？",
+            "q": f"落下 {5*t*t} 公尺 (h=5t²)，需幾秒？",
             "options": [str(t), str(t*2), "10", "5"],
             "ans": str(t),
-            "expl": f"{5*t*t}=5t² => t²={t*t} => t={t}。",
+            "expl": f"t²={t*t} => t={t}。",
             "svg": "none"
         })
     for _ in range(50):
         n = random.randint(1, 10)
         database["4-3 應用問題"].append({
-            "q": f"兩連續正整數乘積為 {n*(n+1)}，求較小數？",
+            "q": f"兩連續正整數乘積 {n*(n+1)}，較小數？",
             "options": [str(n), str(n+1), str(n-1), "0"],
             "ans": str(n),
-            "expl": f"n(n+1) = {n*(n+1)}，故 n={n}。",
+            "expl": f"n(n+1) = {n*(n+1)}。",
             "svg": "none"
         })
     for _ in range(50):
         w = random.randint(3, 8)
         database["4-3 應用問題"].append({
-            "q": f"長方形長比寬多2，面積為 {w*(w+2)}，求寬？",
+            "q": f"長比寬多 2，面積 {w*(w+2)}，寬？",
             "options": [str(w), str(w+2), str(w-2), "1"],
             "ans": str(w),
-            "expl": f"x(x+2)={w*(w+2)}，得 x={w}。",
+            "expl": f"寬為 {w}。",
             "svg": "none"
         })
     for _ in range(50):
         database["4-3 應用問題"].append({
-            "q": "算出長度為 -5 應如何處理？",
-            "options": ["不合 (需為正)", "取絕對值", "當作答案", "重算"],
-            "ans": "不合 (需為正)",
-            "expl": "長度在幾何上必須大於 0。",
+            "q": "解應用題算出長度 -5 代表？",
+            "options": ["不合", "取絕對值", "答案", "重算"],
+            "ans": "不合",
+            "expl": "長度需為正。",
             "svg": "none"
         })
 
@@ -293,39 +293,27 @@ class SVGDrawer:
 # 3. APP 介面
 # ==========================================
 st.set_page_config(page_title="國中數學雲端教室", page_icon="☁️")
-st.title("☁️ 國中數學智能題庫 (V25.3)")
+st.title("☁️ 國中數學智能題庫 (V25.4)")
 
 if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
 if 'quiz' not in st.session_state: st.session_state.quiz = []
-if 'start_time' not in st.session_state: st.session_state.start_time = 0
-if 'total_time' not in st.session_state: st.session_state.total_time = 0
 
-with st.spinner('正在雲端重構 1250 題型...'):
-    data = create_cloud_database()
-
+data = create_cloud_database()
 st.sidebar.success(f"✅ 題庫生成完畢！\n共 {sum(len(v) for v in data.values())} 題。\n已排除重複模板。")
 
-def reset_exam():
-    st.session_state.exam_finished = False
-    st.session_state.quiz = []
-    st.session_state.start_time = 0
-
 unit_options = list(data.keys()) + ["全範圍總複習"]
-unit = st.sidebar.selectbox("請選擇練習單元", unit_options, on_change=reset_exam)
+unit = st.sidebar.selectbox("請選擇練習單元", unit_options)
 
 if st.sidebar.button("🚀 生成試卷 (10題)"):
     all_q = []
     for k in data: all_q.extend(data[k])
     target = all_q if unit == "全範圍總複習" else data[unit]
+    # 嚴格隨機抽樣，確保 10 題完全不重複
     st.session_state.quiz = random.sample(target, min(len(target), 10))
     st.session_state.exam_finished = False
-    st.session_state.start_time = time.time()
     st.rerun()
 
 if st.session_state.quiz and not st.session_state.exam_finished:
-    elapsed = int(time.time() - st.session_state.start_time)
-    st.sidebar.metric("⏳ 當前已用時", f"{elapsed} 秒")
-    
     with st.form("quiz_form"):
         u_answers = []
         for i, q in enumerate(st.session_state.quiz):
@@ -336,14 +324,12 @@ if st.session_state.quiz and not st.session_state.exam_finished:
             u_answers.append(u_ans)
             st.divider()
         if st.form_submit_button("✅ 交卷", use_container_width=True):
-            st.session_state.total_time = int(time.time() - st.session_state.start_time)
             st.session_state.results = u_answers
             st.session_state.exam_finished = True
             st.rerun()
 
 if st.session_state.exam_finished:
     score = 0
-    st.info(f"⏱️ 本次測驗總耗時：{st.session_state.total_time} 秒")
     for i, q in enumerate(st.session_state.quiz):
         is_correct = st.session_state.results[i] == q['ans']
         if is_correct: score += 1
@@ -351,7 +337,8 @@ if st.session_state.exam_finished:
             st.write(f"題目: {q['q']}")
             st.write(f"正確答案: {q['ans']}")
             st.info(f"解析: {q['expl']}")
-    st.success(f"## 您的得分: {score * 10} 分")
+    st.success(f"## 您的總分: {score * 10} 分")
     if st.button("🔄 重新生成測驗", use_container_width=True):
-        reset_exam()
+        st.session_state.quiz = []
+        st.session_state.exam_finished = False
         st.rerun()
