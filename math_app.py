@@ -11,19 +11,10 @@ class MathUtils:
         distractors = set()
         count = 0
         if mode == "int": ans = int(ans)
-        
         while len(distractors) < 3 and count < 50:
             count += 1
             if mode == "int":
-                trap = random.choice([
-                    ans + random.randint(1, 5), 
-                    ans - random.randint(1, 5),
-                    ans * 2, 
-                    int(ans / 2), 
-                    -ans,
-                    abs(ans - 10),
-                    ans + 10
-                ])
+                trap = random.choice([ans+random.randint(1,5), ans-random.randint(1,5), ans*2, int(ans/2), -ans, abs(ans-10), ans+10])
                 if trap != ans: distractors.add(str(trap))
             elif mode == "float":
                 trap = round(ans + random.choice([0.5, -0.5, 1.0, -1.0, 2.0]), 1)
@@ -41,10 +32,9 @@ class MathUtils:
         return list(distractors)
 
 # ==========================================
-# 2. 題庫工廠 (V25 - 真正全功能無刪減版)
+# 2. 題庫工廠 (V25.1 完整版)
 # ==========================================
 class QuestionFactory:
-    
     # --- 3-1 證明與推理 ---
     @staticmethod
     def gen_3_1(q_type):
@@ -60,21 +50,16 @@ class QuestionFactory:
             else:
                 bad = random.choice(["SSA", "AAA"])
                 return {"q": f"下列何者「無法」保證全等？", "options": [bad, "SAS", "ASA", "SSS"], "ans": bad, "expl": f"{bad} 不保證全等。", "svg": "none", "params": {}}
-        
         elif q_type == "calc":
-            # V25: 確保 內角、外角、邊角關係、多邊形 都有
             subtype = random.choice(["angle_sum", "ext_angle", "side_angle", "poly"])
-            
             if subtype == "angle_sum":
                 a = random.randint(40, 80); b = random.randint(20, 180-a-10); ans = 180-a-b
                 opts = MathUtils.get_distractors(ans) + [str(ans)]; random.shuffle(opts)
                 return {"q": f"△ABC 中，∠A={a}°，∠B={b}°，求 ∠C？", "options": opts, "ans": str(ans), "expl": "內角和180。", "svg": "general_triangle", "params": {"angle_a": a, "angle_b": b}}
-            
             elif subtype == "ext_angle":
                 a = random.randint(40, 80); b = random.randint(20, 180-a-10); ans = a + b
                 opts = MathUtils.get_distractors(ans) + [str(ans)]; random.shuffle(opts)
                 return {"q": f"△ABC 中，∠A={a}°，∠B={b}°，則 ∠C 的外角？", "options": opts, "ans": str(ans), "expl": "外角定理。", "svg": "general_triangle", "params": {"angle_a": a, "angle_b": b}}
-            
             elif subtype == "side_angle":
                 sides = [5, 6, 7]; random.shuffle(sides)
                 a, b, c = sides[0], sides[1], sides[2]
@@ -82,12 +67,10 @@ class QuestionFactory:
                 ans_map = {a: "∠A", b: "∠B", c: "∠C"}
                 ans = ans_map[min_side]
                 return {"q": f"△ABC 中，AB={c}, BC={a}, AC={b}，請問哪一個角最小？", "options": ["∠A", "∠B", "∠C", "一樣大"], "ans": ans, "expl": f"最小邊 {min_side} 對應最小角 {ans} (小邊對小角)。", "svg": "none", "params": {}}
-            
-            else: # poly
+            else:
                 n = random.choice([5,6,8,10]); ans = (n-2)*180
                 opts = [str(ans), str(n*180), "360", "720"]; random.shuffle(opts)
                 return {"q": f"正 {n} 邊形內角和？", "options": opts, "ans": str(ans), "expl": "(n-2)*180。", "svg": "polygon_n", "params": {"n": n}}
-        
         else: # Real
             scenarios = [
                 {"q": "兩根吸管長 {s1}, {s2}，第三邊 x 的範圍？", "type": "sticks"},
@@ -111,7 +94,6 @@ class QuestionFactory:
         if q_type == "concept":
             tri_type = random.choice([("鈍角", "外部"), ("直角", "斜邊中點"), ("銳角", "內部")])
             return {"q": f"「{tri_type[0]}三角形」的外心位置在哪裡？", "options": [tri_type[1], "頂點", "重心", "不一定"], "ans": tri_type[1], "expl": "外心位置性質。", "svg": "triangle_circumcenter", "params": {}}
-        
         elif q_type == "calc":
             subtype = random.choice(["right_R", "reverse_R", "coord_O"])
             if subtype == "right_R":
@@ -126,7 +108,6 @@ class QuestionFactory:
                 k = random.randint(2, 8) * 2; ans = f"({k//2},{k//2})"
                 opts = MathUtils.get_distractors(ans, "coord") + [ans]; random.shuffle(opts)
                 return {"q": f"A(0,{k}), B({k},0), O(0,0)，求外心座標？", "options": opts, "ans": ans, "expl": "直角三角形外心為斜邊中點。", "svg": "coord_triangle", "params": {"k": k}}
-        
         else: # Real
             scenarios = [
                 {"q": "三村莊 A, B, C 想蓋共用水塔(到三點等距)，選址？", "type": "tower"},
@@ -146,7 +127,6 @@ class QuestionFactory:
     def gen_3_3(q_type):
         if q_type == "concept":
             return {"q": "內心到三角形哪裡的距離相等？", "options": ["三邊", "三頂點", "三中點", "外部"], "ans": "三邊", "expl": "內切圓性質。", "svg": "triangle_incenter_concept", "params": {}}
-        
         elif q_type == "calc":
             subtype = random.choice(["angle", "reverse_angle", "right_r", "area"])
             if subtype == "angle":
@@ -165,7 +145,6 @@ class QuestionFactory:
                 ans_a = random.randint(40, 100); ans_a += 1 if ans_a%2!=0 else 0; bic = 90 + ans_a // 2
                 opts = MathUtils.get_distractors(ans_a) + [str(ans_a)]; random.shuffle(opts)
                 return {"q": f"I 為內心，若 ∠BIC={bic}°，則 ∠A 是幾度？", "options": opts, "ans": str(ans_a), "expl": "(BIC-90)*2。", "svg": "triangle_incenter_angle", "params": {"a": "?"}}
-        
         else: # Real
             scenarios = [
                 {"q": "公園內蓋最大圓形噴水池，圓心選？", "type": "fountain"},
@@ -185,7 +164,6 @@ class QuestionFactory:
     def gen_3_4(q_type):
         if q_type == "concept":
             return {"q": "重心是哪三條線的交點？", "options": ["中線", "中垂線", "角平分線", "高"], "ans": "中線", "expl": "重心定義。", "svg": "triangle_centroid", "params": {}}
-        
         elif q_type == "calc":
             subtype = random.choice(["len_ratio", "coord_G", "area_div"])
             if subtype == "len_ratio":
@@ -203,7 +181,6 @@ class QuestionFactory:
                 total = random.randint(2, 12) * 6; ans = total // 6
                 opts = MathUtils.get_distractors(ans) + [str(ans)]; random.shuffle(opts)
                 return {"q": f"△ABC 面積 {total}，G 為重心，△GAB 內的中線分割出的最小三角形面積？", "options": opts, "ans": str(ans), "expl": "重心將面積六等分。", "svg": "triangle_centroid", "params": {}}
-        
         else: # Real
             scenarios = [
                 {"q": "手指頂住三角形木板平衡，支點是？", "type": "balance"},
@@ -223,32 +200,25 @@ class QuestionFactory:
     def gen_4_1(q_type):
         if q_type == "concept":
             return {"q": "若 ab=0，則？", "options": ["a=0 或 b=0", "a=0 且 b=0", "a=b", "無法判斷"], "ans": "a=0 或 b=0", "expl": "零積性質。", "svg": "none", "params": {}}
-        
         elif q_type == "calc":
-            # V25: 確保 平方差、提公因式、十字交乘、完全平方 都有
             subtype = random.choice(["diff_sq", "cross", "common_factor", "perfect_sq_k"])
-            
             if subtype == "diff_sq":
                 k = random.randint(2, 9); ans = f"(x+{k})(x-{k})"
                 opts = [ans, f"(x-{k})²", f"(x+{k})²", f"x(x-{k})"]; random.shuffle(opts)
                 return {"q": f"因式分解 x² - {k*k}？", "options": opts, "ans": ans, "expl": "平方差公式。", "svg": "diff_squares", "params": {"k": k}}
-            
             elif subtype == "common_factor":
                 a = random.randint(2, 5); b = random.randint(2, 5)
                 ans = f"x({a}x+{b})"
                 return {"q": f"因式分解 {a}x² + {b}x？", "options": [ans, f"x({a}x-{b})", f"x²({a}+{b})", f"({a}x+1)({b}x)"], "ans": ans, "expl": "提公因式 x。", "svg": "none", "params": {}}
-            
             elif subtype == "perfect_sq_k":
                 b = random.randint(2, 10) * 2; ans = (b // 2) ** 2
                 opts = MathUtils.get_distractors(ans) + [str(ans)]; random.shuffle(opts)
                 return {"q": f"若 x² + {b}x + k 是完全平方式，求 k？", "options": opts, "ans": str(ans), "expl": "一次項係數一半的平方。", "svg": "area_square_k", "params": {}}
-            
             else: # cross
                 p = random.randint(1,5); q_val = random.randint(1,5); b = p+q_val; c = p*q_val
                 ans = f"(x+{p})(x+{q_val})"
                 opts = [ans, f"(x-{p})(x-{q_val})", f"(x+{p})(x-{q_val})", f"(x+{b})(x+1)"]; random.shuffle(opts)
                 return {"q": f"因式分解 x² + {b}x + {c}？", "options": opts, "ans": ans, "expl": "十字交乘。", "svg": "none", "params": {}}
-        
         else: # Real
             scenarios = [
                 {"q": "長方形面積 {area}，長寬為整數，長寬關係？", "type": "rect"},
@@ -275,11 +245,8 @@ class QuestionFactory:
                 return {"q": "判別式 D = 0 代表？", "options": ["重根(兩相等實根)", "兩相異實根", "無實根", "無解"], "ans": "重根(兩相等實根)", "expl": "與 x 軸相切。", "svg": "none", "params": {}}
             else:
                 return {"q": "判別式 D < 0 代表？", "options": ["無實根", "重根", "兩相異實根", "無限多解"], "ans": "無實根", "expl": "與 x 軸無交點。", "svg": "parabola_d_neg", "params": {}}
-        
         elif q_type == "calc":
-            # V25: 確保 判別式、配方、根與係數、公式解 都有
             subtype = random.choice(["complete_sq", "sum_roots", "discriminant", "formula"])
-            
             if subtype == "discriminant":
                 d_case = random.choice(["pos", "zero", "neg"])
                 if d_case == "pos":
@@ -289,24 +256,20 @@ class QuestionFactory:
                 else:
                     eq = "x² + x + 5 = 0"; ans = "無實根"; expl = "D = 1-20 < 0"
                 return {"q": f"方程式 {eq} 的根的性質？", "options": ["兩相異實根", "重根", "無實根", "無限多解"], "ans": ans, "expl": expl, "svg": "none", "params": {}}
-            
             elif subtype == "complete_sq":
                 k = random.randint(2, 10) * 2; ans = (k//2)**2
                 opts = MathUtils.get_distractors(ans) + [str(ans)]; random.shuffle(opts)
                 return {"q": f"x² + {k}x + □ 配成完全平方，□ = ？", "options": opts, "ans": str(ans), "expl": "一半的平方。", "svg": "area_square_k", "params": {}}
-            
             elif subtype == "sum_roots":
                 r1, r2 = random.randint(-5, 5), random.randint(-5, 5)
                 b = -(r1 + r2); c = r1 * r2; ans = r1 + r2
                 eq = f"x² + {b}x + {c} = 0" if b >= 0 else f"x² - {-b}x + {c} = 0"
                 opts = MathUtils.get_distractors(ans) + [str(ans)]; random.shuffle(opts)
                 return {"q": f"方程式 {eq} 的兩根之和為何？", "options": opts, "ans": str(ans), "expl": "兩根和 = -b/a。", "svg": "none", "params": {}}
-            
             else: # formula
                 ans = "x = (-b ± √D) / 2a"
                 opts = [ans, "x = -b / 2a", "x = (-b ± √D) / a", "x = b ± √D"]; random.shuffle(opts)
                 return {"q": "一元二次方程式公式解為何？", "options": opts, "ans": ans, "expl": "公式解。", "svg": "none", "params": {}}
-        
         else: # Real
             scenarios = [
                 {"q": "長方形花圃長20寬10，中間開闢等寬道路，剩餘面積144，求路寬？", "type": "path"},
@@ -329,7 +292,6 @@ class QuestionFactory:
     def gen_4_3(q_type):
         if q_type == "concept":
             return {"q": "解幾何邊長為負數，應？", "options": ["捨去", "取絕對值", "保留", "重算"], "ans": "捨去", "expl": "長度為正。", "svg": "none", "params": {}}
-        
         elif q_type == "calc":
             subtype = random.choice(["num_sq", "max_val"])
             if subtype == "num_sq":
@@ -340,7 +302,6 @@ class QuestionFactory:
                 h = random.randint(1,5); k = random.randint(5,15); ans = k
                 opts = MathUtils.get_distractors(ans) + [str(ans)]; random.shuffle(opts)
                 return {"q": f"y = -2(x-{h})² + {k} 的最大值？", "options": opts, "ans": str(ans), "expl": "頂點 y 座標。", "svg": "parabola_firework", "params": {}}
-        
         else: # Real
             scenarios = [
                 {"type": "ladder", "q": "梯子長 {c}，梯腳離牆 {a}，梯頂高度？"},
@@ -351,30 +312,24 @@ class QuestionFactory:
                 {"type": "taxi", "q": "計程車起跳 70 元，每公里加 20 元，跑 {x} 公里多少錢？"}
             ]
             s = random.choice(scenarios)
-            
             if s["type"] == "ladder":
                 m=random.randint(2,6); n=1; a=m*m-n*n; b=2*m*n; c=m*m+n*n
                 opts = MathUtils.get_distractors(b) + [str(b)]; random.shuffle(opts)
                 return {"q": s["q"].format(c=c, a=a), "options": opts, "ans": str(b), "expl": "畢氏定理。", "svg": "ladder_wall", "params": {"a":a,"b":b,"c":c}}
-            
             elif s["type"] == "profit":
                 p = random.randint(10, 50)
                 return {"q": s["q"].format(p=p), "options": [f"y=-(x-{p})²+100", f"y=(x-{p})²+100", f"y=x-{p}", "y=x²"], "ans": f"y=-(x-{p})²+100", "expl": "開口向下拋物線頂點。", "svg": "none", "params": {}}
-            
             elif s["type"] == "speed":
                 d = 60; v1 = 20; v2 = 30; ans = 24
                 return {"q": s["q"].format(d=d, v1=v1, v2=v2), "options": ["24", "25", "20", "30"], "ans": "24", "expl": "總距離/總時間 = 120/5 = 24。", "svg": "none", "params": {}}
-            
             elif s["type"] == "firework":
                 t=random.randint(2,4); h=30*t-5*t*t
                 opts = [str(h), "0", "100", "50"]; random.shuffle(opts)
                 return {"q": s["q"].format(t=t), "options": opts, "ans": str(h), "expl": "代入。", "svg": "parabola_firework", "params": {}}
-            
             elif s["type"] == "tv":
                 k = random.randint(5, 10); a, b, c = 4*k, 3*k, 5*k
                 opts = MathUtils.get_distractors(c) + [str(c)]; random.shuffle(opts)
                 return {"q": s["q"].format(a=a, b=b), "options": opts, "ans": str(c), "expl": "畢氏定理求對角線。", "svg": "rect_diag", "params": {"a":a, "b":b}}
-            
             elif s["type"] == "taxi":
                 x = random.randint(2, 10); ans = 70 + 20 * x
                 opts = MathUtils.get_distractors(ans) + [str(ans)]; random.shuffle(opts)
@@ -383,12 +338,9 @@ class QuestionFactory:
     @staticmethod
     def generate(unit):
         mapping = {
-            "3-1 證明與推理": QuestionFactory.gen_3_1,
-            "3-2 三角形的外心": QuestionFactory.gen_3_2,
-            "3-3 三角形的內心": QuestionFactory.gen_3_3,
-            "3-4 三角形的重心": QuestionFactory.gen_3_4,
-            "4-1 因式分解法": QuestionFactory.gen_4_1,
-            "4-2 配方法與公式解": QuestionFactory.gen_4_2,
+            "3-1 證明與推理": QuestionFactory.gen_3_1, "3-2 三角形的外心": QuestionFactory.gen_3_2,
+            "3-3 三角形的內心": QuestionFactory.gen_3_3, "3-4 三角形的重心": QuestionFactory.gen_3_4,
+            "4-1 因式分解法": QuestionFactory.gen_4_1, "4-2 配方法與公式解": QuestionFactory.gen_4_2,
             "4-3 應用問題": QuestionFactory.gen_4_3
         }
         generator = mapping.get(unit)
@@ -396,94 +348,34 @@ class QuestionFactory:
         return [generator("concept"), generator("calc"), generator("real")]
 
 # ==========================================
-# 3. 視覺繪圖引擎 (V25 - 完整無刪減)
+# 3. 視覺繪圖引擎 (V25.1 緊湊版)
 # ==========================================
 class SVGDrawer:
     @staticmethod
     def draw(svg_type, **kwargs):
         base = '<svg width="300" height="220" xmlns="http://www.w3.org/2000/svg" style="background-color:white; border:1px solid #eee; border-radius:8px;">{}</svg>'
-        
         if svg_type == "rect_path":
-            return base.format('''
-                <rect x="50" y="50" width="200" height="120" fill="#81c784" stroke="black"/>
-                <rect x="140" y="50" width="20" height="120" fill="#e0e0e0" stroke="none"/>
-                <rect x="50" y="100" width="200" height="20" fill="#e0e0e0" stroke="none"/>
-                <text x="145" y="45">x</text>
-                <text x="30" y="115">x</text>
-                <text x="260" y="115">長20</text>
-                <text x="140" y="190">寬10</text>
-            ''')
+            return base.format('<rect x="50" y="50" width="200" height="120" fill="#81c784" stroke="black"/><rect x="140" y="50" width="20" height="120" fill="#e0e0e0" stroke="none"/><rect x="50" y="100" width="200" height="20" fill="#e0e0e0" stroke="none"/><text x="145" y="45">x</text><text x="30" y="115">x</text><text x="260" y="115">長20</text><text x="140" y="190">寬10</text>')
         elif svg_type == "triangle_incenter_angle":
             a_val = kwargs.get("a", "?")
-            return base.format(f'''
-                <path d="M150,30 L40,190 L260,190 Z" fill="none" stroke="black" stroke-width="2"/>
-                <text x="150" y="25" font-size="16" text-anchor="middle" font-weight="bold">A ({a_val}°)</text>
-                <text x="25" y="200" font-size="16" font-weight="bold">B</text>
-                <text x="275" y="200" font-size="16" font-weight="bold">C</text>
-                <circle cx="150" cy="132.2" r="57.8" fill="#fff9c4" stroke="#fbc02d" stroke-width="2" opacity="0.6"/>
-                <circle cx="150" cy="132.2" r="4" fill="red"/>
-                <text x="150" y="125" fill="red" font-size="14" text-anchor="middle" font-weight="bold">I</text>
-                <line x1="40" y1="190" x2="150" y2="132.2" stroke="red" stroke-width="2" stroke-dasharray="5,5"/>
-                <line x1="260" y1="190" x2="150" y2="132.2" stroke="red" stroke-width="2" stroke-dasharray="5,5"/>
-                <text x="150" y="170" fill="blue" font-size="20" text-anchor="middle" font-weight="bold">?</text>
-            ''')
+            return base.format(f'<path d="M150,30 L40,190 L260,190 Z" fill="none" stroke="black" stroke-width="2"/><text x="150" y="25" font-size="16" text-anchor="middle" font-weight="bold">A ({a_val}°)</text><text x="25" y="200" font-size="16" font-weight="bold">B</text><text x="275" y="200" font-size="16" font-weight="bold">C</text><circle cx="150" cy="132.2" r="57.8" fill="#fff9c4" stroke="#fbc02d" stroke-width="2" opacity="0.6"/><circle cx="150" cy="132.2" r="4" fill="red"/><text x="150" y="125" fill="red" font-size="14" text-anchor="middle" font-weight="bold">I</text><line x1="40" y1="190" x2="150" y2="132.2" stroke="red" stroke-width="2" stroke-dasharray="5,5"/><line x1="260" y1="190" x2="150" y2="132.2" stroke="red" stroke-width="2" stroke-dasharray="5,5"/><text x="150" y="170" fill="blue" font-size="20" text-anchor="middle" font-weight="bold">?</text>')
         elif svg_type == "right_triangle_incenter":
             a = kwargs.get("a", 3); b = kwargs.get("b", 4); c = kwargs.get("c", 5)
-            return base.format(f'''
-                <path d="M50,40 L50,180 L200,180 Z" fill="none" stroke="black" stroke-width="2"/>
-                <rect x="50" y="160" width="20" height="20" fill="none" stroke="black"/>
-                <circle cx="85" cy="145" r="35" fill="#e1bee7" stroke="purple" opacity="0.5"/>
-                <text x="30" y="110" font-size="14">{a}</text>
-                <text x="120" y="200" font-size="14">{b}</text>
-                <text x="130" y="100" font-size="14">{c}</text>
-                <text x="85" y="150" fill="purple" font-weight="bold">r?</text>
-            ''')
+            return base.format(f'<path d="M50,40 L50,180 L200,180 Z" fill="none" stroke="black" stroke-width="2"/><rect x="50" y="160" width="20" height="20" fill="none" stroke="black"/><circle cx="85" cy="145" r="35" fill="#e1bee7" stroke="purple" opacity="0.5"/><text x="30" y="110" font-size="14">{a}</text><text x="120" y="200" font-size="14">{b}</text><text x="130" y="100" font-size="14">{c}</text><text x="85" y="150" fill="purple" font-weight="bold">r?</text>')
         elif svg_type == "triangle_incenter_concept":
-            return base.format('''
-                <path d="M150,30 L40,190 L260,190 Z" fill="none" stroke="black" stroke-width="2"/>
-                <circle cx="150" cy="132.2" r="57.8" fill="none" stroke="orange" stroke-width="2"/>
-                <circle cx="150" cy="132.2" r="4" fill="orange"/>
-                <text x="150" y="125" fill="orange" font-weight="bold" text-anchor="middle">I</text>
-                <line x1="150" y1="132.2" x2="150" y2="190" stroke="orange" stroke-width="2" stroke-dasharray="4"/>
-                <text x="155" y="165" font-size="14" fill="gray" font-weight="bold">r</text>
-            ''')
+            return base.format('<path d="M150,30 L40,190 L260,190 Z" fill="none" stroke="black" stroke-width="2"/><circle cx="150" cy="132.2" r="57.8" fill="none" stroke="orange" stroke-width="2"/><circle cx="150" cy="132.2" r="4" fill="orange"/><text x="150" y="125" fill="orange" font-weight="bold" text-anchor="middle">I</text><line x1="150" y1="132.2" x2="150" y2="190" stroke="orange" stroke-width="2" stroke-dasharray="4"/><text x="155" y="165" font-size="14" fill="gray" font-weight="bold">r</text>')
         elif svg_type == "general_triangle":
             a = kwargs.get("angle_a", 60); b = kwargs.get("angle_b", 60)
-            return base.format(f'''
-                <path d="M80,150 L220,150 L120,50 Z" fill="#e3f2fd" stroke="black" stroke-width="2"/>
-                <text x="110" y="40" font-size="14">A({a}°)</text>
-                <text x="60" y="160" font-size="14">B({b}°)</text>
-                <text x="230" y="160" font-size="14" fill="red">C(?)</text>
-            ''')
+            return base.format(f'<path d="M80,150 L220,150 L120,50 Z" fill="#e3f2fd" stroke="black" stroke-width="2"/><text x="110" y="40" font-size="14">A({a}°)</text><text x="60" y="160" font-size="14">B({b}°)</text><text x="230" y="160" font-size="14" fill="red">C(?)</text>')
         elif svg_type == "sticks_triangle":
             s1 = kwargs.get("s1", 5); s2 = kwargs.get("s2", 5); total = s1 + s2 if s1+s2 > 0 else 1; scale = 150 / total
-            return base.format(f'''
-                <rect x="50" y="80" width="{s1*scale}" height="10" fill="blue"/>
-                <rect x="50" y="110" width="{s2*scale}" height="10" fill="green"/>
-                <text x="50" y="70" fill="blue">長度 {s1}</text>
-                <text x="50" y="140" fill="green">長度 {s2}</text>
-                <text x="200" y="100" fill="red">第三邊 x ?</text>
-            ''')
+            return base.format(f'<rect x="50" y="80" width="{s1*scale}" height="10" fill="blue"/><rect x="50" y="110" width="{s2*scale}" height="10" fill="green"/><text x="50" y="70" fill="blue">長度 {s1}</text><text x="50" y="140" fill="green">長度 {s2}</text><text x="200" y="100" fill="red">第三邊 x ?</text>')
         elif svg_type == "ladder_wall":
             a = kwargs.get("a", 3); c = kwargs.get("c", 5)
-            return base.format(f'''
-                <line x1="50" y1="20" x2="50" y2="180" stroke="black" stroke-width="4"/>
-                <line x1="20" y1="180" x2="200" y2="180" stroke="black" stroke-width="4"/>
-                <line x1="50" y1="60" x2="130" y2="180" stroke="brown" stroke-width="5"/>
-                <text x="20" y="120" font-size="14">高?</text>
-                <text x="80" y="195" font-size="14">底{a}</text>
-                <text x="100" y="110" font-size="14" fill="brown">斜{c}</text>
-            ''')
+            return base.format(f'<line x1="50" y1="20" x2="50" y2="180" stroke="black" stroke-width="4"/><line x1="20" y1="180" x2="200" y2="180" stroke="black" stroke-width="4"/><line x1="50" y1="60" x2="130" y2="180" stroke="brown" stroke-width="5"/><text x="20" y="120" font-size="14">高?</text><text x="80" y="195" font-size="14">底{a}</text><text x="100" y="110" font-size="14" fill="brown">斜{c}</text>')
         elif svg_type == "rect_diag":
             a = kwargs.get("a", 4); b = kwargs.get("b", 3)
-            return base.format(f'''
-                <rect x="50" y="40" width="160" height="120" fill="#333"/>
-                <rect x="55" y="45" width="150" height="110" fill="#fff"/>
-                <line x1="55" y1="45" x2="205" y2="155" stroke="red" stroke-width="2"/>
-                <text x="130" y="100" fill="red" font-weight="bold">?</text>
-                <text x="130" y="175">{a} 吋</text>
-                <text x="20" y="100">{b} 吋</text>
-            ''')
+            return base.format(f'<rect x="50" y="40" width="160" height="120" fill="#333"/><rect x="55" y="45" width="150" height="110" fill="#fff"/><line x1="55" y1="45" x2="205" y2="155" stroke="red" stroke-width="2"/><text x="130" y="100" fill="red" font-weight="bold">?</text><text x="130" y="175">{a} 吋</text><text x="20" y="100">{b} 吋</text>')
         elif svg_type == "polygon_n":
             n = kwargs.get("n", 5); points = []
             for i in range(n):
@@ -492,22 +384,10 @@ class SVGDrawer:
             return base.format(f'<polygon points="{" ".join(points)}" fill="#f3e5f5" stroke="purple" stroke-width="2"/><text x="130" y="105" fill="purple">正{n}邊形</text>')
         elif svg_type == "diff_squares":
             k = kwargs.get("k", 3)
-            return base.format(f'''
-                <rect x="80" y="40" width="140" height="140" fill="#e8f5e9" stroke="black"/>
-                <rect x="180" y="140" width="40" height="40" fill="white" stroke="red" stroke-dasharray="4"/>
-                <text x="130" y="110" font-size="20">x²</text>
-                <text x="190" y="165" font-size="12" fill="red">{k}²</text>
-            ''')
+            return base.format(f'<rect x="80" y="40" width="140" height="140" fill="#e8f5e9" stroke="black"/><rect x="180" y="140" width="40" height="40" fill="white" stroke="red" stroke-dasharray="4"/><text x="130" y="110" font-size="20">x²</text><text x="190" y="165" font-size="12" fill="red">{k}²</text>')
         elif svg_type == "coord_triangle":
             k = kwargs.get("k", 4)
-            return base.format(f'''
-                <line x1="20" y1="180" x2="200" y2="180" stroke="black" stroke-width="2"/>
-                <line x1="20" y1="20" x2="20" y2="180" stroke="black" stroke-width="2"/>
-                <path d="M20,20 L180,180 L20,180 Z" fill="none" stroke="blue"/>
-                <text x="10" y="20">A(0,{k})</text>
-                <text x="180" y="195">B({k},0)</text>
-                <text x="5" y="195">O</text>
-            ''')
+            return base.format(f'<line x1="20" y1="180" x2="200" y2="180" stroke="black" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="180" stroke="black" stroke-width="2"/><path d="M20,20 L180,180 L20,180 Z" fill="none" stroke="blue"/><text x="10" y="20">A(0,{k})</text><text x="180" y="195">B({k},0)</text><text x="5" y="195">O</text>')
         elif svg_type == "geometry_sas":
             return base.format('<path d="M30,120 L90,120 L60,40 Z" fill="none" stroke="black"/><path d="M160,120 L220,120 L190,40 Z" fill="none" stroke="black"/><text x="110" y="80" fill="blue">全等?</text>')
         elif svg_type == "right_triangle_circumcenter":
@@ -525,22 +405,18 @@ class SVGDrawer:
             return base.format('<path d="M20,180 Q150,-50 280,180" fill="none" stroke="red" stroke-width="2"/><circle cx="150" cy="40" r="5" fill="orange"/><text x="160" y="40">最高點</text>')
         elif svg_type == "area_square_k":
             return base.format('<rect x="100" y="50" width="100" height="100" fill="#fff3e0" stroke="black" stroke-dasharray="4"/><text x="150" y="105" text-anchor="middle">補項?</text>')
-        
         return ""
 
 # ==========================================
 # 4. APP 介面
 # ==========================================
 st.set_page_config(page_title="國中數學雲端教室", page_icon="♾️")
-st.title("♾️ 國中數學無限生成引擎 (V25.0 贖罪完整版)")
+st.title("♾️ 國中數學無限生成引擎 (V25.1 完整修復版)")
 
 if 'quiz' not in st.session_state: st.session_state.quiz = []
 if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
 
-units = [
-    "3-1 證明與推理", "3-2 三角形的外心", "3-3 三角形的內心", "3-4 三角形的重心",
-    "4-1 因式分解法", "4-2 配方法與公式解", "4-3 應用問題"
-]
+units = ["3-1 證明與推理", "3-2 三角形的外心", "3-3 三角形的內心", "3-4 三角形的重心", "4-1 因式分解法", "4-2 配方法與公式解", "4-3 應用問題"]
 unit = st.sidebar.selectbox("請選擇練習單元", units)
 
 if st.sidebar.button("🚀 生成無限試卷 (全功能無刪減)"):
@@ -554,18 +430,14 @@ if st.session_state.quiz and not st.session_state.exam_finished:
     with st.form("quiz_form"):
         u_answers = []
         type_names = ["觀念", "計算", "情境"]
-        
         for i, q in enumerate(st.session_state.quiz):
             badge = type_names[i] if i < 3 else "綜合"
             st.markdown(f"### Q{i+1} <span style='background-color:#e0f7fa; padding:2px 8px; border-radius:4px; font-size:0.7em; color:#006064'>{badge}</span> {q['q']}", unsafe_allow_html=True)
-            
             if q.get('svg') != "none":
                 st.markdown(SVGDrawer.draw(q['svg'], **q.get('params', {})), unsafe_allow_html=True)
-            
             u_ans = st.radio("選擇答案", q['options'], key=f"q_{i}", label_visibility="collapsed")
             u_answers.append(u_ans)
             st.divider()
-            
         if st.form_submit_button("✅ 交卷", use_container_width=True):
             st.session_state.results = u_answers
             st.session_state.exam_finished = True
@@ -580,4 +452,11 @@ if st.session_state.exam_finished:
             st.write(f"題目: {q['q']}")
             st.write(f"您的答案: {st.session_state.results[i]}")
             st.write(f"正確答案: {q['ans']}")
-            st.
+            st.info(f"解析: {q['expl']}")
+    final_score = int((score / 3) * 100)
+    st.success(f"## 您的最終得分: {final_score} 分")
+    if st.button("🔄 再生成一份 (題目會完全不同)", use_container_width=True):
+        new_quiz = QuestionFactory.generate(unit)
+        st.session_state.quiz = new_quiz
+        st.session_state.exam_finished = False
+        st.rerun()
