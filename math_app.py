@@ -32,11 +32,11 @@ class MathUtils:
         return list(distractors)
 
 # ==========================================
-# 2. 題庫工廠 (V27 - 數學全邏輯 + 文字解析)
+# 2. 題庫工廠 (V27.1 - 完整版)
 # ==========================================
 class QuestionFactory:
     
-    # --- 新增：文字貼上解析功能 ---
+    # --- 文字貼上解析功能 ---
     @staticmethod
     def parse_custom_text(raw_text):
         questions = []
@@ -58,7 +58,7 @@ class QuestionFactory:
             except: continue
         return questions
 
-    # --- 3-1 證明與推理 (完整版) ---
+    # --- 3-1 證明與推理 ---
     @staticmethod
     def gen_3_1(q_type):
         if q_type == "concept":
@@ -100,7 +100,7 @@ class QuestionFactory:
             elif s["type"] == "shortcut": return {"q": s["q"], "options": ["兩邊之和大於第三邊", "畢氏定理", "內角和180", "大角對大邊"], "ans": "兩邊之和大於第三邊", "expl": "直線距離最短。", "svg": "none"}
             else: return {"q": s["q"], "options": ["內角120度x3=360", "邊長相等", "對角線等長", "面積相等"], "ans": "內角120度x3=360", "expl": "密鋪性質。", "svg": "polygon_n", "params": {"n": 6}}
 
-    # --- 3-2 外心 (完整版) ---
+    # --- 3-2 外心 ---
     @staticmethod
     def gen_3_2(q_type):
         if q_type == "concept":
@@ -124,7 +124,7 @@ class QuestionFactory:
             elif s["type"] == "plate": return {"q": s["q"], "options": ["中垂線交點(外心)", "角平分線(內心)", "中線(重心)", "切線"], "ans": "中垂線交點(外心)", "expl": "三點定圓(外心)。", "svg": "none"}
             else: return {"q": s["q"], "options": ["廣場內部", "廣場外部", "邊緣", "不一定"], "ans": "廣場內部", "expl": "銳角三角形外心在內部。", "svg": "none"}
 
-    # --- 3-3 內心 (完整版) ---
+    # --- 3-3 內心 ---
     @staticmethod
     def gen_3_3(q_type):
         if q_type == "concept": return {"q": "內心到三角形哪裡的距離相等？", "options": ["三邊", "三頂點", "三中點", "外部"], "ans": "三邊", "expl": "內切圓性質。", "svg": "triangle_incenter_concept"}
@@ -149,7 +149,7 @@ class QuestionFactory:
             elif s["type"] == "roads": return {"q": s["q"], "options": ["內心", "外心", "重心", "中點"], "ans": "內心", "expl": "角平分線到兩邊等距。", "svg": "none"}
             else: return {"q": s["q"], "options": ["角平分線交點", "中垂線交點", "中線交點", "高線交點"], "ans": "角平分線交點", "expl": "內心定義。", "svg": "none"}
 
-    # --- 3-4 重心 (完整版) ---
+    # --- 3-4 重心 ---
     @staticmethod
     def gen_3_4(q_type):
         if q_type == "concept": return {"q": "重心是哪三條線的交點？", "options": ["中線", "中垂線", "角平分線", "高"], "ans": "中線", "expl": "重心定義。", "svg": "triangle_centroid"}
@@ -172,7 +172,7 @@ class QuestionFactory:
             elif s["type"] == "hanging": return {"q": s["q"], "options": ["重心", "外心", "內心", "頂點"], "ans": "重心", "expl": "力矩平衡。", "svg": "none"}
             else: return {"q": s["q"], "options": ["重心", "內心", "外心", "頂點"], "ans": "重心", "expl": "重心將面積六等分。", "svg": "none"}
 
-    # --- 4-1 因式分解 (完整版) ---
+    # --- 4-1 因式分解 ---
     @staticmethod
     def gen_4_1(q_type):
         if q_type == "concept": return {"q": "若 ab=0，則？", "options": ["a=0 或 b=0", "a=0 且 b=0", "a=b", "無法判斷"], "ans": "a=0 或 b=0", "expl": "零積性質。", "svg": "none"}
@@ -199,7 +199,7 @@ class QuestionFactory:
             elif s["type"] == "group": return {"q": s["q"], "options": ["12和13", "10和16", "11和15", "無法計算"], "ans": "12和13", "expl": "(x+2)(x+3)。", "svg": "none"}
             else: return {"q": s["q"], "options": ["平方差公式", "和的平方", "差的平方", "分配律"], "ans": "平方差公式", "expl": "a^2-b^2=(a+b)(a-b)。", "svg": "none"}
 
-    # --- 4-2 配方法 (完整版) ---
+    # --- 4-2 配方法 ---
     @staticmethod
     def gen_4_2(q_type):
         if q_type == "concept":
@@ -234,7 +234,7 @@ class QuestionFactory:
             elif s["type"] == "golden": return {"q": s["q"], "options": ["x²-x-1=0", "x²+x+1=0", "x²-1=0", "x=2"], "ans": "x²-x-1=0", "expl": "黃金比例定義。", "svg": "none"}
             else: return {"q": s["q"], "options": ["無實數解", "x=1", "x=-1", "x=0"], "ans": "無實數解", "expl": "D < 0，不可能發生。", "svg": "none"}
 
-    # --- 4-3 應用問題 (完整版) ---
+    # --- 4-3 應用問題 ---
     @staticmethod
     def gen_4_3(q_type):
         if q_type == "concept": return {"q": "解幾何邊長為負數，應？", "options": ["捨去", "取絕對值", "保留", "重算"], "ans": "捨去", "expl": "長度為正。", "svg": "none"}
@@ -279,9 +279,8 @@ class QuestionFactory:
         generator = mapping.get(unit)
         if not generator: return None
         return [generator("concept"), generator("calc"), generator("real")]
-
 # ==========================================
-# 3. 視覺繪圖引擎 (V27 - 完整全圖形版)
+# 3. 視覺繪圖引擎 (V27.1 - 幾何修正版)
 # ==========================================
 class SVGDrawer:
     @staticmethod
@@ -292,9 +291,22 @@ class SVGDrawer:
         elif svg_type == "triangle_incenter_angle":
             a_val = kwargs.get("a", "?")
             return base.format(f'<path d="M150,30 L40,190 L260,190 Z" fill="none" stroke="black" stroke-width="2"/><text x="150" y="25" font-size="16" text-anchor="middle" font-weight="bold">A ({a_val}°)</text><text x="25" y="200" font-size="16" font-weight="bold">B</text><text x="275" y="200" font-size="16" font-weight="bold">C</text><circle cx="150" cy="132.2" r="57.8" fill="#fff9c4" stroke="#fbc02d" stroke-width="2" opacity="0.6"/><circle cx="150" cy="132.2" r="4" fill="red"/><text x="150" y="125" fill="red" font-size="14" text-anchor="middle" font-weight="bold">I</text><line x1="40" y1="190" x2="150" y2="132.2" stroke="red" stroke-width="2" stroke-dasharray="5,5"/><line x1="260" y1="190" x2="150" y2="132.2" stroke="red" stroke-width="2" stroke-dasharray="5,5"/><text x="150" y="170" fill="blue" font-size="20" text-anchor="middle" font-weight="bold">?</text>')
+        
+        # --- 修正後的內切圓繪圖邏輯 ---
         elif svg_type == "right_triangle_incenter":
             a = kwargs.get("a", 3); b = kwargs.get("b", 4); c = kwargs.get("c", 5)
-            return base.format(f'<path d="M50,40 L50,180 L200,180 Z" fill="none" stroke="black" stroke-width="2"/><rect x="50" y="160" width="20" height="20" fill="none" stroke="black"/><circle cx="85" cy="145" r="35" fill="#e1bee7" stroke="purple" opacity="0.5"/><text x="30" y="110" font-size="14">{a}</text><text x="120" y="200" font-size="14">{b}</text><text x="130" y="100" font-size="14">{c}</text><text x="85" y="150" fill="purple" font-weight="bold">r?</text>')
+            # 修正：重新計算 SVG 上的幾何內心，確保圓切到斜邊
+            # 圓心 (50+42.4, 180-42.4) = (92.4, 137.6)
+            return base.format(f'''
+                <path d="M50,40 L50,180 L200,180 Z" fill="none" stroke="black" stroke-width="2"/>
+                <rect x="50" y="160" width="20" height="20" fill="none" stroke="black"/>
+                <circle cx="92.4" cy="137.6" r="42.4" fill="#e1bee7" stroke="purple" opacity="0.5"/>
+                <text x="30" y="110" font-size="14">{a}</text>
+                <text x="120" y="200" font-size="14">{b}</text>
+                <text x="130" y="100" font-size="14">{c}</text>
+                <text x="92" y="142" fill="purple" font-weight="bold" font-size="12">r?</text>
+            ''')
+            
         elif svg_type == "triangle_incenter_concept":
             return base.format('<path d="M150,30 L40,190 L260,190 Z" fill="none" stroke="black" stroke-width="2"/><circle cx="150" cy="132.2" r="57.8" fill="none" stroke="orange" stroke-width="2"/><circle cx="150" cy="132.2" r="4" fill="orange"/><text x="150" y="125" fill="orange" font-weight="bold" text-anchor="middle">I</text><line x1="150" y1="132.2" x2="150" y2="190" stroke="orange" stroke-width="2" stroke-dasharray="4"/><text x="155" y="165" font-size="14" fill="gray" font-weight="bold">r</text>')
         elif svg_type == "general_triangle":
@@ -341,10 +353,10 @@ class SVGDrawer:
         return ""
 
 # ==========================================
-# 4. APP 介面 (V27 - 雙模式切換)
+# 4. APP 介面
 # ==========================================
 st.set_page_config(page_title="國中數學雲端教室", page_icon="♾️")
-st.title("♾️ 國中數學無限生成引擎 (V27.0 終極融合版)")
+st.title("♾️ 國中數學無限生成引擎 (V27.1 幾何修正版)")
 
 if 'quiz' not in st.session_state: st.session_state.quiz = []
 if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
