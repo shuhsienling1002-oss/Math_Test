@@ -137,13 +137,19 @@ def create_cloud_database():
     # ================= 4-1 因式分解 (5種變化) =================
     for _ in range(50):
         r1, r2 = random.randint(1, 5), random.randint(-5, -1)
+        # --- 核心修正區：處理方程式顯示邏輯 ---
+        # 處理第一個括號 (x - r1)
+        s1 = f"(x - {r1})"
+        # 處理第二個括號 (x - r2)，若 r2 為負數如 -3，顯示 (x + 3)
+        s2 = f"(x + {abs(r2)})" if r2 < 0 else f"(x - {r2})"
+        
         database["4-1 因式分解法"].append({
-            "q": f"解方程式 (x - {r1})(x - {r2}) = 0？",
+            "q": f"解方程式 {s1}{s2} = 0？",
             "options": [f"{r1} 或 {r2}", f"{-r1} 或 {-r2}", f"{r1} 或 {-r2}", "無解"],
             "ans": f"{r1} 或 {r2}",
             "expl": f"令括號為 0，可得 x={r1} 或 x={r2}。",
             "svg": "roots_line",
-            "svg_params": {"r1": r1, "r2": r2}
+            "svg_params": {"r1": "a", "r2": "b"} # --- 核心修正區：改用代號防止圖形洩題 ---
         })
 
     for _ in range(50):
@@ -326,8 +332,13 @@ class SVGDrawer:
             return base.format('<path d="M150,30 L50,170 L250,170 Z" fill="none" stroke="black"/><line x1="150" y1="30" x2="150" y2="170" stroke="red" stroke-dasharray="4"/><line x1="50" y1="170" x2="200" y2="100" stroke="red" stroke-dasharray="4"/><text x="150" y="123" fill="blue" font-weight="bold">Center</text>')
         elif svg_type == "roots_line":
             r1, r2 = kwargs.get('r1', 0), kwargs.get('r2', 0)
-            mx = lambda v: 150 + v*12
-            return base.format(f'<line x1="10" y1="50" x2="290" y2="50" stroke="black"/><text x="150" y="40">0</text><circle cx="{mx(r1)}" cy="50" r="5" fill="red"/><text x="{mx(r1)}" y="80" fill="red">{r1}</text><circle cx="{mx(r2)}" cy="50" r="5" fill="red"/><text x="{mx(r2)}" y="80" fill="red">{r2}</text>')
+            # --- 核心修正區：處理座標顯示，若是代號則顯示在對應位置 ---
+            def get_x(val):
+                if val == "a": return 110
+                if val == "b": return 190
+                return 150 + (int(val) * 12)
+            
+            return base.format(f'<line x1="10" y1="50" x2="290" y2="50" stroke="black"/><text x="150" y="40">0</text><circle cx="{get_x(r1)}" cy="50" r="5" fill="red"/><text x="{get_x(r1)}" y="80" fill="red" text-anchor="middle">{r1}</text><circle cx="{get_x(r2)}" cy="50" r="5" fill="red"/><text x="{get_x(r2)}" y="80" fill="red" text-anchor="middle">{r2}</text>')
         elif svg_type == "roots_0_k":
             k = kwargs.get('k', 0)
             mx = lambda v: 150 + v*12
