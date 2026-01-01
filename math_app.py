@@ -70,7 +70,6 @@ class SVGGenerator:
 
     @staticmethod
     def geometry_sas():
-        """SSS/SAS 全等示意"""
         return SVGGenerator._base_svg("""
             <path d="M20,120 L80,120 L50,40 Z" fill="none" stroke="black" stroke-width="2"/><text x="50" y="140" text-anchor="middle">A</text>
             <path d="M150,120 L210,120 L180,40 Z" fill="none" stroke="black" stroke-width="2"/><text x="180" y="140" text-anchor="middle">B</text>
@@ -79,7 +78,6 @@ class SVGGenerator:
 
 # ==========================================
 # 2. 題目工廠 (Question Generators)
-# [重要] 補回 3-1, 3-2, 4-1, 4-2, 4-3 的所有獨立題型
 # ==========================================
 class QGen:
     # --- 3-1 證明與推理 ---
@@ -154,6 +152,18 @@ class QGen:
     def gen_3_2_position_obtuse():
         return {"q": "鈍角三角形的外心位置在？", "options": ["三角形外部", "三角形內部", "斜邊中點", "頂點"], "ans": 0, "expl": "鈍角在外。", "svg_gen": None}
 
+    @staticmethod
+    def gen_3_2_equilateral():
+        return {"q": "正三角形的重心、外心、內心有何關係？", "options": ["三心合一 (同一點)", "在同一直線上", "形成三角形", "無關"], "ans": 0, "expl": "正三角形三心重合。", "svg_gen": None}
+
+    @staticmethod
+    def gen_3_2_inradius_right():
+        # [修復點] 補回之前遺漏的函式定義
+        triples = [(3,4,5), (5,12,13), (8,15,17)]
+        a, b, c = random.choice(triples)
+        r = int((a + b - c) / 2)
+        return {"q": f"直角三角形兩股 {a}, {b}，斜邊 {c}，求內切圓半徑 r？", "options": [f"{r}", f"{r+1}", f"{r*2}", f"{c/2}"], "ans": 0, "expl": f"公式：$r = (a+b-c)/2 = ({a}+{b}-{c})/2 = {r}$。", "svg_gen": None}
+
     # --- 4-1 因式分解法 ---
     @staticmethod
     def gen_4_1_solve_basic():
@@ -223,14 +233,19 @@ class QGen:
         return {"q": f"物體落下距離 $h=5t^2$，若 $h={5*t*t}$，求時間 t？", "options": [f"{t}", f"{t*2}", f"{t+5}", "10"], "ans": 0, "expl": f"{5*t*t} = 5t^2 => t={t}。", "svg_gen": None}
 
 # ==========================================
-# 3. 智能組卷邏輯 (Router) - 選單還原
+# 3. 智能組卷邏輯 (Router)
 # ==========================================
 def get_generators_for_unit(unit_name):
     """根據單元名稱回傳生成器列表"""
+    # [檢查點] 確保這裡列出的所有 function 都在 QGen 中定義了
     if "3-1" in unit_name:
         return [QGen.gen_3_1_sss_sas, QGen.gen_3_1_angle_calc, QGen.gen_3_1_side_angle, QGen.gen_3_1_quad_prop, QGen.gen_3_1_isosceles]
     elif "3-2" in unit_name:
-        return [QGen.gen_3_2_centroid_def, QGen.gen_3_2_circum_def, QGen.gen_3_2_incenter_def, QGen.gen_3_2_centroid_calc, QGen.gen_3_2_circum_right, QGen.gen_3_2_incenter_angle, QGen.gen_3_2_circum_angle, QGen.gen_3_2_area_split, QGen.gen_3_2_position_obtuse, QGen.gen_3_2_inradius_right]
+        # [修復] 包含了所有 11 個 3-2 題型生成器
+        return [QGen.gen_3_2_centroid_def, QGen.gen_3_2_circum_def, QGen.gen_3_2_incenter_def, 
+                QGen.gen_3_2_centroid_calc, QGen.gen_3_2_circum_right, QGen.gen_3_2_incenter_angle, 
+                QGen.gen_3_2_circum_angle, QGen.gen_3_2_area_split, QGen.gen_3_2_position_obtuse, 
+                QGen.gen_3_2_equilateral, QGen.gen_3_2_inradius_right]
     elif "4-1" in unit_name:
         return [QGen.gen_4_1_solve_basic, QGen.gen_4_1_solve_no_c, QGen.gen_4_1_solve_sq_diff, QGen.gen_4_1_solve_perfect_sq, QGen.gen_4_1_find_k_root, QGen.gen_4_1_reverse_roots]
     elif "4-2" in unit_name:
@@ -242,12 +257,9 @@ def get_generators_for_unit(unit_name):
 
 def generate_quiz(unit_name, count=10):
     generators = get_generators_for_unit(unit_name)
-    # 確保不重複邏輯：如果需要的題目數 > 模板數，則重複利用但參數隨機
-    # 如果需要的題目數 <= 模板數，則隨機抽樣模板，保證題型不重複
     if len(generators) >= count:
         selected_gens = random.sample(generators, count)
     else:
-        # 題型少於 10 題，必須重複，但會打散順序
         selected_gens = generators * (count // len(generators) + 1)
         random.shuffle(selected_gens)
         selected_gens = selected_gens[:count]
@@ -268,7 +280,7 @@ def reset_exam():
     st.session_state.exam_finished = False
 
 def main():
-    st.set_page_config(page_title="國中數學：全單元不重複版", page_icon="💯", layout="centered")
+    st.set_page_config(page_title="國中數學：校驗修復版", page_icon="💯", layout="centered")
     
     if 'exam_started' not in st.session_state: st.session_state.exam_started = False
     if 'current_questions' not in st.session_state: st.session_state.current_questions = []
@@ -277,16 +289,15 @@ def main():
 
     st.sidebar.title("💯 數學智能題庫")
     
-    # 選單完全還原
     units = ["3-1 證明與推理", "3-2 三角形的外心、內心與重心", "4-1 因式分解法", "4-2 配方法與公式解", "4-3 應用問題", "全範圍總複習"]
     selected_unit = st.sidebar.selectbox("請選擇練習單元", units, on_change=reset_exam)
-    st.sidebar.info("已還原所有細項單元，並採用不重複題型機制！")
+    st.sidebar.success("已修復所有函式對應問題，系統運行穩定！")
 
     st.title("💯 國中數學：考前衝刺版")
     st.markdown(f"#### 目前單元：{selected_unit}")
 
     if not st.session_state.exam_started:
-        st.info("💡 系統將從該單元的多種題型中，隨機生成 10 題不重複的考題。")
+        st.info("💡 系統將隨機生成 10 題不重複的考題。")
         if st.button("🚀 生成試卷", use_container_width=True):
             st.session_state.exam_finished = False 
             st.session_state.exam_results = {} 
