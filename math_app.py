@@ -4,6 +4,7 @@ import math
 
 # ==========================================
 # 1. 視覺繪圖引擎 (SVG Generator)
+# [說明] 維持 V11 架構，保留所有動態繪圖功能
 # ==========================================
 class SVGGenerator:
     @staticmethod
@@ -12,7 +13,6 @@ class SVGGenerator:
 
     @staticmethod
     def geometry_triangle(type_label):
-        """生成幾何示意圖"""
         return SVGGenerator._base_svg(f"""
             <path d="M50,150 L250,150 L150,20 Z" fill="#e3f2fd" stroke="blue" stroke-width="2"/>
             <text x="150" y="180" text-anchor="middle" font-weight="bold" fill="black">{type_label}</text>
@@ -20,7 +20,6 @@ class SVGGenerator:
 
     @staticmethod
     def triangle_center_angle(angle_type, angle_val):
-        """生成三心角度示意圖"""
         color = "green" if "外心" in angle_type else "orange"
         return SVGGenerator._base_svg(f"""
             <path d="M150,30 L50,170 L250,170 Z" fill="none" stroke="black" stroke-width="2"/>
@@ -33,8 +32,6 @@ class SVGGenerator:
 
     @staticmethod
     def roots_on_line(r1, r2):
-        """數線顯示根"""
-        # 簡單映射，避免超出範圍
         def map_x(v): return 150 + (v * 15)
         p1_svg = f'<circle cx="{map_x(r1)}" cy="50" r="5" fill="red"/><text x="{map_x(r1)}" y="80" text-anchor="middle" fill="red">{r1}</text>'
         p2_svg = f'<circle cx="{map_x(r2)}" cy="50" r="5" fill="red"/><text x="{map_x(r2)}" y="80" text-anchor="middle" fill="red">{r2}</text>' if r1 != r2 else ""
@@ -46,7 +43,6 @@ class SVGGenerator:
 
     @staticmethod
     def area_square(side):
-        """正方形面積圖"""
         return SVGGenerator._base_svg(f"""
             <rect x="100" y="50" width="100" height="100" fill="#bbdefb" stroke="black"/>
             <text x="150" y="100" text-anchor="middle" font-weight="bold">面積 = {side*side}</text>
@@ -55,7 +51,7 @@ class SVGGenerator:
 
 # ==========================================
 # 2. 無限題庫生成器 (Question Factory)
-# 這才是 AI 該做的事：用程式碼生成無限題目
+# [改良] 擴大隨機參數範圍，減少撞題機率
 # ==========================================
 class QuestionFactory:
     
@@ -64,10 +60,8 @@ class QuestionFactory:
         """生成 3-1 證明與推理題目"""
         type_idx = random.randint(1, 4)
         if type_idx == 1:
-            # 全等性質判別
             props = ["SSS", "SAS", "ASA", "AAS", "RHS"]
             ans = random.choice(props)
-            wrong = "AAA" if ans != "AAA" else "SSA"
             return {
                 "q": f"若已知兩個三角形滿足「{ans}」條件，則它們的關係為何？",
                 "options": ["必全等", "必相似但不一定全等", "面積相等但不一定全等", "無法判斷"],
@@ -76,9 +70,9 @@ class QuestionFactory:
                 "svg_gen": lambda: SVGGenerator.geometry_triangle(f"{ans} 全等")
             }
         elif type_idx == 2:
-            # 角度計算 (外角定理)
-            in1 = random.randint(30, 80)
-            in2 = random.randint(30, 80)
+            # 擴大角度範圍
+            in1 = random.randint(20, 85)
+            in2 = random.randint(20, 85)
             ext = in1 + in2
             return {
                 "q": f"三角形 ABC 中，若 $\\angle A = {in1}^\\circ, \\angle B = {in2}^\\circ$，則 $\\angle C$ 的外角是多少度？",
@@ -88,9 +82,8 @@ class QuestionFactory:
                 "svg_gen": None
             }
         elif type_idx == 3:
-            # 邊角關係
             sides = ["AB", "BC", "AC"]
-            random.shuffle(sides)
+            random.shuffle(sides) # 隨機排列增加變化
             return {
                 "q": f"在 $\\triangle ABC$ 中，若 $\\angle A > \\angle B > \\angle C$，則下列邊長關係何者正確？",
                 "options": ["BC > AC > AB", "AB > AC > BC", "AC > BC > AB", "無法判斷"],
@@ -99,12 +92,12 @@ class QuestionFactory:
                 "svg_gen": None
             }
         else:
-            # 特殊四邊形
             q_map = {
                 "菱形": "對角線互相垂直平分",
                 "矩形": "對角線等長且互相平分",
                 "平行四邊形": "對角線互相平分",
-                "箏形": "對角線互相垂直"
+                "箏形": "對角線互相垂直",
+                "正方形": "對角線等長且互相垂直平分"
             }
             shape = random.choice(list(q_map.keys()))
             return {
@@ -117,11 +110,11 @@ class QuestionFactory:
 
     @staticmethod
     def gen_3_2_centers():
-        """生成 3-2 三心題目 (動態數字)"""
+        """生成 3-2 三心題目"""
         type_idx = random.randint(1, 4)
         if type_idx == 1:
-            # 內心角度公式 90 + A/2
-            angle_a = random.choice([40, 50, 60, 70, 80])
+            # 擴大角度範圍 (避免只有 40,50,60)
+            angle_a = random.randint(30, 80) 
             ans_angle = 90 + angle_a // 2
             return {
                 "q": f"若 I 為 $\\triangle ABC$ 的內心，且 $\\angle A = {angle_a}^\\circ$，則 $\\angle BIC$ 為多少度？",
@@ -131,8 +124,7 @@ class QuestionFactory:
                 "svg_gen": lambda: SVGGenerator.triangle_center_angle("內心 I", ans_angle)
             }
         elif type_idx == 2:
-            # 外心角度公式 (銳角 2A, 鈍角 360-2A) - 這裡簡化考銳角
-            angle_a = random.choice([40, 50, 60, 70])
+            angle_a = random.randint(30, 80)
             ans_angle = 2 * angle_a
             return {
                 "q": f"若 O 為銳角 $\\triangle ABC$ 的外心，且 $\\angle A = {angle_a}^\\circ$，則 $\\angle BOC$ 為多少度？",
@@ -142,9 +134,7 @@ class QuestionFactory:
                 "svg_gen": lambda: SVGGenerator.triangle_center_angle("外心 O", ans_angle)
             }
         elif type_idx == 3:
-            # 直角三角形外接圓半徑 (斜邊一半)
-            # 生成畢氏數
-            triples = [(3,4,5), (6,8,10), (5,12,13), (8,15,17), (10,24,26)]
+            triples = [(3,4,5), (6,8,10), (5,12,13), (8,15,17), (10,24,26), (7,24,25), (9,12,15)]
             a, b, c = random.choice(triples)
             R = c / 2
             return {
@@ -155,7 +145,6 @@ class QuestionFactory:
                 "svg_gen": None
             }
         else:
-            # 重心性質
             return {
                 "q": "關於三角形「重心」的敘述，下列何者正確？",
                 "options": ["重心是三條中線的交點", "重心到三頂點等距離", "重心到三邊等距離", "重心必在三角形外部"],
@@ -166,18 +155,20 @@ class QuestionFactory:
 
     @staticmethod
     def gen_4_1_factor():
-        """生成 4-1 因式分解法解方程式"""
-        # 生成 (x-a)(x-b)=0
-        r1 = random.randint(-9, 9)
-        r2 = random.randint(-9, 9)
-        # 展開係數
+        """生成 4-1 因式分解法"""
+        # 擴大根的範圍 (-15 ~ 15)
+        r1 = random.randint(-15, 15)
+        r2 = random.randint(-15, 15)
         b = -(r1 + r2)
         c = r1 * r2
         
-        # 格式化方程式字串
-        eq_str = f"x^2 "
-        eq_str += f"+ {b}x " if b >= 0 else f"{b}x "
-        eq_str += f"+ {c} = 0" if c >= 0 else f"{c} = 0"
+        # 動態調整方程式顯示
+        b_str = f"+ {b}x" if b >= 0 else f"{b}x"
+        c_str = f"+ {c}" if c >= 0 else f"{c}"
+        if b == 0: b_str = "" # 處理 x^2 - 25 = 0 這種情況
+        if c == 0: c_str = ""
+        
+        eq_str = f"x^2 {b_str} {c_str} = 0"
         
         return {
             "q": f"解一元二次方程式：${eq_str}$",
@@ -192,10 +183,9 @@ class QuestionFactory:
         """生成 4-2 配方法與判別式"""
         type_idx = random.randint(1, 3)
         if type_idx == 1:
-            # 判別式計算
-            a = random.randint(1, 3)
-            b = random.randint(1, 8)
-            c = random.randint(-5, 5)
+            a = random.randint(1, 5)
+            b = random.randint(1, 10)
+            c = random.randint(-10, 10)
             D = b**2 - 4*a*c
             status = "相異兩根" if D > 0 else ("重根" if D == 0 else "無解")
             
@@ -207,15 +197,14 @@ class QuestionFactory:
                 "svg_gen": None
             }
         else:
-            # 配方法補項
-            k = random.randint(2, 10) * 2 # 偶數方便除2
+            k = random.randint(1, 12) * 2 
             term = (k // 2) ** 2
             return {
                 "q": f"若要將 $x^2 + {k}x$ 配成完全平方式，需要加上多少？",
                 "options": [f"{term}", f"{k}", f"{k*2}", f"{term//2}"],
                 "ans": 0,
                 "expl": f"配方公式：加上 $(\\frac{{一次項係數}}{{2}})^2$，即 $(\\frac{{{k}}}{{2}})^2 = {k//2}^2 = {term}$。",
-                "svg_gen": lambda: SVGGenerator.area_square(k//2) # 示意
+                "svg_gen": lambda: SVGGenerator.area_square(k//2)
             }
 
     @staticmethod
@@ -223,8 +212,7 @@ class QuestionFactory:
         """生成 4-3 應用問題"""
         type_idx = random.randint(1, 2)
         if type_idx == 1:
-            # 兩數積
-            s = random.randint(2, 10)
+            s = random.randint(2, 20) # 擴大範圍
             l = s + 2
             prod = s * l
             return {
@@ -235,8 +223,7 @@ class QuestionFactory:
                 "svg_gen": lambda: SVGGenerator.roots_on_line(s, l)
             }
         else:
-            # 正方形面積
-            side = random.randint(5, 15)
+            side = random.randint(5, 25) # 擴大範圍
             area = side * side
             return {
                 "q": f"一個正方形的面積為 {area}，求其邊長？",
@@ -247,32 +234,43 @@ class QuestionFactory:
             }
 
 # ==========================================
-# 3. APP 主程式邏輯
+# 3. APP 主程式邏輯 (智能去重核心)
 # ==========================================
 def generate_quiz_questions(unit_name, count=10):
-    """根據單元名稱，動態生成指定數量的題目"""
+    """
+    [智能生成系統]
+    1. 隨機生成題目
+    2. 強制檢查是否重複 (使用 Set 去重)
+    3. 若重複則重算，直到滿 10 題為止
+    """
     questions = []
+    seen_hashes = set() # 用來記錄題目特徵，防止重複
+    attempts = 0 
     
-    # 根據單元路由到對應的生成器
-    for _ in range(count):
-        if "3-1" in unit_name:
-            q = QuestionFactory.gen_3_1_proof()
-        elif "3-2" in unit_name:
-            q = QuestionFactory.gen_3_2_centers()
-        elif "4-1" in unit_name:
-            q = QuestionFactory.gen_4_1_factor()
-        elif "4-2" in unit_name:
-            q = QuestionFactory.gen_4_2_formula()
-        elif "4-3" in unit_name:
-            q = QuestionFactory.gen_4_3_app()
-        else:
-            # 默認混合出題 (給總複習用)
+    while len(questions) < count and attempts < 100: # 避免無限迴圈
+        attempts += 1
+        
+        # 路由邏輯
+        if "3-1" in unit_name: q = QuestionFactory.gen_3_1_proof()
+        elif "3-2" in unit_name: q = QuestionFactory.gen_3_2_centers()
+        elif "4-1" in unit_name: q = QuestionFactory.gen_4_1_factor()
+        elif "4-2" in unit_name: q = QuestionFactory.gen_4_2_formula()
+        elif "4-3" in unit_name: q = QuestionFactory.gen_4_3_app()
+        else: # 總複習
             funcs = [QuestionFactory.gen_3_1_proof, QuestionFactory.gen_3_2_centers, 
-                     QuestionFactory.gen_4_1_factor, QuestionFactory.gen_4_2_formula]
+                     QuestionFactory.gen_4_1_factor, QuestionFactory.gen_4_2_formula, QuestionFactory.gen_4_3_app]
             q = random.choice(funcs)()
             
-        # 打亂選項順序 (除了最後一個選項如'以上皆非'通常保留，這裡簡單全亂)
-        # 為了能追蹤答案，需要處理 options 和 ans 的對應
+        # === 核心去重邏輯 ===
+        # 使用題目的 "問題文字" 作為唯一識別碼 (Hash Key)
+        q_hash = q['q']
+        
+        if q_hash in seen_hashes:
+            continue # 發現重複，跳過，再抽一次
+            
+        seen_hashes.add(q_hash)
+        
+        # 打亂選項
         correct_opt = q['options'][q['ans']]
         random.shuffle(q['options'])
         q['ans'] = q['options'].index(correct_opt)
@@ -288,7 +286,7 @@ def reset_exam():
     st.session_state.exam_finished = False
 
 def main():
-    st.set_page_config(page_title="國中數學：無限題庫版", page_icon="♾️", layout="centered")
+    st.set_page_config(page_title="國中數學：智能去重無限版", page_icon="♾️", layout="centered")
     
     if 'exam_started' not in st.session_state: st.session_state.exam_started = False
     if 'current_questions' not in st.session_state: st.session_state.current_questions = []
@@ -296,7 +294,7 @@ def main():
     if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
 
     st.sidebar.title("♾️ 無限數學題庫")
-    st.sidebar.info("本系統採用「動態生成引擎」。\n\n每次點擊開始，系統會即時運算產生全新的數據與題目，題庫量理論上為無限大！")
+    st.sidebar.info("🔥 系統已升級「智能去重」演算法，保證每次生成的 10 題絕對不重複！")
     
     # 單元選單
     units = [
@@ -309,17 +307,17 @@ def main():
     ]
     selected_unit = st.sidebar.selectbox("請選擇練習單元", units, on_change=reset_exam)
 
-    st.title("♾️ 國中數學：考前衝刺 (無限版)")
+    st.title("♾️ 國中數學：智能去重版")
     st.markdown(f"#### 目前單元：{selected_unit}")
 
     if not st.session_state.exam_started:
         st.info(f"準備好挑戰 **{selected_unit}** 了嗎？")
-        st.write("點擊下方按鈕，AI 將為您現場生成 10 道全新題目。")
+        st.write("點擊按鈕，AI 將現場運算生成 10 道全新題目。")
         
         if st.button("🚀 生成試卷 (Generate)", use_container_width=True):
             st.session_state.exam_finished = False 
             st.session_state.exam_results = {} 
-            # 呼叫工廠生成題目
+            # 呼叫生成引擎
             st.session_state.current_questions = generate_quiz_questions(selected_unit, 10)
             st.session_state.exam_started = True
             st.rerun()
@@ -333,7 +331,6 @@ def main():
             for idx, q in enumerate(questions):
                 st.markdown(f"**第 {idx+1} 題：**")
                 
-                # 顯示圖形
                 if q.get("svg_gen"):
                     st.markdown(q["svg_gen"](), unsafe_allow_html=True)
                     st.caption("👆 視覺輔助圖")
@@ -382,7 +379,6 @@ def main():
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("🔄 再刷一卷 (全新題目)", use_container_width=True):
-                    # 重新生成全新數字的題目
                     st.session_state.current_questions = generate_quiz_questions(selected_unit, 10)
                     st.session_state.exam_finished = False
                     st.session_state.exam_results = {}
