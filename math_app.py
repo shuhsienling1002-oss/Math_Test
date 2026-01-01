@@ -46,36 +46,27 @@ class SVGDrawer:
         return ""
 
 # ==========================================
-# 2. 考卷生成邏輯 (已修復變數處理 BUG)
+# 2. 考卷生成邏輯
 # ==========================================
 def generate_question_from_template(template):
     variables = {}
     
-    # 1. 變數隨機化 [BUG FIX: 加入字串與長度判斷]
+    # 1. 變數隨機化
     if "variables" in template:
         for var_name, range_list in template["variables"].items():
             if not range_list: continue
             
             first_val = range_list[0]
-            
-            # 狀況 A: 如果是字串列表 (例如 ["菱形", "矩形"]) -> 用 random.choice
-            if isinstance(first_val, str):
+            # 判斷變數類型 (修正: 支援字串與列表)
+            if isinstance(first_val, str) or isinstance(first_val, list):
                 variables[var_name] = random.choice(range_list)
-            
-            # 狀況 B: 如果是列表的列表 (例如 triples) -> 用 random.choice
-            elif isinstance(first_val, list):
-                variables[var_name] = random.choice(range_list)
-                
-            # 狀況 C: 如果是數字
             elif isinstance(first_val, (int, float)):
-                # 如果只有兩個數字，視為範圍 [min, max] -> 用 randint
                 if len(range_list) == 2:
                     variables[var_name] = random.randint(range_list[0], range_list[1])
-                # 如果超過兩個數字，視為選項列表 [2, 3, 5, 7] -> 用 choice
                 else:
                     variables[var_name] = random.choice(range_list)
 
-    # 2. 處理 list 變數展開 (如 triple)
+    # 2. 處理 list 變數展開
     flat_vars = variables.copy()
     for k, v in variables.items():
         if isinstance(v, list):
@@ -135,13 +126,13 @@ def generate_question_from_template(template):
             "svg": svg
         }
     except Exception as e:
-        return {"q": f"生成錯誤 (Variable: {flat_vars}): {e}", "options": ["Error"], "correct_ans": "Error", "expl": "", "svg": ""}
+        return {"q": f"生成錯誤: {e}", "options": ["Error"], "correct_ans": "Error", "expl": "", "svg": ""}
 
 # ==========================================
-# 3. APP 介面
+# 3. APP 介面 (修正：清楚標示對錯)
 # ==========================================
 st.set_page_config(page_title="數學習題載入器", page_icon="📂")
-st.title("📂 國中數學習題載入器 (V24.1 Fix)")
+st.title("📂 國中數學習題載入器 (V24.2 UI Fix)")
 st.info("請上傳 `questions.json` 題庫檔。")
 
 uploaded_file = st.file_uploader("上傳題庫檔 (.json)", type=['json'])
@@ -197,9 +188,17 @@ if 'quiz' in st.session_state and st.session_state.quiz:
             if user_ans == q['correct_ans']: score += 1
             
         if st.form_submit_button("✅ 交卷"):
-            st.markdown(f"## 得分：{score * 10}")
-            for i, (q, u) in enumerate(results):
-                with st.expander(f"第 {i+1} 題詳解"):
-                    st.write(f"題目：{q['q']}")
-                    st.write(f"正解：{q['correct_ans']}")
-                    st.info(q['expl'])
+            st.markdown(f"## 得分：{score * 10} 分")
+            for i, (q, user_ans) in enumerate(results):
+                # [修正] 這裡增加了對錯判斷與標示
+                is_correct = (user_ans == q['correct_ans'])
+                status = "✅ 正確" if is_correct else "❌ 錯誤"
+                
+                with st.expander(f"第 {i+1} 題詳解 ({status})"):
+                    st.write(f"**題目**：{q['q']}")
+                    st.write(f"**您的答案**：{user_ans}")
+                    st.write(f"**正確答案**：{q['correct_ans']}")
+                    if not is_correct:
+                        st.error(f"💡 解析：{q['expl']}")
+                    else:
+                        st.success(f"💡 解析：{q['expl']}")
