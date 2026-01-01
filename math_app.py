@@ -1,166 +1,261 @@
 import streamlit as st
 import random
+import math
 
 # ==========================================
-# 1. 內嵌視覺圖庫 (SVG Assets)
+# 1. 動態 SVG 生成引擎 (The Artist)
 # ==========================================
-SVG_ASSETS = {
-    # --- 原有圖庫 ---
-    "number_line_dist": """<svg width="400" height="100" xmlns="http://www.w3.org/2000/svg"><line x1="20" y1="50" x2="380" y2="50" stroke="black" stroke-width="2" marker-end="url(#arrow)"/><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#000" /></marker></defs><line x1="200" y1="45" x2="200" y2="55" stroke="black" stroke-width="2"/><text x="200" y="70" text-anchor="middle">0</text><line x1="120" y1="45" x2="120" y2="55" stroke="black" stroke-width="2"/><text x="120" y="70" text-anchor="middle">-4</text><line x1="280" y1="45" x2="280" y2="55" stroke="black" stroke-width="2"/><text x="280" y="70" text-anchor="middle">3</text><path d="M120,40 Q200,10 280,40" stroke="red" stroke-width="2" fill="none" stroke-dasharray="5,5"/><text x="200" y="25" text-anchor="middle" fill="red" font-weight="bold">距離 = ?</text><circle cx="120" cy="50" r="5" fill="red"/><circle cx="280" cy="50" r="5" fill="red"/></svg>""",
-    "coordinate_q2": """<svg width="300" height="300" viewBox="-150 -150 300 300" xmlns="http://www.w3.org/2000/svg"><line x1="-140" y1="0" x2="140" y2="0" stroke="black" stroke-width="2" marker-end="url(#arrow)"/><line x1="0" y1="140" x2="0" y2="-140" stroke="black" stroke-width="2" marker-end="url(#arrow)"/><text x="130" y="20">x</text><text x="10" y="-130">y</text><text x="-20" y="20">O</text><circle cx="-80" cy="-60" r="6" fill="red"/><text x="-110" y="-70" fill="red" font-size="16" font-weight="bold">P</text><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#000" /></marker></defs></svg>""",
-    "pythagoras_visual": """<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg"><polygon points="50,150 250,150 50,50" style="fill:lightblue;stroke:black;stroke-width:2" /><rect x="50" y="130" width="20" height="20" style="fill:none;stroke:black;stroke-width:1"/><text x="150" y="170" text-anchor="middle" font-size="14">股 a = 12</text><text x="30" y="100" text-anchor="end" font-size="14">股 b = 5</text><text x="160" y="90" text-anchor="start" font-size="16" fill="red" font-weight="bold">斜邊 c = ?</text></svg>""",
-    "parallel_lines": """<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg"><line x1="20" y1="50" x2="280" y2="50" stroke="black" stroke-width="2"/><text x="290" y="55">L1</text><line x1="20" y1="150" x2="280" y2="150" stroke="black" stroke-width="2"/><text x="290" y="155">L2</text><line x1="80" y1="20" x2="220" y2="180" stroke="red" stroke-width="2"/><text x="120" y="65" font-size="14">∠1</text><text x="170" y="140" font-size="14" fill="blue" font-weight="bold">∠2 = ?</text><text x="20" y="20" fill="gray">若 L1 // L2</text></svg>""",
-    "parabola_visual": """<svg width="300" height="300" viewBox="-10 -10 20 20" xmlns="http://www.w3.org/2000/svg"><line x1="-9" y1="0" x2="9" y2="0" stroke="gray" stroke-width="0.5"/><line x1="0" y1="9" x2="0" y2="-9" stroke="gray" stroke-width="0.5"/><path d="M -3,5 Q 0,-4 3,5" stroke="blue" stroke-width="1" fill="none"/><circle cx="0" cy="-4" r="0.8" fill="red"/><text x="1" y="-4" fill="red" font-size="2">頂點</text><text x="-8" y="8" font-size="2">y = ax² + k</text></svg>""",
-    "circle_tangent": """<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg"><circle cx="150" cy="150" r="80" stroke="black" stroke-width="2" fill="none"/><circle cx="150" cy="150" r="3" fill="black"/><text x="140" y="145">O</text><line x1="50" y1="250" x2="250" y2="50" stroke="red" stroke-width="2"/><text x="260" y="60" fill="red">L (切線)</text><line x1="150" y1="150" x2="206.5" y2="93.5" stroke="blue" stroke-width="2" stroke-dasharray="5,5"/><circle cx="206.5" cy="93.5" r="5" fill="red"/><text x="215" y="100">P (切點)</text><text x="170" y="130" fill="blue">半徑 r</text><text x="20" y="30" fill="gray">請問 OP 與 L 的夾角？</text></svg>""",
-    "linear_graph": """<svg width="300" height="300" viewBox="-10 -10 20 20" xmlns="http://www.w3.org/2000/svg"><line x1="-10" y1="0" x2="10" y2="0" stroke="black" stroke-width="0.5"/><line x1="0" y1="10" x2="0" y2="-10" stroke="black" stroke-width="0.5"/><text x="9" y="-1">x</text><text x="1" y="9">y</text><line x1="-5" y1="-8" x2="8" y2="5" stroke="blue" stroke-width="1.5"/><circle cx="0" cy="-3" r="0.5" fill="red"/><text x="1" y="-3" font-size="2">y截距(0, b)</text><circle cx="3" cy="0" r="0.5" fill="red"/><text x="3" y="-1" font-size="2">x截距</text></svg>""",
-    "similar_triangles": """<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg"><polygon points="20,180 100,180 60,100" fill="none" stroke="blue" stroke-width="2"/><text x="60" y="195" text-anchor="middle">小三角形</text><text x="35" y="140">1</text><polygon points="120,180 280,180 200,20" fill="none" stroke="red" stroke-width="2"/><text x="200" y="195" text-anchor="middle">大三角形 (放大2倍)</text><text x="150" y="100">2</text></svg>""",
-    "circle_angles": """<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg"><circle cx="150" cy="150" r="100" stroke="black" fill="none"/><circle cx="150" cy="150" r="3" fill="black"/><text x="140" y="160">O(圓心)</text><path d="M 50,150 L 150,150 L 100,63.4" stroke="red" stroke-width="2" fill="none"/><text x="120" y="130" fill="red">圓心角</text><path d="M 50,150 L 250,150 L 100,63.4" stroke="blue" stroke-width="2" fill="none" stroke-dasharray="5,5"/><text x="200" y="130" fill="blue">圓周角</text><text x="100" y="40">對同一弧</text></svg>"""
-}
+class SVGGenerator:
+    @staticmethod
+    def coordinate_point(x, y, label="P"):
+        """動態生成坐標點：根據傳入的 x, y 改變紅點位置"""
+        # 簡單映射：範圍 -5 到 5，映射到畫布座標
+        cx = 150 + (x * 25)
+        cy = 150 - (y * 25)
+        
+        return f"""
+        <svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="#f9f9f9"/>
+            <defs><pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse"><path d="M 25 0 L 0 0 0 25" fill="none" stroke="#ddd" stroke-width="1"/></pattern></defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+            <line x1="150" y1="0" x2="150" y2="300" stroke="black" stroke-width="2"/>
+            <line x1="0" y1="150" x2="300" y2="150" stroke="black" stroke-width="2"/>
+            <text x="285" y="145" font-weight="bold">x</text><text x="155" y="15" font-weight="bold">y</text>
+            <circle cx="{cx}" cy="{cy}" r="6" fill="red" stroke="white" stroke-width="2"/>
+            <text x="{cx+10}" y="{cy-10}" fill="red" font-weight="bold" font-size="16">{label}({x},{y})</text>
+        </svg>
+        """
+
+    @staticmethod
+    def number_line(p1, p2):
+        """動態數線：標示兩點與距離"""
+        # 映射：每個單位 25px，原點在 200
+        x1 = 200 + (p1 * 25)
+        x2 = 200 + (p2 * 25)
+        dist = abs(p2 - p1)
+        mid = (x1 + x2) / 2
+        
+        return f"""
+        <svg width="400" height="120" xmlns="http://www.w3.org/2000/svg">
+            <line x1="20" y1="80" x2="380" y2="80" stroke="black" stroke-width="2" marker-end="url(#arrow)"/>
+            <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#000" /></marker></defs>
+            <line x1="200" y1="75" x2="200" y2="85" stroke="black" stroke-width="2"/><text x="200" y="100" text-anchor="middle">0</text>
+            <circle cx="{x1}" cy="80" r="5" fill="blue"/>
+            <text x="{x1}" y="115" text-anchor="middle" fill="blue" font-weight="bold">{p1}</text>
+            <circle cx="{x2}" cy="80" r="5" fill="red"/>
+            <text x="{x2}" y="115" text-anchor="middle" fill="red" font-weight="bold">{p2}</text>
+            <path d="M{x1},70 Q{mid},{70-dist*5} {x2},70" stroke="purple" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+            <text x="{mid}" y="{60-dist*2}" text-anchor="middle" fill="purple" font-weight="bold" font-size="14">距離 = {dist}</text>
+        </svg>
+        """
+
+    @staticmethod
+    def probability_balls(red, white, green=0):
+        """動態機率圖：真的畫出幾顆球"""
+        balls_svg = ""
+        start_x = 30
+        for i in range(red):
+            balls_svg += f'<circle cx="{start_x}" cy="40" r="15" fill="#ff4444" stroke="black"/><text x="{start_x}" y="45" text-anchor="middle" fill="white" font-size="10">紅</text>'
+            start_x += 35
+        for i in range(white):
+            balls_svg += f'<circle cx="{start_x}" cy="40" r="15" fill="white" stroke="black"/><text x="{start_x}" y="45" text-anchor="middle" fill="black" font-size="10">白</text>'
+            start_x += 35
+        for i in range(green):
+            balls_svg += f'<circle cx="{start_x}" cy="40" r="15" fill="#44ff44" stroke="black"/><text x="{start_x}" y="45" text-anchor="middle" fill="black" font-size="10">綠</text>'
+            start_x += 35
+            
+        return f"""
+        <svg width="400" height="80" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="#eee" rx="10"/>
+            {balls_svg}
+            <text x="200" y="75" text-anchor="middle" fill="#555" font-size="12">袋子裡的情況</text>
+        </svg>
+        """
+
+    @staticmethod
+    def triangle_label(a, b, c, h="?"):
+        """動態標示三角形：圖形形狀固定(示意圖)，但數字標籤會變"""
+        return f"""
+        <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50,170 L250,170 L50,50 Z" fill="#e3f2fd" stroke="blue" stroke-width="3"/>
+            <rect x="50" y="150" width="20" height="20" fill="none" stroke="blue"/>
+            <text x="150" y="190" text-anchor="middle" font-size="16" fill="black">底 = {a}</text>
+            <text x="30" y="110" text-anchor="end" font-size="16" fill="black">高 = {b}</text>
+            <text x="160" y="100" text-anchor="start" font-size="16" fill="red" font-weight="bold">斜邊 = {c}</text>
+        </svg>
+        """
+    
+    @staticmethod
+    def linear_func(m, k):
+        """畫出一次函數 y = mx + k (示意趨勢)"""
+        # 簡單判斷斜率正負來畫線
+        if m > 0:
+            line = '<line x1="50" y1="250" x2="250" y2="50" stroke="blue" stroke-width="3"/>'
+            text = "斜率 > 0 (右上左下)"
+        elif m < 0:
+            line = '<line x1="50" y1="50" x2="250" y2="250" stroke="red" stroke-width="3"/>'
+            text = "斜率 < 0 (左上右下)"
+        else:
+            line = '<line x1="20" y1="150" x2="280" y2="150" stroke="green" stroke-width="3"/>'
+            text = "斜率 = 0 (水平線)"
+            
+        return f"""
+        <svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+            <line x1="150" y1="0" x2="150" y2="300" stroke="black" stroke-width="1"/>
+            <line x1="0" y1="150" x2="300" y2="150" stroke="black" stroke-width="1"/>
+            {line}
+            <text x="150" y="280" text-anchor="middle" font-weight="bold">{text}</text>
+            <text x="20" y="20" font-size="14">y = {m}x + {k}</text>
+        </svg>
+        """
 
 # ==========================================
-# 2. 海量題庫
+# 2. 題庫 (整合動態圖形生成)
 # ==========================================
 MATH_DB = {
-    # ---------------- 國一 (七年級) ----------------
-    "七上：整數與絕對值": [
-        {"q": "計算 $(-15) + 8 - (-5)$ 的值？", "options": ["-2", "-12", "2", "-28"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "負負得正：$-15 + 8 + 5 = -15 + 13 = -2$"},
-        {"q": "【圖解題】參考數線圖，-4 到 3 的距離？", "options": ["1", "7", "-1", "-7"], "ans": 1, "diff": "簡單", "type": "單選", "svg": "number_line_dist", "expl": "距離 = 大減小 = $3 - (-4) = 7$。"},
-        {"q": "若 $|a| = 5$，在數線上表示 a 的點與原點距離為何？", "options": ["5", "-5", "0", "25"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "number_line_dist", "expl": "絕對值的幾何意義就是與原點的距離。"},
-        {"q": "計算 $12 \\div (-3) \\times 4$？", "options": ["-16", "-1", "16", "1"], "ans": 0, "diff": "中等", "type": "單選", "expl": "由左而右運算：$-4 \\times 4 = -16$ (不能先算後面乘法！)"}
+    "七上：整數與數線": [
+        {
+            "q": "【動態圖】數線上，-3 到 4 的距離是多少？",
+            "options": ["1", "7", "-1", "-7"], "ans": 1, "diff": "簡單",
+            "svg_gen": lambda: SVGGenerator.number_line(-3, 4),
+            "expl": "距離 = 大數 - 小數 = $4 - (-3) = 7$。請看圖中紫色虛線跨過的長度。"
+        },
+        {
+            "q": "【動態圖】數線上，-5 到 -2 的距離是多少？",
+            "options": ["3", "-3", "7", "-7"], "ans": 0, "diff": "簡單",
+            "svg_gen": lambda: SVGGenerator.number_line(-5, -2),
+            "expl": "距離 = $|-2 - (-5)| = |3| = 3$。"
+        },
+        {
+            "q": "計算 $15 + (-8)$ 的值？", "options": ["7", "-7", "23", "-23"], "ans": 0, "diff": "簡單",
+            "svg_gen": None, "expl": "正多負少，結果為正。$15-8=7$。"
+        }
     ],
-    "七上：分數與指數律": [
-        {"q": "計算 $\\frac{2}{3} + (-\\frac{1}{4})$？", "options": ["5/12", "3/7", "1/12", "11/12"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "通分母為 12：$\\frac{8}{12} - \\frac{3}{12} = \\frac{5}{12}$。"},
-        {"q": "下列何者錯誤？", "options": ["$2^3 \\times 2^2 = 2^5$", "$(2^3)^2 = 2^6$", "$2^0 = 1$", "$2^3 + 2^3 = 2^6$"], "ans": 3, "diff": "中等", "type": "單選", "expl": "$2^3 + 2^3 = 2 \\times 2^3 = 2^4 \\ne 2^6$ (相加不能指數相加)。"}
+    "七下：直角坐標": [
+        {
+            "q": "【動態圖】請問點 A(-3, 2) 位於第幾象限？",
+            "options": ["一", "二", "三", "四"], "ans": 1, "diff": "簡單",
+            "svg_gen": lambda: SVGGenerator.coordinate_point(-3, 2, "A"),
+            "expl": "x為負(左)，y為正(上)，故為第二象限。"
+        },
+        {
+            "q": "【動態圖】請問點 B(4, -4) 位於第幾象限？",
+            "options": ["一", "二", "三", "四"], "ans": 3, "diff": "簡單",
+            "svg_gen": lambda: SVGGenerator.coordinate_point(4, -4, "B"),
+            "expl": "x為正(右)，y為負(下)，故為第四象限。"
+        },
+        {
+            "q": "【動態圖】觀察圖形，若 $y = 2x + 1$，直線走向為何？",
+            "options": ["右上左下 (斜率正)", "左上右下 (斜率負)", "水平", "垂直"], "ans": 0, "diff": "中等",
+            "svg_gen": lambda: SVGGenerator.linear_func(2, 1),
+            "expl": "x 的係數(斜率)為 2 > 0，故直線隨著 x 變大而上升。"
+        }
     ],
-    "七上：一元一次方程式": [
-        {"q": "化簡 $5(x-2) - 2(2x+1)$？", "options": ["$x-12$", "$x-8$", "$9x-12$", "$x+8$"], "ans": 0, "diff": "中等", "type": "單選", "expl": "$5x - 10 - 4x - 2 = x - 12$。"},
-        {"q": "解方程式 $\\frac{x}{3} + 1 = x - 3$？", "options": ["6", "4", "2", "-6"], "ans": 0, "diff": "中等", "type": "單選", "expl": "同乘 3：$x + 3 = 3x - 9 \\Rightarrow 12 = 2x \\Rightarrow x = 6$。"},
-        {"q": "父親今年 40 歲，兒子 10 歲，幾年後父親年齡是兒子的 3 倍？", "options": ["5", "8", "10", "15"], "ans": 0, "diff": "中等", "type": "單選", "expl": "設 x 年後：$40+x = 3(10+x) \\Rightarrow 40+x = 30+3x \\Rightarrow 10=2x \\Rightarrow x=5$。"}
+    "八上：畢氏定理": [
+        {
+            "q": "【動態圖】直角三角形兩股為 3, 4，斜邊長度？",
+            "options": ["5", "6", "7", "25"], "ans": 0, "diff": "簡單",
+            "svg_gen": lambda: SVGGenerator.triangle_label(3, 4, "?"),
+            "expl": "$\\sqrt{3^2 + 4^2} = \\sqrt{9+16} = \\sqrt{25} = 5$。"
+        },
+        {
+            "q": "【動態圖】直角三角形兩股為 6, 8，斜邊長度？",
+            "options": ["10", "12", "14", "100"], "ans": 0, "diff": "簡單",
+            "svg_gen": lambda: SVGGenerator.triangle_label(6, 8, "?"),
+            "expl": "$\\sqrt{6^2 + 8^2} = \\sqrt{36+64} = \\sqrt{100} = 10$。"
+        },
+        {
+            "q": "【動態圖】已知斜邊為 13，一股為 5，求另一股？",
+            "options": ["12", "8", "10", "18"], "ans": 0, "diff": "中等",
+            "svg_gen": lambda: SVGGenerator.triangle_label("?", 5, 13),
+            "expl": "另一股 = $\\sqrt{13^2 - 5^2} = \\sqrt{169-25} = \\sqrt{144} = 12$。"
+        }
     ],
-    "七下：二元一次聯立方程式": [
-        {"q": "解 $\\begin{cases} x+y=5 \\\\ x-y=1 \\end{cases}$，$(x, y)$？", "options": ["(3, 2)", "(2, 3)", "(4, 1)", "(1, 4)"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "相加：$2x=6 \\Rightarrow x=3$。代回 $y=2$。"}
-    ],
-    "七下：坐標與函數圖形": [
-        {"q": "【圖解題】點 P 在第三象限，其坐標特性？", "options": ["(+,+)", "(-,+)", "(-,-)", "(+,-)"], "ans": 2, "diff": "簡單", "type": "單選", "svg": "coordinate_q2", "expl": "左(-)、下(-)。"},
-        {"q": "【圖解題】參考一次函數圖形，直線與 y 軸交點稱為？", "options": ["y截距", "x截距", "斜率", "原點"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "linear_graph", "expl": "與 y 軸的交點即為 y 截距 (當 x=0 時)。"},
-        {"q": "方程式 $y=3$ 的圖形是？", "options": ["水平線", "鉛垂線", "斜線", "拋物線"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "y 永遠是 3，為水平線。"}
-    ],
-
-    # ---------------- 國二 (八年級) ----------------
-    "八上：乘法公式與多項式": [
-        {"q": "展開 $(a-b)^2$？", "options": ["$a^2-b^2$", "$a^2+b^2$", "$a^2-2ab+b^2$", "$a^2+2ab+b^2$"], "ans": 2, "diff": "簡單", "type": "單選", "expl": "差平方公式：$(a-b)^2 = a^2 - 2ab + b^2$"},
-        {"q": "計算 $199^2$？", "options": ["39601", "39999", "39901", "39801"], "ans": 0, "diff": "中等", "type": "單選", "expl": "$(200-1)^2 = 40000 - 400 + 1 = 39601$。"}
-    ],
-    "八上：平方根與畢氏定理": [
-        {"q": "【圖解題】直角三角形兩股為 5, 12，斜邊？", "options": ["13", "17", "10", "15"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "pythagoras_visual", "expl": "$\\sqrt{5^2+12^2} = 13$。"},
-        {"q": "【圖解題】若直角三角形斜邊為 10，一股為 6，參考圖形概念，另一股為？", "options": ["8", "4", "2", "12"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "pythagoras_visual", "expl": "$\\sqrt{10^2-6^2} = \\sqrt{64} = 8$。"},
-        {"q": "計算 $\\sqrt{20}$ 化簡後？", "options": ["$2\\sqrt{5}$", "$5\\sqrt{2}$", "$4\\sqrt{5}$", "10"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "$20 = 4 \\times 5$，4 開出來是 2。"}
-    ],
-    "八上：因式分解": [
-        {"q": "分解 $x^2 - 25$？", "options": ["$(x-5)^2$", "$(x+5)(x-5)$", "$(x+25)(x-1)$", "無法分解"], "ans": 1, "diff": "簡單", "type": "單選", "expl": "平方差：$a^2-b^2 = (a+b)(a-b)$。"},
-        {"q": "分解 $x^2 + 5x + 6$？", "options": ["$(x+2)(x+3)$", "$(x+1)(x+6)$", "$(x-2)(x-3)$", "$(x-1)(x-6)$"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "積 6 和 5 $\\Rightarrow$ 2, 3。"}
-    ],
-    "八下：等差數列與級數": [
-        {"q": "數列 2, 5, 8, ... 第 20 項？", "options": ["59", "60", "62", "57"], "ans": 0, "diff": "中等", "type": "單選", "expl": "$a_{20} = 2 + 19 \\times 3 = 59$。"},
-        {"q": "級數 1+2+...+100？", "options": ["5050", "5000", "5100", "10100"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "梯形公式：$\\frac{(1+100) \\times 100}{2} = 5050$。"}
-    ],
-    "八下：幾何圖形與性質": [
-        {"q": "【圖解題】L1//L2，內錯角 ∠1, ∠2 關係？", "options": ["相等", "互補", "互餘", "無關"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "parallel_lines", "expl": "平行線內錯角相等。"},
-        {"q": "正五邊形的「內角和」度數？", "options": ["540", "720", "360", "180"], "ans": 0, "diff": "中等", "type": "單選", "expl": "$(5-2) \\times 180 = 540$。"}
-    ],
-
-    # ---------------- 國三 (九年級) ----------------
-    "九上：相似形": [
-        {"q": "【圖解題】參考相似三角形圖形，若邊長放大 2 倍，面積會放大幾倍？", "options": ["2倍", "4倍", "8倍", "不變"], "ans": 1, "diff": "簡單", "type": "單選", "svg": "similar_triangles", "expl": "面積比 = 邊長比的平方 ($2^2 = 4$)。"},
-        {"q": "地圖比例尺 1:100，圖上 2cm 代表實際？", "options": ["2m", "200m", "20m", "0.2m"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "200 cm = 2 m。"}
-    ],
-    "九上：圓的性質": [
-        {"q": "【圖解題】切線 L 與半徑 OP 的夾角？", "options": ["90度", "60度", "45度", "180度"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "circle_tangent", "expl": "切線垂直半徑。"},
-        {"q": "【圖解題】參考圖形，對同一個弧，圓心角是圓周角的幾倍？", "options": ["2倍", "1/2倍", "相等", "3倍"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "circle_angles", "expl": "圓心角度數 = 所對弧度數 = 2 $\\times$ 圓周角度數。"},
-        {"q": "圓內接四邊形對角關係？", "options": ["互補", "相等", "互餘", "無關"], "ans": 0, "diff": "中等", "type": "單選", "expl": "對角和 180 度。"}
-    ],
-    "九上：三角形三心": [
-        {"q": "「重心」是哪三線交點？", "options": ["中線", "角平分線", "中垂線", "高"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "重心分中線為 2:1。"},
-        {"q": "「內心」到三角形哪裡距離相等？", "options": ["三邊", "三頂點", "三高", "重心"], "ans": 0, "diff": "中等", "type": "單選", "expl": "內心是內切圓圓心，到三邊等距 (半徑)。"}
-    ],
-    "九下：二次函數": [
-        {"q": "【圖解題】開口向上的拋物線，係數 a？", "options": ["正", "負", "0", "無法判斷"], "ans": 0, "diff": "簡單", "type": "單選", "svg": "parabola_visual", "expl": "a > 0 開口向上，有最小值。"},
-        {"q": "函數 $y=(x-3)^2+5$ 的頂點？", "options": ["(3, 5)", "(-3, 5)", "(3, -5)", "(-3, -5)"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "頂點式 $(h, k)$。"}
-    ],
-    "九下：統計與機率": [
-        {"q": "投擲一枚硬幣 3 次，恰好 1 正 2 反的機率？", "options": ["3/8", "1/8", "1/2", "1/4"], "ans": 0, "diff": "困難", "type": "單選", "expl": "(正反反, 反正反, 反反正) 共 3 種。全部 $2^3=8$ 種。機率 3/8。"},
-        {"q": "資料：10, 20, 20, 30, 40，眾數是？", "options": ["20", "30", "24", "10"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "出現次數最多的數。"}
+    "九下：機率": [
+        {
+            "q": "【動態圖】袋中有 3 顆紅球，2 顆白球。抽中紅球機率？",
+            "options": ["3/5", "2/5", "1/2", "1/3"], "ans": 0, "diff": "簡單",
+            "svg_gen": lambda: SVGGenerator.probability_balls(3, 2),
+            "expl": "總球數 = 5。紅球 = 3。機率 = 3/5。"
+        },
+        {
+            "q": "【動態圖】袋中有 1 紅、1 白、1 綠。抽中白球機率？",
+            "options": ["1/3", "1/2", "2/3", "1"], "ans": 0, "diff": "簡單",
+            "svg_gen": lambda: SVGGenerator.probability_balls(1, 1, 1),
+            "expl": "總球數 = 3。白球 = 1。機率 = 1/3。"
+        },
+        {
+            "q": "【動態圖】袋中有 4 紅、1 白。抽中紅球機率？",
+            "options": ["4/5", "1/5", "1/4", "3/4"], "ans": 0, "diff": "簡單",
+            "svg_gen": lambda: SVGGenerator.probability_balls(4, 1),
+            "expl": "紅球佔了絕大多數，看圖就知道機率很高。4/(4+1) = 4/5。"
+        }
     ]
 }
 
+# 擴充其他單元的基礎題目 (混合無圖題，確保題庫量夠大)
+MATH_DB["七上：整數與數線"].append({"q": "比 -10 大 3 的數是？", "options": ["-7", "-13", "7", "13"], "ans": 0, "diff": "簡單", "svg_gen": None, "expl": "$-10 + 3 = -7$"})
+MATH_DB["八上：畢氏定理"].append({"q": "直角三角形斜邊最長嗎？", "options": ["是", "不是", "不一定", "看角度"], "ans": 0, "diff": "簡單", "svg_gen": None, "expl": "大角對大邊，90度最大，故斜邊最長。"})
+
 # ==========================================
-# 3. APP 主程式邏輯
+# 3. APP 主程式
 # ==========================================
 def reset_exam():
-    """切換單元時重置狀態"""
     st.session_state.exam_started = False
     st.session_state.current_questions = []
     st.session_state.exam_results = {}
     st.session_state.exam_finished = False
 
 def main():
-    st.set_page_config(page_title="國中數學：視覺增強版", page_icon="📐", layout="centered")
+    st.set_page_config(page_title="國中數學：動態視覺版", page_icon="🎨", layout="centered")
     
     if 'exam_started' not in st.session_state: st.session_state.exam_started = False
     if 'current_questions' not in st.session_state: st.session_state.current_questions = []
     if 'exam_results' not in st.session_state: st.session_state.exam_results = {}
     if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
 
-    st.sidebar.title("📐 數學單元 (視覺加強)")
+    st.sidebar.title("🎨 數學實驗室")
+    st.sidebar.info("💡 此版本採用「動態繪圖技術」。\n\n每一題的圖形都是「現場畫出來」的，所以會根據題目數字不同而改變！")
     
     unit_options = list(MATH_DB.keys())
     selected_unit = st.sidebar.selectbox("選擇單元", unit_options, on_change=reset_exam)
-    st.sidebar.info("💡 此版本修正了詳解顯示亂碼的問題，數學符號現在能完美顯示了。")
 
-    st.title("📐 國中數學：視覺增強版")
+    st.title("🎨 國中數學：動態視覺版")
     st.markdown(f"#### 目前單元：{selected_unit}")
 
-    # 考試首頁
     if not st.session_state.exam_started:
         st.info(f"準備練習：**{selected_unit}**")
-        st.write("系統將隨機抽出 10 題進行測驗。")
-        
-        if st.button("🎲 隨機抽題開始", use_container_width=True):
+        if st.button("🚀 開始動態測驗", use_container_width=True):
             st.session_state.exam_finished = False 
             st.session_state.exam_results = {} 
-            
             all_questions = MATH_DB.get(selected_unit, [])
+            # 隨機選題
             num_to_pick = min(len(all_questions), 10)
-            if num_to_pick == 0:
-                st.error("此單元暫無題目")
-            else:
-                selected_q = random.sample(all_questions, num_to_pick)
-                st.session_state.current_questions = selected_q
-                st.session_state.exam_started = True
-                st.rerun()
+            st.session_state.current_questions = random.sample(all_questions, num_to_pick)
+            st.session_state.exam_started = True
+            st.rerun()
 
-    # 考試進行中
     else:
         total_q = len(st.session_state.current_questions)
-        st.progress(0, text=f"進度：0/{total_q}")
+        st.progress(0, text=f"題目總數：{total_q}")
 
         with st.form("math_exam_form"):
             questions = st.session_state.current_questions
             for idx, q in enumerate(questions):
                 st.markdown(f"**第 {idx+1} 題：**")
                 
-                # 顯示 SVG
-                if "svg" in q and q["svg"] in SVG_ASSETS:
-                    st.markdown(SVG_ASSETS[q["svg"]], unsafe_allow_html=True)
-                    st.caption("👆 請參考圖形作答")
+                # === 核心：動態生成圖形 ===
+                if q.get("svg_gen"):
+                    svg_code = q["svg_gen"]() # 執行函數生成 SVG
+                    st.markdown(svg_code, unsafe_allow_html=True)
+                    st.caption("👆 這張圖是根據題目數字現場畫出來的喔！")
+                # ========================
                 
-                # 題目使用 markdown 顯示數學
                 st.markdown(f"### {q['q']}")
                 st.radio("選項", q['options'], key=f"q_{idx}", index=None, label_visibility="collapsed")
                 st.divider()
 
-            # 交卷
-            if st.form_submit_button("✅ 交卷看成績", use_container_width=True):
+            if st.form_submit_button("✅ 交卷", use_container_width=True):
                 score = 0
                 results = []
                 for idx, q in enumerate(questions):
@@ -174,45 +269,32 @@ def main():
                 st.session_state.exam_results = {"score": score, "total": total_q, "details": results}
                 st.session_state.exam_finished = True
 
-        # 結果頁面
         if st.session_state.get("exam_finished") and st.session_state.exam_results:
             res = st.session_state.exam_results
             final_score = int((res['score'] / res['total']) * 100) if res['total'] > 0 else 0
             
             st.markdown("---")
-            if final_score == 100: st.success(f"💯 滿分！觀念很清楚喔！")
-            elif final_score >= 60: st.info(f"👍 及格了！")
-            else: st.error(f"💪 請務必看下方圖解訂正！")
-            
             st.markdown(f"### 得分：{final_score} 分")
+            if final_score < 60:
+                st.error("別灰心，多看幾次圖就會懂了！")
+            else:
+                st.success("很棒！這就是圖像記憶的力量！")
 
             for i, item in enumerate(res['details']):
                 q_data = item['q']
                 with st.expander(f"第 {i+1} 題詳解 ({'✅' if item['is_correct'] else '❌'})"):
-                    # 詳解也要顯示圖
-                    if "svg" in q_data and q_data["svg"] in SVG_ASSETS:
-                         st.markdown(SVG_ASSETS[q_data["svg"]], unsafe_allow_html=True)
+                    # 詳解也要顯示動態圖
+                    if q_data.get("svg_gen"):
+                        st.markdown(q_data["svg_gen"](), unsafe_allow_html=True)
+                        
                     st.write(f"**題目**：{q_data['q']}")
                     st.write(f"**正解**：{item['correct']}")
                     st.markdown(f"**💡 解析**：")
-                    
-                    # === 核心修正點：使用 st.markdown 來正確顯示中文混和數學 ===
-                    st.markdown(q_data['expl']) 
-                    # =========================================================
+                    st.markdown(q_data['expl'])
 
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("🔄 再刷一次 (題目變換)", use_container_width=True):
-                    all_questions = MATH_DB.get(selected_unit, [])
-                    num_to_pick = min(len(all_questions), 10)
-                    st.session_state.current_questions = random.sample(all_questions, num_to_pick)
-                    st.session_state.exam_finished = False
-                    st.session_state.exam_results = {}
-                    st.rerun()
-            with col2:
-                if st.button("⬅️ 換單元", use_container_width=True):
-                    reset_exam()
-                    st.rerun()
+            if st.button("🔄 再玩一次"):
+                reset_exam()
+                st.rerun()
 
 if __name__ == "__main__":
     main()
