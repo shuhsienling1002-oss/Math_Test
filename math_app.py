@@ -1,7 +1,6 @@
 import streamlit as st
 import random
 import math
-import time
 
 # ==========================================
 # 1. 數學工具箱 (無限生成核心)
@@ -33,7 +32,7 @@ class MathUtils:
                 try:
                     parts = ans.replace('(','').replace(')','').split(',')
                     x, y = int(parts[0]), int(parts[1])
-                    traps = [(y, x), (x, -y), (-x, y), (0,0), (x+5, y+5)]
+                    traps = [(y, x), (x, -y), (-x, y), (0,0), (x+5, y+5), (x-2, y+2)]
                     t = random.choice(traps)
                     t_str = f"({t[0]},{t[1]})"
                     if t_str != ans: distractors.add(t_str)
@@ -41,16 +40,24 @@ class MathUtils:
                     distractors.add("(0,0)")
         return list(distractors)
 
+    @staticmethod
+    def gcd(a, b):
+        while b:
+            a, b = b, a % b
+        return a
+
 # ==========================================
-# 2. 無限題庫工廠 (全單元邏輯 - 完整回歸)
+# 2. 無限題庫工廠 (V18.0 多重宇宙擴充版)
 # ==========================================
 class QuestionFactory:
     
-    # --- 3-1 證明 ---
+    # --- 3-1 證明與推理 (擴充版) ---
     @staticmethod
     def gen_3_1(q_type):
         if q_type == "concept":
-            if random.random() > 0.5:
+            # 隨機路由：全等性質 vs 相似性質 vs 幾何名詞
+            subtype = random.choice(["congruence", "bad_cond", "definition"])
+            if subtype == "congruence":
                 prop = random.choice(["SSS", "SAS", "ASA", "AAS", "RHS"])
                 return {
                     "q": f"若兩個三角形滿足「{prop}」對應相等，則它們的關係為何？",
@@ -58,7 +65,7 @@ class QuestionFactory:
                     "ans": "必全等", "expl": f"{prop} 是全等性質。",
                     "svg": "geometry_sas", "params": {}
                 }
-            else:
+            elif subtype == "bad_cond":
                 bad = random.choice(["SSA", "AAA"])
                 return {
                     "q": f"下列哪一個條件「無法」保證三角形全等？",
@@ -66,8 +73,30 @@ class QuestionFactory:
                     "ans": bad, "expl": f"{bad} 只能確定相似或不確定。",
                     "svg": "none", "params": {}
                 }
+            else:
+                return {
+                    "q": "「若 P 則 Q」的語句中，P 稱為什麼？",
+                    "options": ["題設(前件)", "結論(後件)", "逆敘述", "公理"],
+                    "ans": "題設(前件)", "expl": "邏輯定義。",
+                    "svg": "none", "params": {}
+                }
+
         elif q_type == "calc":
-            if random.random() > 0.5: # 角度
+            # 隨機路由：三角形角度 vs 多邊形角度 vs 外角定理
+            subtype = random.choice(["tri_angle", "poly_angle", "ext_angle"])
+            
+            if subtype == "tri_angle":
+                a = random.randint(40, 80)
+                b = random.randint(20, 180 - a - 10)
+                ans = 180 - a - b
+                opts = MathUtils.get_distractors(ans) + [str(ans)]
+                random.shuffle(opts)
+                return {
+                    "q": f"△ABC 中，∠A={a}°，∠B={b}°，求 ∠C？",
+                    "options": opts, "ans": str(ans), "expl": "內角和 180°。",
+                    "svg": "general_triangle", "params": {"angle_a": a, "angle_b": b}
+                }
+            elif subtype == "ext_angle":
                 a = random.randint(40, 80)
                 b = random.randint(20, 180 - a - 10)
                 ans = a + b
@@ -75,11 +104,11 @@ class QuestionFactory:
                 random.shuffle(opts)
                 return {
                     "q": f"△ABC 中，∠A={a}°，∠B={b}°，則 ∠C 的外角？",
-                    "options": opts, "ans": str(ans), "expl": "外角定理。",
+                    "options": opts, "ans": str(ans), "expl": "外角等於內對角和。",
                     "svg": "general_triangle", "params": {"angle_a": a, "angle_b": b}
                 }
-            else: # 多邊形
-                n = random.choice([5, 6, 8, 10, 12])
+            else:
+                n = random.choice([5, 6, 8, 9, 10, 12])
                 ans = (n-2)*180
                 opts = [str(ans), str(n*180), "360", "720"]
                 random.shuffle(opts)
@@ -101,7 +130,7 @@ class QuestionFactory:
                 "svg": "sticks_triangle", "params": {"s1": s1, "s2": s2}
             }
 
-    # --- 3-2 外心 ---
+    # --- 3-2 外心 (擴充版) ---
     @staticmethod
     def gen_3_2(q_type):
         if q_type == "concept":
@@ -113,7 +142,10 @@ class QuestionFactory:
                 "svg": "triangle_circumcenter", "params": {}
             }
         elif q_type == "calc":
-            if random.random() > 0.5: # 直角求半徑
+            # 隨機路由：直角半徑 vs 座標外心 vs 逆向求斜邊
+            subtype = random.choice(["right_R", "coord_O", "reverse_R"])
+            
+            if subtype == "right_R":
                 c = random.randint(5, 30) * 2
                 r = c // 2
                 opts = MathUtils.get_distractors(r) + [str(r)]
@@ -123,7 +155,17 @@ class QuestionFactory:
                     "options": opts, "ans": str(r), "expl": "直角外心在斜邊中點。",
                     "svg": "right_triangle_circumcenter", "params": {}
                 }
-            else: # 座標
+            elif subtype == "reverse_R":
+                r = random.randint(3, 15)
+                ans = r * 2
+                opts = MathUtils.get_distractors(ans) + [str(ans)]
+                random.shuffle(opts)
+                return {
+                    "q": f"直角三角形的外接圓半徑為 {r}，求斜邊長？",
+                    "options": opts, "ans": str(ans), "expl": "斜邊 = 2 × 半徑。",
+                    "svg": "right_triangle_circumcenter", "params": {}
+                }
+            else: # coord
                 k = random.randint(2, 8) * 2
                 ans = f"({k//2},{k//2})"
                 opts = MathUtils.get_distractors(ans, "coord") + [ans]
@@ -141,7 +183,7 @@ class QuestionFactory:
                 "svg": "triangle_circumcenter", "params": {}
             }
 
-    # --- 3-3 內心 (使用精密幾何邏輯) ---
+    # --- 3-3 內心 (擴充版：加入直角公式與逆推) ---
     @staticmethod
     def gen_3_3(q_type):
         if q_type == "concept":
@@ -152,7 +194,10 @@ class QuestionFactory:
                 "svg": "triangle_incenter_concept", "params": {}
             }
         elif q_type == "calc":
-            if random.random() > 0.5: # 角度
+            # 隨機路由：角度公式 vs 面積公式 vs 直角內切圓公式 vs 角度逆推
+            subtype = random.choice(["angle", "area", "right_r", "reverse_angle"])
+            
+            if subtype == "angle":
                 deg = random.randint(30, 100)
                 if deg % 2 != 0: deg += 1
                 ans = 90 + deg // 2
@@ -163,7 +208,31 @@ class QuestionFactory:
                     "options": opts, "ans": str(ans), "expl": "公式：90 + A/2。",
                     "svg": "triangle_incenter_angle", "params": {"a": deg}
                 }
-            else: # 面積
+            elif subtype == "reverse_angle":
+                # 逆推：給 BIC 求 A
+                ans_a = random.randint(40, 100)
+                if ans_a % 2 != 0: ans_a += 1
+                bic = 90 + ans_a // 2
+                opts = MathUtils.get_distractors(ans_a) + [str(ans_a)]
+                random.shuffle(opts)
+                return {
+                    "q": f"I 為內心，若 ∠BIC={bic}°，則 ∠A 是幾度？",
+                    "options": opts, "ans": str(ans_a), "expl": "逆推：(BIC-90)*2。",
+                    "svg": "triangle_incenter_angle", "params": {"a": "?"}
+                }
+            elif subtype == "right_r":
+                # 直角三角形內切圓公式 r = (a+b-c)/2
+                k = random.randint(1, 5)
+                a, b, c = 3*k, 4*k, 5*k
+                ans = (a + b - c) // 2
+                opts = MathUtils.get_distractors(ans) + [str(ans)]
+                random.shuffle(opts)
+                return {
+                    "q": f"直角三角形三邊為 {a}, {b}, {c}，求內切圓半徑？",
+                    "options": opts, "ans": str(ans), "expl": "公式：(兩股和 - 斜邊) / 2。",
+                    "svg": "right_triangle_incenter", "params": {"a": a, "b": b, "c": c}
+                }
+            else: # area
                 s = random.randint(10, 30)
                 r = random.randint(2, 8)
                 area = s * r // 2
@@ -182,7 +251,7 @@ class QuestionFactory:
                 "svg": "triangle_incenter_concept", "params": {}
             }
 
-    # --- 3-4 重心 ---
+    # --- 3-4 重心 (擴充版：加入座標與面積分割) ---
     @staticmethod
     def gen_3_4(q_type):
         if q_type == "concept":
@@ -193,15 +262,42 @@ class QuestionFactory:
                 "svg": "triangle_centroid", "params": {}
             }
         elif q_type == "calc":
-            m = random.randint(2, 20) * 3
-            ans = m * 2 // 3
-            opts = MathUtils.get_distractors(ans) + [str(ans)]
-            random.shuffle(opts)
-            return {
-                "q": f"G 為重心，中線 AD 長 {m}，求 AG？",
-                "options": opts, "ans": str(ans), "expl": "重心分中線 2:1。",
-                "svg": "triangle_centroid", "params": {"m": m}
-            }
+            # 隨機路由：長度公式 vs 座標重心 vs 面積六等分
+            subtype = random.choice(["len_ratio", "coord_G", "area_div"])
+            
+            if subtype == "len_ratio":
+                m = random.randint(2, 20) * 3
+                ans = m * 2 // 3
+                opts = MathUtils.get_distractors(ans) + [str(ans)]
+                random.shuffle(opts)
+                return {
+                    "q": f"G 為重心，中線 AD 長 {m}，求 AG？",
+                    "options": opts, "ans": str(ans), "expl": "重心分中線 2:1。",
+                    "svg": "triangle_centroid", "params": {"m": m}
+                }
+            elif subtype == "coord_G":
+                x1, y1 = random.randint(0,6)*3, random.randint(0,6)*3
+                x2, y2 = random.randint(0,6)*3, random.randint(0,6)*3
+                x3, y3 = random.randint(0,6)*3, random.randint(0,6)*3
+                gx, gy = (x1+x2+x3)//3, (y1+y2+y3)//3
+                ans = f"({gx},{gy})"
+                opts = MathUtils.get_distractors(ans, "coord") + [ans]
+                random.shuffle(opts)
+                return {
+                    "q": f"A({x1},{y1}), B({x2},{y2}), C({x3},{y3})，求重心 G 座標？",
+                    "options": opts, "ans": ans, "expl": "三點座標相加除以 3。",
+                    "svg": "none", "params": {}
+                }
+            else: # area_div
+                total = random.randint(2, 20) * 6
+                ans = total // 6
+                opts = MathUtils.get_distractors(ans) + [str(ans)]
+                random.shuffle(opts)
+                return {
+                    "q": f"△ABC 面積為 {total}，G 為重心，求 △GAB 內的中線分割出的最小三角形面積？",
+                    "options": opts, "ans": str(ans), "expl": "重心將面積六等分。",
+                    "svg": "triangle_centroid", "params": {}
+                }
         else:
             return {
                 "q": "手指頂住木板平衡，要放在？",
@@ -210,7 +306,7 @@ class QuestionFactory:
                 "svg": "triangle_centroid", "params": {}
             }
 
-    # --- 4-1 因式分解 ---
+    # --- 4-1 因式分解 (擴充版：加入完全平方判斷) ---
     @staticmethod
     def gen_4_1(q_type):
         if q_type == "concept":
@@ -221,15 +317,29 @@ class QuestionFactory:
                 "svg": "none", "params": {}
             }
         elif q_type == "calc":
-            k = random.randint(2, 12)
-            ans = f"(x+{k})(x-{k})"
-            opts = [ans, f"(x-{k})²", f"(x+{k})²", f"x(x-{k})"]
-            random.shuffle(opts)
-            return {
-                "q": f"因式分解 x² - {k*k}？",
-                "options": opts, "ans": ans, "expl": "平方差公式。",
-                "svg": "diff_squares", "params": {"k": k}
-            }
+            # 隨機路由：平方差 vs 完全平方常數 k
+            subtype = random.choice(["diff_sq", "perfect_sq_k"])
+            
+            if subtype == "diff_sq":
+                k = random.randint(2, 12)
+                ans = f"(x+{k})(x-{k})"
+                opts = [ans, f"(x-{k})²", f"(x+{k})²", f"x(x-{k})"]
+                random.shuffle(opts)
+                return {
+                    "q": f"因式分解 x² - {k*k}？",
+                    "options": opts, "ans": ans, "expl": "平方差公式。",
+                    "svg": "diff_squares", "params": {"k": k}
+                }
+            else: # perfect_sq_k
+                b = random.randint(2, 10) * 2
+                ans = (b // 2) ** 2
+                opts = MathUtils.get_distractors(ans) + [str(ans)]
+                random.shuffle(opts)
+                return {
+                    "q": f"若 x² + {b}x + k 是完全平方式，求 k？",
+                    "options": opts, "ans": str(ans), "expl": "k = (一次項係數一半)的平方。",
+                    "svg": "area_square_k", "params": {}
+                }
         else:
             area = random.randint(12, 100)
             return {
@@ -239,7 +349,7 @@ class QuestionFactory:
                 "svg": "rect_area", "params": {"area": area}
             }
 
-    # --- 4-2 配方法 ---
+    # --- 4-2 配方法 (擴充版：加入根與係數) ---
     @staticmethod
     def gen_4_2(q_type):
         if q_type == "concept":
@@ -250,15 +360,33 @@ class QuestionFactory:
                 "svg": "parabola_d_neg", "params": {}
             }
         elif q_type == "calc":
-            k = random.randint(2, 12) * 2
-            ans = (k//2)**2
-            opts = MathUtils.get_distractors(ans) + [str(ans)]
-            random.shuffle(opts)
-            return {
-                "q": f"x² + {k}x + □ 配成完全平方，□ = ？",
-                "options": opts, "ans": str(ans), "expl": "補項公式。",
-                "svg": "area_square_k", "params": {}
-            }
+            # 隨機路由：配方補項 vs 根與係數(兩根和)
+            subtype = random.choice(["complete_sq", "sum_roots"])
+            
+            if subtype == "complete_sq":
+                k = random.randint(2, 12) * 2
+                ans = (k//2)**2
+                opts = MathUtils.get_distractors(ans) + [str(ans)]
+                random.shuffle(opts)
+                return {
+                    "q": f"x² + {k}x + □ 配成完全平方，□ = ？",
+                    "options": opts, "ans": str(ans), "expl": "補項公式。",
+                    "svg": "area_square_k", "params": {}
+                }
+            else: # sum_roots
+                r1 = random.randint(-5, 5)
+                r2 = random.randint(-5, 5)
+                b = -(r1 + r2)
+                c = r1 * r2
+                ans = r1 + r2
+                eq = f"x² + {b}x + {c} = 0" if b >= 0 else f"x² - {-b}x + {c} = 0"
+                opts = MathUtils.get_distractors(ans) + [str(ans)]
+                random.shuffle(opts)
+                return {
+                    "q": f"方程式 {eq} 的兩根之和為何？",
+                    "options": opts, "ans": str(ans), "expl": "兩根和 = -b/a。",
+                    "svg": "none", "params": {}
+                }
         else:
             return {
                 "q": "時間 t 為虛數，代表？",
@@ -267,7 +395,7 @@ class QuestionFactory:
                 "svg": "parabola_d_neg", "params": {}
             }
 
-    # --- 4-3 應用問題 ---
+    # --- 4-3 應用問題 (擴充版：加入極值問題) ---
     @staticmethod
     def gen_4_3(q_type):
         if q_type == "concept":
@@ -278,15 +406,31 @@ class QuestionFactory:
                 "svg": "none", "params": {}
             }
         elif q_type == "calc":
-            n = random.randint(2, 15)
-            val = n*(n-1)
-            opts = MathUtils.get_distractors(n) + [str(n)]
-            random.shuffle(opts)
-            return {
-                "q": f"某正數平方比該數大 {val}，求該數？",
-                "options": opts, "ans": str(n), "expl": "列式求解。",
-                "svg": "none", "params": {}
-            }
+            # 隨機路由：正數平方問題 vs 拋物線極值
+            subtype = random.choice(["num_sq", "max_val"])
+            
+            if subtype == "num_sq":
+                n = random.randint(2, 15)
+                val = n*(n-1)
+                opts = MathUtils.get_distractors(n) + [str(n)]
+                random.shuffle(opts)
+                return {
+                    "q": f"某正數平方比該數大 {val}，求該數？",
+                    "options": opts, "ans": str(n), "expl": "列式求解。",
+                    "svg": "none", "params": {}
+                }
+            else: # max_val
+                h = random.randint(1, 5)
+                k = random.randint(5, 20)
+                # y = -(x-h)^2 + k
+                ans = k
+                opts = MathUtils.get_distractors(ans) + [str(ans)]
+                random.shuffle(opts)
+                return {
+                    "q": f"二次函數 y = -(x-{h})² + {k} 的最大值？",
+                    "options": opts, "ans": str(ans), "expl": "頂點式 (h, k) 為頂點。",
+                    "svg": "parabola_firework", "params": {}
+                }
         else:
             if random.random() > 0.5: # 梯子
                 m = random.randint(2, 8)
@@ -313,7 +457,6 @@ class QuestionFactory:
                     "svg": "parabola_firework", "params": {}
                 }
 
-    # --- 路由 (完整版，不刪減) ---
     @staticmethod
     def generate(unit):
         mapping = {
@@ -330,7 +473,7 @@ class QuestionFactory:
         return [generator("concept"), generator("calc"), generator("real")]
 
 # ==========================================
-# 3. 視覺繪圖引擎 (全功能 + 精密幾何版)
+# 3. 視覺繪圖引擎 (V18.0 全功能 + 精密幾何 + 新題型支援)
 # ==========================================
 class SVGDrawer:
     @staticmethod
@@ -339,7 +482,7 @@ class SVGDrawer:
         
         # 🔥 V16 精密幾何修復：內切圓 🔥
         if svg_type == "triangle_incenter_angle":
-            a_val = kwargs.get("a", 60)
+            a_val = kwargs.get("a", "?")
             return base.format(f'''
                 <path d="M150,30 L40,190 L260,190 Z" fill="none" stroke="black" stroke-width="2"/>
                 <text x="150" y="25" font-size="16" text-anchor="middle" font-weight="bold">A ({a_val}°)</text>
@@ -356,6 +499,21 @@ class SVGDrawer:
                 <text x="150" y="170" fill="blue" font-size="20" text-anchor="middle" font-weight="bold">?</text>
             ''')
         
+        # 🔥 V18 新增：直角三角形內切圓 🔥
+        elif svg_type == "right_triangle_incenter":
+            a = kwargs.get("a", 3)
+            b = kwargs.get("b", 4)
+            c = kwargs.get("c", 5)
+            return base.format(f'''
+                <path d="M50,40 L50,180 L200,180 Z" fill="none" stroke="black" stroke-width="2"/>
+                <rect x="50" y="160" width="20" height="20" fill="none" stroke="black"/>
+                <circle cx="85" cy="145" r="35" fill="#e1bee7" stroke="purple" opacity="0.5"/>
+                <text x="30" y="110" font-size="14">{a}</text>
+                <text x="120" y="200" font-size="14">{b}</text>
+                <text x="130" y="100" font-size="14">{c}</text>
+                <text x="85" y="150" fill="purple" font-weight="bold">r?</text>
+            ''')
+
         elif svg_type == "triangle_incenter_concept":
             return base.format('''
                 <path d="M150,30 L40,190 L260,190 Z" fill="none" stroke="black" stroke-width="2"/>
@@ -374,7 +532,7 @@ class SVGDrawer:
                 <path d="M80,150 L220,150 L120,50 Z" fill="#e3f2fd" stroke="black" stroke-width="2"/>
                 <text x="110" y="40" font-size="14">A({a}°)</text>
                 <text x="60" y="160" font-size="14">B({b}°)</text>
-                <text x="230" y="160" font-size="14" fill="red">C(外角?)</text>
+                <text x="230" y="160" font-size="14" fill="red">C(?)</text>
                 <line x1="220" y1="150" x2="280" y2="150" stroke="black" stroke-dasharray="4"/>
             ''')
         elif svg_type == "sticks_triangle":
@@ -456,7 +614,7 @@ class SVGDrawer:
 # 4. APP 介面
 # ==========================================
 st.set_page_config(page_title="國中數學雲端教室", page_icon="♾️")
-st.title("♾️ 國中數學無限生成引擎 (V17.0 終極完全體)")
+st.title("♾️ 國中數學無限生成引擎 (V18.0 多重宇宙擴充版)")
 
 if 'quiz' not in st.session_state: st.session_state.quiz = []
 if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
@@ -467,7 +625,7 @@ units = [
 ]
 unit = st.sidebar.selectbox("請選擇練習單元", units)
 
-if st.sidebar.button("🚀 生成無限試卷 (全單元+精密幾何)"):
+if st.sidebar.button("🚀 生成無限試卷 (全單元+精密幾何+多重題型)"):
     new_quiz = QuestionFactory.generate(unit)
     if new_quiz:
         st.session_state.quiz = new_quiz
