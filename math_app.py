@@ -45,7 +45,7 @@ def create_cloud_database():
             "svg": "none"
         })
 
-    for _ in range(50): # 變化 D: 特殊四邊形性質 (修復 shape bug)
+    for _ in range(50): # 變化 D: 特殊四邊形性質
         shape_type = random.choice([
             ("菱形", "互相垂直平分"),
             ("矩形", "等長且互相平分"),
@@ -348,7 +348,7 @@ class SVGDrawer:
 # 3. APP 介面
 # ==========================================
 st.set_page_config(page_title="國中數學雲端教室", page_icon="☁️")
-st.title("☁️ 國中數學智能題庫 (V25.0 雪恥版)")
+st.title("☁️ 國中數學智能題庫 (V25.0)")
 
 # 初始化狀態
 if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
@@ -357,7 +357,7 @@ if 'quiz_score' not in st.session_state: st.session_state.quiz_score = 0
 if 'quiz' not in st.session_state: st.session_state.quiz = []
 
 # 【核心步驟】程式啟動時，直接在雲端生成 1000+ 題
-with st.spinner('正在雲端重構 25 種不同題型，保證不洗版...'):
+with st.spinner('正在雲端重構 25 種不同題型...'):
     data = create_cloud_database()
 
 st.sidebar.success(f"✅ 題庫生成完畢！\n共 {sum(len(v) for v in data.values())} 題。\n已排除重複模板。")
