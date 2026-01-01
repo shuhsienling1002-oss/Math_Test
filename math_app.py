@@ -135,9 +135,9 @@ def create_cloud_database():
             "q": f"解方程式 {term1}{term2} = 0？",
             "options": [f"{r1} 或 {r2}", f"{-r1} 或 {-r2}", f"{r1} 或 {-r2}", "無解"],
             "ans": f"{r1} 或 {r2}",
-            "expl": f"令括號為 0 可得解為 {r1} 或 {r2}。",
+            "expl": f"解為 {r1} 或 {r2}。",
             "svg": "roots_line_hidden",
-            "svg_params": {"r1_label": "a", "r2_label": "b", "r1": r1, "r2": r2}
+            "svg_params": {"r1_label": "x₁", "r2_label": "x₂", "r1": r1, "r2": r2}
         })
     for _ in range(50):
         k = random.randint(2, 9)
@@ -145,9 +145,9 @@ def create_cloud_database():
             "q": f"解方程式 x² - {k}x = 0？",
             "options": [f"0 或 {k}", f"{k}", "0", f"1 或 {k}"],
             "ans": f"0 或 {k}",
-            "expl": f"提公因式：x(x-{k})=0 => x=0 或 {k}。",
+            "expl": f"x(x-{k})=0 => 0, {k}。",
             "svg": "roots_0_k",
-            "svg_params": {"k": k}
+            "svg_params": {"k_label": "k", "k": k}
         })
     for _ in range(50):
         k = random.randint(2, 9)
@@ -155,7 +155,7 @@ def create_cloud_database():
             "q": f"解方程式 x² - {k*k} = 0？",
             "options": [f"±{k}", f"{k}", str(k*k), "無解"],
             "ans": f"±{k}",
-            "expl": f"x²={k*k} => x=±{k}。",
+            "expl": f"x²={k*k} => ±{k}。",
             "svg": "none"
         })
     for _ in range(50):
@@ -262,7 +262,7 @@ def create_cloud_database():
     return database
 
 # ==========================================
-# 2. 視覺繪圖引擎
+# 2. 視覺繪圖引擎 (遮蔽答案版)
 # ==========================================
 class SVGDrawer:
     @staticmethod
@@ -279,11 +279,12 @@ class SVGDrawer:
             return base.format('<path d="M150,30 L50,170 L250,170 Z" fill="none" stroke="black"/><circle cx="150" cy="120" r="4" fill="orange"/><text x="150" y="110" fill="orange">I</text>')
         elif svg_type == "roots_line_hidden":
             r1, r2 = kwargs.get('r1', 0), kwargs.get('r2', 0)
-            l1, l2 = kwargs.get('r1_label', 'a'), kwargs.get('r2_label', 'b')
+            l1, l2 = kwargs.get('r1_label', 'x₁'), kwargs.get('r2_label', 'x₂')
             return base.format(f'<line x1="10" y1="100" x2="290" y2="100" stroke="black"/><text x="150" y="90" text-anchor="middle">0</text><circle cx="{mx(r1)}" cy="100" r="5" fill="red"/><text x="{mx(r1)}" y="130" fill="red" text-anchor="middle">{l1}</text><circle cx="{mx(r2)}" cy="100" r="5" fill="red"/><text x="{mx(r2)}" y="130" fill="red" text-anchor="middle">{l2}</text>')
         elif svg_type == "roots_0_k":
             k = kwargs.get('k', 0)
-            return base.format(f'<line x1="10" y1="100" x2="290" y2="100" stroke="black"/><circle cx="{mx(0)}" cy="100" r="5" fill="red"/><circle cx="{mx(k)}" cy="100" r="5" fill="red"/><text x="{mx(k)}" y="130" fill="red">k</text><text x="{mx(0)}" y="130">0</text>')
+            kl = kwargs.get('k_label', 'k')
+            return base.format(f'<line x1="10" y1="100" x2="290" y2="100" stroke="black"/><circle cx="{mx(0)}" cy="100" r="5" fill="red"/><circle cx="{mx(k)}" cy="100" r="5" fill="red"/><text x="{mx(k)}" y="130" fill="red">{kl}</text><text x="{mx(0)}" y="130">0</text>')
         elif svg_type == "area_square":
             return base.format('<rect x="100" y="50" width="100" height="100" fill="#e3f2fd" stroke="black"/><text x="150" y="105" text-anchor="middle">面積</text>')
         elif svg_type == "area_square_k":
@@ -296,8 +297,8 @@ class SVGDrawer:
 st.set_page_config(page_title="國中數學雲端教室", page_icon="☁️")
 st.title("☁️ 國中數學智能題庫 (V25.4)")
 
-if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
 if 'quiz' not in st.session_state: st.session_state.quiz = []
+if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
 
 data = create_cloud_database()
 st.sidebar.success(f"✅ 題庫生成完畢！\n共 {sum(len(v) for v in data.values())} 題。\n已排除重複模板。")
@@ -336,6 +337,7 @@ if st.session_state.exam_finished:
         if is_correct: score += 1
         with st.expander(f"第 {i+1} 題: {'✅ 正確' if is_correct else '❌ 錯誤'}"):
             st.write(f"題目: {q['q']}")
+            st.write(f"您的答案: {st.session_state.results[i]}")
             st.write(f"正確答案: {q['ans']}")
             st.info(f"解析: {q['expl']}")
     st.success(f"## 您的得分: {score * 10} 分")
