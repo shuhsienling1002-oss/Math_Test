@@ -363,7 +363,7 @@ def generate_question_from_template(template):
     return {
         "q": template["q"],
         "options": options,
-        "correct_ans": template["ans"],
+        "ans": template["ans"],
         "expl": template["expl"],
         "svg": svg
     }
@@ -441,7 +441,7 @@ if st.session_state.quiz and not st.session_state.exam_finished:
             results = []
             for i, q in enumerate(st.session_state.quiz):
                 u_ans = user_answers[i]
-                is_correct = (u_ans == q['correct_ans'])
+                is_correct = (u_ans == q['ans'])
                 if is_correct: score += 1
                 results.append({"q": q, "user": u_ans, "correct": is_correct})
             
@@ -471,7 +471,7 @@ if st.session_state.exam_finished:
 
             st.write(f"**題目**：{q['q']}")
             st.write(f"**您的答案**：{item['user']}")
-            st.write(f"**正確答案**：{q['correct_ans']}")
+            st.write(f"**正確答案**：{q['ans']}")
             if not is_right:
                 st.error(f"💡 解析：{q['expl']}")
             else:
