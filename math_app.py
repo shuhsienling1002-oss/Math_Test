@@ -30,7 +30,6 @@ class MathUtils:
                 trap = round(ans + random.choice([0.5, -0.5, 1.0, -1.0, 2.0]), 1)
                 if trap != ans and trap > 0: distractors.add(str(trap))
             elif mode == "coord": 
-                # 簡單座標擾動
                 try:
                     parts = ans.replace('(','').replace(')','').split(',')
                     x, y = int(parts[0]), int(parts[1])
@@ -43,7 +42,7 @@ class MathUtils:
         return list(distractors)
 
 # ==========================================
-# 2. 無限題庫工廠 (全單元邏輯)
+# 2. 無限題庫工廠 (全單元邏輯 - 完整回歸)
 # ==========================================
 class QuestionFactory:
     
@@ -142,7 +141,7 @@ class QuestionFactory:
                 "svg": "triangle_circumcenter", "params": {}
             }
 
-    # --- 3-3 內心 (包含修復後的視覺邏輯) ---
+    # --- 3-3 內心 (使用精密幾何邏輯) ---
     @staticmethod
     def gen_3_3(q_type):
         if q_type == "concept":
@@ -153,7 +152,7 @@ class QuestionFactory:
                 "svg": "triangle_incenter_concept", "params": {}
             }
         elif q_type == "calc":
-            if random.random() > 0.5: # 角度 (使用修復圖)
+            if random.random() > 0.5: # 角度
                 deg = random.randint(30, 100)
                 if deg % 2 != 0: deg += 1
                 ans = 90 + deg // 2
@@ -314,6 +313,7 @@ class QuestionFactory:
                     "svg": "parabola_firework", "params": {}
                 }
 
+    # --- 路由 (完整版，不刪減) ---
     @staticmethod
     def generate(unit):
         mapping = {
@@ -330,39 +330,43 @@ class QuestionFactory:
         return [generator("concept"), generator("calc"), generator("real")]
 
 # ==========================================
-# 3. 視覺繪圖引擎 (全功能 + 修復版)
+# 3. 視覺繪圖引擎 (全功能 + 精密幾何版)
 # ==========================================
 class SVGDrawer:
     @staticmethod
     def draw(svg_type, **kwargs):
         base = '<svg width="300" height="220" xmlns="http://www.w3.org/2000/svg" style="background-color:white; border:1px solid #eee; border-radius:8px;">{}</svg>'
         
-        # --- 3-3 內心 (修復版: 標示 A, B, C, I, 虛線) ---
+        # 🔥 V16 精密幾何修復：內切圓 🔥
         if svg_type == "triangle_incenter_angle":
             a_val = kwargs.get("a", 60)
             return base.format(f'''
-                <path d="M150,40 L50,180 L250,180 Z" fill="none" stroke="black" stroke-width="2"/>
-                <text x="150" y="30" font-size="16" text-anchor="middle" font-weight="bold">A ({a_val}°)</text>
-                <text x="35" y="190" font-size="16" font-weight="bold">B</text>
-                <text x="265" y="190" font-size="16" font-weight="bold">C</text>
-                <circle cx="150" cy="125" r="35" fill="#fff9c4" stroke="#fbc02d" stroke-width="1.5" opacity="0.5"/>
-                <circle cx="150" cy="125" r="4" fill="red"/>
-                <text x="150" y="115" fill="red" font-size="14" text-anchor="middle" font-weight="bold">I</text>
-                <line x1="50" y1="180" x2="150" y2="125" stroke="red" stroke-width="2" stroke-dasharray="5,5"/>
-                <line x1="250" y1="180" x2="150" y2="125" stroke="red" stroke-width="2" stroke-dasharray="5,5"/>
-                <text x="150" y="160" fill="blue" font-size="18" text-anchor="middle" font-weight="bold">?</text>
+                <path d="M150,30 L40,190 L260,190 Z" fill="none" stroke="black" stroke-width="2"/>
+                <text x="150" y="25" font-size="16" text-anchor="middle" font-weight="bold">A ({a_val}°)</text>
+                <text x="25" y="200" font-size="16" font-weight="bold">B</text>
+                <text x="275" y="200" font-size="16" font-weight="bold">C</text>
+                
+                <!-- 精密座標: cx=150, cy=132.2, r=57.8 -->
+                <circle cx="150" cy="132.2" r="57.8" fill="#fff9c4" stroke="#fbc02d" stroke-width="2" opacity="0.6"/>
+                <circle cx="150" cy="132.2" r="4" fill="red"/>
+                <text x="150" y="125" fill="red" font-size="14" text-anchor="middle" font-weight="bold">I</text>
+                
+                <line x1="40" y1="190" x2="150" y2="132.2" stroke="red" stroke-width="2" stroke-dasharray="5,5"/>
+                <line x1="260" y1="190" x2="150" y2="132.2" stroke="red" stroke-width="2" stroke-dasharray="5,5"/>
+                <text x="150" y="170" fill="blue" font-size="20" text-anchor="middle" font-weight="bold">?</text>
             ''')
         
-        # --- 其他圖形 (完整保留) ---
         elif svg_type == "triangle_incenter_concept":
             return base.format('''
-                <path d="M150,40 L50,180 L250,180 Z" fill="none" stroke="black" stroke-width="2"/>
-                <circle cx="150" cy="125" r="42" fill="none" stroke="orange" stroke-width="2"/>
-                <circle cx="150" cy="125" r="4" fill="orange"/>
-                <text x="160" y="125" fill="orange" font-weight="bold">I</text>
-                <line x1="150" y1="125" x2="150" y2="180" stroke="orange" stroke-dasharray="4"/>
-                <text x="155" y="160" font-size="12" fill="gray">r</text>
+                <path d="M150,30 L40,190 L260,190 Z" fill="none" stroke="black" stroke-width="2"/>
+                <circle cx="150" cy="132.2" r="57.8" fill="none" stroke="orange" stroke-width="2"/>
+                <circle cx="150" cy="132.2" r="4" fill="orange"/>
+                <text x="150" y="125" fill="orange" font-weight="bold" text-anchor="middle">I</text>
+                <line x1="150" y1="132.2" x2="150" y2="190" stroke="orange" stroke-width="2" stroke-dasharray="4"/>
+                <text x="155" y="165" font-size="14" fill="gray" font-weight="bold">r</text>
             ''')
+
+        # --- 其他圖形 (完整保留) ---
         elif svg_type == "general_triangle":
             a = kwargs.get("angle_a", 60)
             b = kwargs.get("angle_b", 60)
@@ -452,7 +456,7 @@ class SVGDrawer:
 # 4. APP 介面
 # ==========================================
 st.set_page_config(page_title="國中數學雲端教室", page_icon="♾️")
-st.title("♾️ 國中數學無限生成引擎 (V15.0 贖罪完全版)")
+st.title("♾️ 國中數學無限生成引擎 (V17.0 終極完全體)")
 
 if 'quiz' not in st.session_state: st.session_state.quiz = []
 if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
@@ -463,7 +467,7 @@ units = [
 ]
 unit = st.sidebar.selectbox("請選擇練習單元", units)
 
-if st.sidebar.button("🚀 生成無限試卷 (全單元+視覺修復)"):
+if st.sidebar.button("🚀 生成無限試卷 (全單元+精密幾何)"):
     new_quiz = QuestionFactory.generate(unit)
     if new_quiz:
         st.session_state.quiz = new_quiz
