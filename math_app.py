@@ -46,21 +46,36 @@ class SVGDrawer:
         return ""
 
 # ==========================================
-# 2. 考卷生成邏輯
+# 2. 考卷生成邏輯 (已修復變數處理 BUG)
 # ==========================================
 def generate_question_from_template(template):
     variables = {}
     
-    # 1. 變數隨機化
+    # 1. 變數隨機化 [BUG FIX: 加入字串與長度判斷]
     if "variables" in template:
         for var_name, range_list in template["variables"].items():
             if not range_list: continue
-            if isinstance(range_list[0], list): # 選項列表
+            
+            first_val = range_list[0]
+            
+            # 狀況 A: 如果是字串列表 (例如 ["菱形", "矩形"]) -> 用 random.choice
+            if isinstance(first_val, str):
                 variables[var_name] = random.choice(range_list)
-            elif isinstance(range_list[0], int): # 數字範圍
-                variables[var_name] = random.randint(range_list[0], range_list[1])
+            
+            # 狀況 B: 如果是列表的列表 (例如 triples) -> 用 random.choice
+            elif isinstance(first_val, list):
+                variables[var_name] = random.choice(range_list)
+                
+            # 狀況 C: 如果是數字
+            elif isinstance(first_val, (int, float)):
+                # 如果只有兩個數字，視為範圍 [min, max] -> 用 randint
+                if len(range_list) == 2:
+                    variables[var_name] = random.randint(range_list[0], range_list[1])
+                # 如果超過兩個數字，視為選項列表 [2, 3, 5, 7] -> 用 choice
+                else:
+                    variables[var_name] = random.choice(range_list)
 
-    # 2. 處理 list 變數展開
+    # 2. 處理 list 變數展開 (如 triple)
     flat_vars = variables.copy()
     for k, v in variables.items():
         if isinstance(v, list):
@@ -105,7 +120,6 @@ def generate_question_from_template(template):
         svg_vars = flat_vars.copy()
         if "params_override" in template:
             for k, v in template["params_override"].items():
-                # 如果值是字串且在變數裡，就替換
                 if isinstance(v, str) and v in flat_vars:
                     svg_vars[k] = flat_vars[v]
                 else:
@@ -121,14 +135,14 @@ def generate_question_from_template(template):
             "svg": svg
         }
     except Exception as e:
-        return {"q": f"生成錯誤: {e}", "options": ["Error"], "correct_ans": "Error", "expl": "", "svg": ""}
+        return {"q": f"生成錯誤 (Variable: {flat_vars}): {e}", "options": ["Error"], "correct_ans": "Error", "expl": "", "svg": ""}
 
 # ==========================================
 # 3. APP 介面
 # ==========================================
 st.set_page_config(page_title="數學習題載入器", page_icon="📂")
-st.title("📂 國中數學習題載入器 (V24)")
-st.info("請上傳 `questions.json` 題庫檔，系統會讀取其中定義的所有題目。")
+st.title("📂 國中數學習題載入器 (V24.1 Fix)")
+st.info("請上傳 `questions.json` 題庫檔。")
 
 uploaded_file = st.file_uploader("上傳題庫檔 (.json)", type=['json'])
 
