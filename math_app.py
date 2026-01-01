@@ -1,158 +1,129 @@
 import streamlit as st
 import random
-import datetime
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.patches as patches
 
 # ==========================================
-# 1. 國中數學題庫 (含 LaTeX 數學公式與詳解)
+# 1. 自動繪圖引擎 (Math Plotter)
+# 不用準備圖片檔，程式現場畫給你看！
+# ==========================================
+def draw_math_figure(fig_type):
+    """根據題目類型，自動生成數學圖形"""
+    fig, ax = plt.subplots(figsize=(4, 3))
+    
+    # 設定通用樣式
+    ax.spines['top'].set_color('none')
+    ax.spines['right'].set_color('none')
+    ax.grid(True, linestyle='--', alpha=0.6)
+    
+    if fig_type == "parabola_up": # 開口向上的拋物線
+        x = np.linspace(-3, 3, 100)
+        y = x**2 - 2
+        ax.plot(x, y, 'b-', label='y = x² - 2')
+        ax.spines['left'].set_position(('data', 0))
+        ax.spines['bottom'].set_position(('data', 0))
+        ax.set_title("y = ax² + k (a>0)")
+        
+    elif fig_type == "parabola_down": # 開口向下的拋物線
+        x = np.linspace(-3, 3, 100)
+        y = -1 * x**2 + 2
+        ax.plot(x, y, 'r-', label='y = -x² + 2')
+        ax.spines['left'].set_position(('data', 0))
+        ax.spines['bottom'].set_position(('data', 0))
+        ax.set_title("y = ax² + k (a<0)")
+
+    elif fig_type == "coordinate_point": # 直角坐標點
+        ax.spines['left'].set_position(('data', 0))
+        ax.spines['bottom'].set_position(('data', 0))
+        ax.plot(2, 3, 'ro') # 第一象限
+        ax.text(2.2, 3, "A(2, 3)", fontsize=12)
+        ax.plot(-3, -2, 'bo') # 第三象限
+        ax.text(-3.2, -1.8, "B(-3, -2)", fontsize=12)
+        ax.set_xlim(-5, 5)
+        ax.set_ylim(-5, 5)
+        ax.set_title("Cartesian Coordinate System")
+
+    elif fig_type == "triangle": # 直角三角形
+        triangle = patches.Polygon([[0, 0], [4, 0], [0, 3]], closed=True, fill=True, alpha=0.3, edgecolor='black')
+        ax.add_patch(triangle)
+        ax.text(2, -0.5, "4 (a)", fontsize=12, ha='center')
+        ax.text(-0.5, 1.5, "3 (b)", fontsize=12, va='center')
+        ax.text(2.2, 1.7, "? (c)", fontsize=12, color='red')
+        ax.set_xlim(-1, 5)
+        ax.set_ylim(-1, 5)
+        ax.set_aspect('equal')
+        ax.set_title("Right Triangle")
+
+    elif fig_type == "linear_function": # 線性函數
+        x = np.linspace(-5, 5, 10)
+        y = 2*x + 1
+        ax.plot(x, y, 'g-', label='y = ax + b')
+        ax.spines['left'].set_position(('data', 0))
+        ax.spines['bottom'].set_position(('data', 0))
+        ax.set_title("Linear Function")
+
+    return fig
+
+# ==========================================
+# 2. 國中數學海量題庫 (含 img_tag 標記)
 # ==========================================
 MATH_DB = {
     "國一數學 (七年級)": [
-        # --- 正負數與絕對值 ---
-        {
-            "q": "計算 $(-8) + |-5| - (-3)$ 的值為何？",
-            "options": ["0", "-6", "-10", "6"],
-            "ans": 0,
-            "diff": "簡單",
-            "type": "單選",
-            "expl": "原式 = $-8 + 5 + 3 = 0$"
-        },
-        {
-            "q": "若 $|a| = 5$，且 $|b| = 3$，若 $a < 0, b > 0$，則 $a + b = ？$",
-            "options": ["2", "-2", "8", "-8"],
-            "ans": 1,
-            "diff": "中等",
-            "type": "單選",
-            "expl": "因為 $a<0, |a|=5 \\Rightarrow a=-5$。因為 $b>0, |b|=3 \\Rightarrow b=3$。故 $-5+3 = -2$。"
-        },
+        # --- 整數運算 ---
+        {"q": "計算 $(-12) + 5 - (-8)$ 的值？", "options": ["1", "-1", "-15", "25"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "$-12 + 5 + 8 = -12 + 13 = 1$"},
+        {"q": "若 $|a| = 3, |b| = 7$，且 $ab < 0$，則 $a + b$ 可能為？", "options": ["4 或 -4", "10 或 -10", "4", "-4"], "ans": 0, "diff": "中等", "type": "單選", "expl": "$ab<0$ 表異號。若 $a=3, b=-7 \Rightarrow -4$；若 $a=-3, b=7 \Rightarrow 4$。"},
+        {"q": "計算 $18 \div (-3)^2 \times 2$？", "options": ["4", "-4", "1", "-12"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "$18 \div 9 \times 2 = 2 \times 2 = 4$ (注意運算順序：先乘方，再乘除)"},
         # --- 指數律 ---
-        {
-            "q": "計算 $(2^3)^2 \\times 2^4 \\div 2^5 = ？$",
-            "options": ["$2^2$", "$2^4$", "$2^5$", "$2^6$"],
-            "ans": 2,
-            "diff": "中等",
-            "type": "單選",
-            "expl": "指數律：$(a^m)^n = a^{mn}$。原式 = $2^6 \\times 2^4 \\div 2^5 = 2^{6+4-5} = 2^5$。"
-        },
-        # --- 一元一次方程式 ---
-        {
-            "q": "解方程式 $3(x-2) = 2x + 1$，則 $x = ？$",
-            "options": ["5", "7", "-5", "-7"],
-            "ans": 1,
-            "diff": "簡單",
-            "type": "單選",
-            "expl": "$3x - 6 = 2x + 1 \\Rightarrow 3x - 2x = 1 + 6 \\Rightarrow x = 7$。"
-        },
+        {"q": "下列何者錯誤？", "options": ["$2^3 \times 2^4 = 2^7$", "$(2^3)^4 = 2^{12}$", "$2^0 = 0$", "$2^{-1} = 1/2$"], "ans": 2, "diff": "簡單", "type": "單選", "expl": "任何非零數的 0 次方皆為 1，故 $2^0 = 1$。"},
+        {"q": "若 $3^x = 81$，則 $x$ 為？", "options": ["3", "4", "5", "27"], "ans": 1, "diff": "簡單", "type": "單選", "expl": "$81 = 9 \times 9 = 3^2 \times 3^2 = 3^4$"},
+        # --- 代數與方程式 ---
+        {"q": "化簡 $3(2x - 1) - 2(3x + 4)$？", "options": ["$-11$", "-5", "$12x - 11$", "$-5x - 11$"], "ans": 0, "diff": "中等", "type": "單選", "expl": "$6x - 3 - 6x - 8 = -11$"},
+        {"q": "解方程式 $\frac{x}{2} - \frac{x}{3} = 1$？", "options": ["1", "5", "6", "-6"], "ans": 2, "diff": "中等", "type": "單選", "expl": "同乘 6：$3x - 2x = 6 \Rightarrow x = 6$"},
+        {"q": "父親今年 40 歲，兒子 10 歲，幾年後父親年齡是兒子的 3 倍？", "options": ["3", "5", "8", "10"], "ans": 1, "diff": "困難", "type": "單選", "expl": "設 $x$ 年後。$40+x = 3(10+x) \Rightarrow 40+x=30+3x \Rightarrow 10=2x \Rightarrow x=5$"},
         # --- 直角坐標 ---
-        {
-            "q": "若點 $P(a, b)$ 在第二象限，則點 $Q(ab, a-b)$ 在第幾象限？",
-            "options": ["第一象限", "第二象限", "第三象限", "第四象限"],
-            "ans": 2,
-            "diff": "困難",
-            "type": "單選",
-            "expl": "第二象限 $(-, +) \\Rightarrow a<0, b>0$。則 $ab$ 為負 $(-)$，$a-b$ (負減正) 為負 $(-)$。故 $Q(-, -)$ 在第三象限。"
-        }
+        {"q": "參考下圖，若點 A 在第二象限，則其坐標符號為何？", "options": ["$(+, +)$", "$(-, +)$", "$(-, -)$", "$(+, -)$"], "ans": 1, "diff": "簡單", "type": "單選", "expl": "第二象限為左上，故 x 為負，y 為正。", "img": "coordinate_point"},
+        {"q": "點 $P(3, -4)$ 到 x 軸的距離為何？", "options": ["3", "4", "-4", "5"], "ans": 1, "diff": "簡單", "type": "單選", "expl": "到 x 軸距離看 y 坐標的絕對值。$|-4| = 4$。"},
+        {"q": "若 $y = ax + b$ 通過 $(0,0)$ 與 $(1,2)$，則 $a+b=$？", "options": ["0", "1", "2", "3"], "ans": 2, "diff": "中等", "type": "單選", "expl": "過 $(0,0) \Rightarrow b=0$。過 $(1,2) \Rightarrow a(1)=2 \Rightarrow a=2$。$a+b=2$", "img": "linear_function"}
     ],
 
     "國二數學 (八年級)": [
-        # --- 乘法公式 ---
-        {
-            "q": "展開 $(2a - 3b)^2$ 的結果為何？",
-            "options": ["$4a^2 - 9b^2$", "$4a^2 - 6ab + 9b^2$", "$4a^2 - 12ab + 9b^2$", "$2a^2 - 3b^2$"],
-            "ans": 2,
-            "diff": "簡單",
-            "type": "單選",
-            "expl": "公式 $(x-y)^2 = x^2 - 2xy + y^2$。故 $(2a)^2 - 2(2a)(3b) + (3b)^2 = 4a^2 - 12ab + 9b^2$。"
-        },
-        {
-            "q": "計算 $199^2 - 1$ 的值？",
-            "options": ["39600", "39900", "39999", "39601"],
-            "ans": 0,
-            "diff": "中等",
-            "type": "單選",
-            "expl": "平方差公式 $a^2 - b^2 = (a+b)(a-b)$。$199^2 - 1^2 = (199+1)(199-1) = 200 \\times 198 = 39600$。"
-        },
-        # --- 畢氏定理 ---
-        {
-            "q": "直角三角形兩股長分別為 5, 12，求斜邊長？",
-            "options": ["13", "15", "17", "$\sqrt{119}$"],
-            "ans": 0,
-            "diff": "簡單",
-            "type": "單選",
-            "expl": "畢氏定理 $c = \\sqrt{a^2 + b^2} = \\sqrt{5^2 + 12^2} = \\sqrt{25+144} = \\sqrt{169} = 13$。"
-        },
+        # --- 乘法公式與多項式 ---
+        {"q": "展開 $(a+b)(a-b)$？", "options": ["$a^2+b^2$", "$a^2-b^2$", "$a^2-2ab+b^2$", "$a^2+2ab+b^2$"], "ans": 1, "diff": "簡單", "type": "單選", "expl": "平方差公式。"},
+        {"q": "計算 $1002 \times 998 = ？$", "options": ["999996", "999994", "1000004", "99996"], "ans": 0, "diff": "中等", "type": "單選", "expl": "$(1000+2)(1000-2) = 1000^2 - 2^2 = 1000000 - 4 = 999996$"},
+        {"q": "若 $x^2 + 6x + k$ 是一個完全平方式，則 $k=？$", "options": ["3", "6", "9", "36"], "ans": 2, "diff": "中等", "type": "單選", "expl": "常數項應為一次項係數一半的平方。$(6/2)^2 = 3^2 = 9$。即 $(x+3)^2$。"},
+        # --- 畢氏定理 (含圖) ---
+        {"q": "如下圖，直角三角形兩股為 3, 4，求斜邊長？", "options": ["5", "6", "7", "$\sqrt{7}$"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "$\sqrt{3^2+4^2} = \sqrt{9+16} = \sqrt{25} = 5$", "img": "triangle"},
+        {"q": "直角三角形斜邊為 10，一股為 6，求另一股？", "options": ["4", "8", "12", "$\sqrt{136}$"], "ans": 1, "diff": "簡單", "type": "單選", "expl": "$\sqrt{10^2 - 6^2} = \sqrt{100-36} = \sqrt{64} = 8$"},
         # --- 因式分解 ---
-        {
-            "q": "因式分解 $x^2 - 5x + 6$？",
-            "options": ["$(x-1)(x-6)$", "$(x-2)(x-3)$", "$(x+2)(x+3)$", "$(x-1)(x+5)$"],
-            "ans": 1,
-            "diff": "中等",
-            "type": "單選",
-            "expl": "十字交乘法：找兩數相乘為6，相加為-5，即 -2 與 -3。故 $(x-2)(x-3)$。"
-        },
-        # --- 等差數列 ---
-        {
-            "q": "一等差數列首項 $a_1=3$，公差 $d=4$，求第10項 $a_{10}$？",
-            "options": ["36", "39", "40", "43"],
-            "ans": 1,
-            "diff": "中等",
-            "type": "單選",
-            "expl": "公式 $a_n = a_1 + (n-1)d$。$a_{10} = 3 + (10-1)\\times 4 = 3 + 36 = 39$。"
-        }
+        {"q": "因式分解 $3x^2 - 3$？", "options": ["$3(x-1)^2$", "$3(x+1)(x-1)$", "$(3x+1)(x-1)$", "$3(x^2-1)$ (尚未完全分解)"], "ans": 1, "diff": "中等", "type": "單選", "expl": "提公因式 3 $\Rightarrow 3(x^2-1)$ $\Rightarrow$ 平方差 $3(x+1)(x-1)$"},
+        {"q": "十字交乘：$x^2 - 7x + 12$ 因式分解為？", "options": ["$(x-3)(x-4)$", "$(x+3)(x+4)$", "$(x-2)(x-6)$", "$(x-1)(x-12)$"], "ans": 0, "diff": "中等", "type": "單選", "expl": "積 12，和 -7 $\Rightarrow -3, -4$。"},
+        # --- 數列與級數 ---
+        {"q": "等差數列 $2, 5, 8, ...$ 第 10 項為何？", "options": ["29", "30", "32", "27"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "$a_{10} = 2 + (10-1) \times 3 = 2 + 27 = 29$"},
+        {"q": "求等差級數 $1 + 2 + 3 + ... + 10$ 之和？", "options": ["50", "55", "60", "45"], "ans": 1, "diff": "簡單", "type": "單選", "expl": "梯形公式 $\\frac{(1+10) \times 10}{2} = 55$"}
     ],
 
     "國三數學 (九年級)": [
-        # --- 二次函數 ---
-        {
-            "q": "關於二次函數 $y = 2(x-1)^2 + 3$，下列敘述何者正確？",
-            "options": ["開口向下，頂點 (1, 3)", "開口向上，頂點 (-1, 3)", "開口向上，頂點 (1, 3)", "開口向下，頂點 (-1, 3)"],
-            "ans": 2,
-            "diff": "簡單",
-            "type": "單選",
-            "expl": "係數 $a=2>0$ 故開口向上。頂點式 $y=a(x-h)^2+k$，頂點為 $(h, k)$ 即 $(1, 3)$。"
-        },
-        {
-            "q": "若 $y = x^2 - 4x + k$ 的圖形與 x 軸只有一個交點，求 k 值？",
-            "options": ["2", "4", "-4", "0"],
-            "ans": 1,
-            "diff": "困難",
-            "type": "單選",
-            "expl": "判別式 $D = b^2 - 4ac = 0$。$(-4)^2 - 4(1)(k) = 0 \\Rightarrow 16 - 4k = 0 \\Rightarrow k=4$。"
-        },
+        # --- 二次函數 (含圖) ---
+        {"q": "參考下圖，關於函數 $y = x^2 - 2$ 的敘述何者正確？", "options": ["開口向上，有最小值 -2", "開口向下，有最大值 -2", "開口向上，有最大值 2", "頂點在 (2, 0)"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "係數 $a=1>0$ 故開口向上，頂點 $(0, -2)$ 為最低點。", "img": "parabola_up"},
+        {"q": "若二次函數 $y = -2(x-1)^2 + 3$，其頂點坐標為？", "options": ["(1, 3)", "(-1, 3)", "(1, -3)", "(-1, -3)"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "頂點式 $y=a(x-h)^2+k$ $\Rightarrow (h,k)=(1,3)$"},
+        # --- 幾何與圓 ---
+        {"q": "三角形的重心是哪三條線的交點？", "options": ["中線", "角平分線 (內心)", "中垂線 (外心)", "高 (垂心)"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "重心是三條中線的交點，性質是重心到頂點距離為中線長的 2/3。"},
+        {"q": "若兩圓半徑分別為 5, 3，圓心距為 10，則兩圓位置關係？", "options": ["外離", "外切", "相交", "內含"], "ans": 0, "diff": "中等", "type": "單選", "expl": "圓心距 $10 > 5+3$ (半徑和)，故兩圓分開，為外離。"},
+        {"q": "一扇形半徑為 6，圓心角 $60^\circ$，求扇形面積？", "options": ["$6\pi$", "$12\pi$", "$3\pi$", "$36\pi$"], "ans": 0, "diff": "中等", "type": "單選", "expl": "圓面積 $\times$ 比例。$36\pi \times \frac{60}{360} = 6\pi$"},
         # --- 機率與統計 ---
-        {
-            "q": "投擲一顆公正骰子，出現點數大於 4 的機率為何？",
-            "options": ["$1/2$", "$1/3$", "$1/6$", "$2/3$"],
-            "ans": 1,
-            "diff": "簡單",
-            "type": "單選",
-            "expl": "大於 4 的點數有 5, 6 兩種。總樣本空間為 6。機率 $P = 2/6 = 1/3$。"
-        },
-        # --- 幾何圖形 (圓) ---
-        {
-            "q": "圓 $O$ 半徑為 10，圓心到直線 $L$ 的距離為 8，則直線 $L$ 與圓 $O$ 的關係為何？",
-            "options": ["相交於兩點 (割線)", "相切 (切線)", "不相交 (外離)", "無法判斷"],
-            "ans": 0,
-            "diff": "中等",
-            "type": "單選",
-            "expl": "圓心距 $d=8$，半徑 $r=10$。因為 $d < r$ (8 < 10)，故直線穿過圓內部，交於兩點。"
-        },
-        # --- 三角形的心 ---
-        {
-            "q": "正三角形的重心、內心、外心，三者的位置關係為何？",
-            "options": ["完全重合 (同一點)", "在同一直線上但不同點", "形成一個三角形", "沒有關係"],
-            "ans": 0,
-            "diff": "簡單",
-            "type": "單選",
-            "expl": "正三角形 (等邊三角形) 的外心、內心、重心、垂心四心合一。"
-        }
+        {"q": "投擲一枚公正硬幣 3 次，出現「三正」的機率？", "options": ["1/2", "1/4", "1/8", "3/8"], "ans": 2, "diff": "困難", "type": "單選", "expl": "$(1/2) \times (1/2) \times (1/2) = 1/8$"},
+        {"q": "盒中有 3 紅球、2 白球，隨機取一球為紅球的機率？", "options": ["3/5", "2/5", "1/2", "1/3"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "紅球數 / 總球數 = $3 / (3+2) = 3/5$"},
+        {"q": "關於『中位數』的敘述，何者正確？", "options": ["資料由小到大排列，位於正中央的數", "出現次數最多的數 (眾數)", "所有數加總除以個數 (平均數)", "最大值減最小值 (全距)"], "ans": 0, "diff": "簡單", "type": "單選", "expl": "定義題。"},
+        # --- 相似形 ---
+        {"q": "若 $\Delta ABC \sim \Delta DEF$，且對應邊 $AB:DE = 1:2$，則面積比為何？", "options": ["1:2", "1:4", "1:8", "1:1.5"], "ans": 1, "diff": "中等", "type": "單選", "expl": "相似三角形面積比 = 邊長比的平方。$1^2 : 2^2 = 1:4$"}
     ]
 }
 
 # ==========================================
-# 2. APP 邏輯 (Math Edition)
+# 3. APP 主程式邏輯
 # ==========================================
 def reset_exam():
-    """重置考試狀態"""
     st.session_state.exam_started = False
     st.session_state.current_questions = []
     st.session_state.exam_results = {}
@@ -160,9 +131,8 @@ def reset_exam():
     st.session_state.exam_finished = False
 
 def main():
-    st.set_page_config(page_title="國中數學全能測驗", page_icon="🧮")
+    st.set_page_config(page_title="國中數學豪華版", page_icon="📐")
     
-    # Session State 初始化
     if 'exam_started' not in st.session_state:
         st.session_state.exam_started = False
     if 'current_questions' not in st.session_state:
@@ -172,38 +142,19 @@ def main():
     if 'exam_finished' not in st.session_state:
         st.session_state.exam_finished = False
 
-    # 側邊欄
     st.sidebar.title("🧮 數學練習設定")
+    grade_level = st.sidebar.selectbox("1. 選擇年級", list(MATH_DB.keys()), on_change=reset_exam)
+    difficulty = st.sidebar.radio("2. 選擇難度", ["簡單", "中等", "困難"], index=1, on_change=reset_exam)
     
-    # 選擇年級
-    grade_level = st.sidebar.selectbox(
-        "1. 選擇年級", 
-        list(MATH_DB.keys()),
-        on_change=reset_exam
-    )
+    st.title("📐 國中數學總複習系統")
+    st.markdown("### 觀念 $\\times$ 計算 $\\times$ 圖形解析")
     
-    # 選擇難度
-    difficulty = st.sidebar.radio(
-        "2. 選擇難度", 
-        ["簡單", "中等", "困難"], 
-        index=1,
-        on_change=reset_exam
-    )
-    
-    st.title("📐 國中數學全能測驗系統")
-    st.markdown("### 觀念釐清 $\\times$ 計算實戰")
-    
-    # === 主頁面：準備開始 ===
     if not st.session_state.exam_started:
-        st.info(f"準備進行：**{grade_level}**")
-        st.markdown(f"難度：**{difficulty}**")
-        st.write("準備好紙筆了嗎？點擊下方按鈕開始！")
-        
-        if st.button("🚀 開始計算", use_container_width=True):
+        st.info(f"準備單元：**{grade_level}** ({difficulty})")
+        if st.button("🚀 生成試卷", use_container_width=True):
             st.session_state.exam_finished = False 
             st.session_state.exam_results = {} 
 
-            # 篩選題目
             raw_questions = MATH_DB.get(grade_level, [])
             filtered_q = []
             for q in raw_questions:
@@ -212,7 +163,7 @@ def main():
                 filtered_q.append(q)
             
             if not filtered_q:
-                st.warning("這個難度下暫時沒有題目，請選擇其他難度！")
+                st.warning("題庫擴充中，請選擇其他難度！")
             else:
                 random.shuffle(filtered_q)
                 st.session_state.current_questions = filtered_q
@@ -220,28 +171,21 @@ def main():
                 st.session_state.exam_started = True
                 st.rerun()
 
-    # === 考試頁面 ===
     else:
         st.subheader(f"📝 {grade_level}")
-        
         with st.form("math_exam_form"):
             questions = st.session_state.current_questions
             
             for idx, q in enumerate(questions):
-                # 使用 LaTeX 渲染題目
                 st.markdown(f"**第 {idx+1} 題：**")
+                
+                # 自動繪圖偵測：如果題目有 img 標籤，就畫圖！
+                if "img" in q:
+                    fig = draw_math_figure(q["img"])
+                    st.pyplot(fig)
+                
                 st.markdown(f"### {q['q']}") 
-                
-                q_key = f"q_{idx}"
-                
-                # 選項顯示
-                st.radio(
-                    "請選擇答案：", 
-                    q['options'], 
-                    key=q_key, 
-                    index=None, 
-                    label_visibility="collapsed"
-                )
+                st.radio("答案：", q['options'], key=f"q_{idx}", index=None, label_visibility="collapsed")
                 st.divider()
 
             submitted = st.form_submit_button("✅ 交卷看詳解", use_container_width=True)
@@ -249,82 +193,34 @@ def main():
             if submitted:
                 score = 0
                 results = []
-                
                 for idx, q in enumerate(questions):
                     q_key = f"q_{idx}"
-                    user_selection = st.session_state.get(q_key)
-                    
-                    is_correct = False
-                    user_ans_display = "未作答"
-                    correct_ans_display = q['options'][q['ans']]
-                    
-                    if user_selection:
-                        user_ans_display = user_selection
-                        if user_selection == correct_ans_display:
-                            is_correct = True
-                            score += 1
+                    user_ans = st.session_state.get(q_key)
+                    correct_ans = q['options'][q['ans']]
+                    is_correct = (user_ans == correct_ans)
+                    if is_correct: score += 1
+                    results.append({"q": q['q'], "is_correct": is_correct, "user": user_ans, "correct": correct_ans, "expl": q['expl']})
 
-                    # 紀錄結果與詳解
-                    result_item = {
-                        "q_idx": idx + 1,
-                        "question": q['q'],
-                        "is_correct": is_correct,
-                        "user_ans": user_ans_display,
-                        "correct_ans": correct_ans_display,
-                        "expl": q.get('expl', '暫無詳解')
-                    }
-                    results.append(result_item)
-
-                st.session_state.exam_results = {
-                    "score": score,
-                    "total": len(questions),
-                    "details": results
-                }
+                st.session_state.exam_results = {"score": score, "total": len(questions), "details": results}
                 st.session_state.exam_finished = True
 
-        # === 顯示成績與詳解 ===
         if st.session_state.get("exam_finished") and st.session_state.exam_results:
             res = st.session_state.exam_results
-            if res['total'] > 0:
-                final_score = int((res['score'] / res['total']) * 100)
-            else:
-                final_score = 0
+            final_score = int((res['score'] / res['total']) * 100) if res['total'] > 0 else 0
             
             st.markdown("---")
-            st.markdown("### 📊 測驗結果")
+            if final_score >= 90: st.success(f"💯 滿分！太強了！ ({final_score}分)")
+            elif final_score >= 60: st.info(f"👍 及格！ ({final_score}分)")
+            else: st.error(f"💪 再加油！ ({final_score}分)")
             
-            if final_score == 100:
-                st.balloons()
-                st.success(f"太神了！滿分！ ({final_score} 分)")
-            elif final_score >= 60:
-                st.info(f"不錯喔，及格了！ ({final_score} 分)")
-            else:
-                st.error(f"要再加油喔！ ({final_score} 分)")
-            
-            st.markdown("### 🧐 題目解析")
-            for item in res['details']:
-                with st.container():
-                    # 標題區塊
-                    if item['is_correct']:
-                        st.markdown(f"✅ **第 {item['q_idx']} 題：答對**")
-                    else:
-                        st.markdown(f"❌ **第 {item['q_idx']} 題：答錯**")
-                    
-                    # 題目與詳解區塊
-                    st.info(f"題目：{item['question']}")
-                    
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.write(f"你的答案：{item['user_ans']}")
-                    with col2:
-                        st.write(f"正確答案：{item['correct_ans']}")
-                    
-                    # 詳解 (重點功能)
+            for i, item in enumerate(res['details']):
+                with st.expander(f"第 {i+1} 題詳解 ({'✅ 對' if item['is_correct'] else '❌ 錯'})"):
+                    st.write(f"題目：{item['q']}")
+                    st.write(f"正解：{item['correct']}")
                     st.markdown(f"**💡 解析：**")
-                    st.latex(item['expl']) # 使用 latex 顯示數學詳解
-                    st.divider()
-            
-            if st.button("🔄 重新測驗"):
+                    st.latex(item['expl'])
+
+            if st.button("🔄 再考一次"):
                 reset_exam()
                 st.rerun()
 
