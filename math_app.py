@@ -22,9 +22,7 @@ class SVGDrawer:
             a = kwargs.get('a', '?')
             return base.format(f'<path d="M150,30 L50,170 L250,170 Z" fill="none" stroke="black"/><text x="150" y="20">A</text><text x="40" y="170">B</text><text x="260" y="170">C</text><circle cx="150" cy="120" r="4" fill="orange"/><text x="150" y="110" fill="orange">I</text><text x="20" y="50">∠A={a}°</text>')
         elif svg_type == "center_def_dynamic":
-            pair = kwargs.get('pair', ['重心','中線'])
-            name, line = pair[0], pair[1]
-            return base.format(f'<path d="M150,30 L50,170 L250,170 Z" fill="none" stroke="black"/><line x1="150" y1="30" x2="150" y2="170" stroke="red" stroke-dasharray="4"/><line x1="50" y1="170" x2="200" y2="100" stroke="red" stroke-dasharray="4"/><text x="150" y="123" fill="blue" font-weight="bold">{name}</text><text x="150" y="190" font-size="12">由{line}交點構成</text>')
+            return base.format('<path d="M150,30 L50,170 L250,170 Z" fill="none" stroke="black"/><line x1="150" y1="30" x2="150" y2="170" stroke="red" stroke-dasharray="4"/><line x1="50" y1="170" x2="200" y2="100" stroke="red" stroke-dasharray="4"/><text x="150" y="123" fill="blue" font-weight="bold">Center</text>')
         elif svg_type == "roots_line":
             r1, r2 = kwargs.get('r1', 0), kwargs.get('r2', 0)
             mx = lambda v: 150 + v*12
@@ -33,10 +31,6 @@ class SVGDrawer:
             k = kwargs.get('k', 0)
             mx = lambda v: 150 + v*12
             return base.format(f'<line x1="10" y1="50" x2="290" y2="50" stroke="black"/><text x="150" y="40">0</text><circle cx="{mx(0)}" cy="50" r="5" fill="red"/><circle cx="{mx(k)}" cy="50" r="5" fill="red"/><text x="{mx(k)}" y="80" fill="red">{k}</text>')
-        elif svg_type == "roots_sq":
-            k = kwargs.get('k', 0)
-            mx = lambda v: 150 + v*12
-            return base.format(f'<line x1="10" y1="50" x2="290" y2="50" stroke="black"/><text x="150" y="40">0</text><circle cx="{mx(k)}" cy="50" r="5" fill="red"/><text x="{mx(k)}" y="80" fill="red">{k}</text><circle cx="{mx(-k)}" cy="50" r="5" fill="red"/><text x="{mx(-k)}" y="80" fill="red">-{k}</text>')
         elif svg_type == "area_square":
             s = kwargs.get('s', 10)
             return base.format(f'<rect x="100" y="50" width="100" height="100" fill="#bbdefb" stroke="black"/><text x="150" y="100" text-anchor="middle">Area={s*s}</text><text x="150" y="170" text-anchor="middle">邊長=?</text>')
@@ -49,88 +43,43 @@ class SVGDrawer:
 # 2. 考卷生成邏輯
 # ==========================================
 def generate_question_from_template(template):
-    variables = {}
+    variables = template.get("variables", {}).copy()
     
-    if "variables" in template:
-        for var_name, range_list in template["variables"].items():
-            if not range_list: continue
-            first_val = range_list[0]
-            if isinstance(first_val, str) or isinstance(first_val, list):
-                variables[var_name] = random.choice(range_list)
-            elif isinstance(first_val, (int, float)):
-                if len(range_list) == 2:
-                    variables[var_name] = random.randint(range_list[0], range_list[1])
-                else:
-                    variables[var_name] = random.choice(range_list)
+    # 處理參數覆蓋 (SVG用)
+    svg_vars = variables.copy()
+    if "params_override" in template:
+        svg_vars.update(template["params_override"])
 
-    flat_vars = variables.copy()
-    for k, v in variables.items():
-        if isinstance(v, list):
-            flat_vars[k] = v
-            for i, val in enumerate(v):
-                flat_vars[f"{k}_{i}"] = val
+    # 選項處理
+    options = []
+    if "fixed_options" in template:
+        options = template["fixed_options"].copy()
+    else:
+        options = [template["answer_formula"]] + template.get("wrong_formulas", [])
     
-    safe_env = {"math": math, "int": int, "abs": abs, **flat_vars}
-    if "calc_extra" in template:
-        for k, expr in template["calc_extra"].items():
-            try:
-                flat_vars[k] = eval(str(expr), {"__builtins__": {}}, safe_env)
-                safe_env[k] = flat_vars[k]
-            except: pass
-
-    try:
-        ans_val = eval(str(template["answer_formula"]), {"__builtins__": {}}, safe_env)
-        options = [str(ans_val)]
-        if "wrong_formulas" in template:
-            for form in template["wrong_formulas"]:
-                try:
-                    w_val = eval(str(form), {"__builtins__": {}}, safe_env)
-                    if str(w_val) != str(ans_val) and str(w_val) not in options:
-                        options.append(str(w_val))
-                except: pass
-        
-        if "fixed_options" in template:
-            options = template["fixed_options"]
-        else:
-            while len(options) < 4:
-                fake = random.randint(1, 100)
-                if str(fake) not in options: options.append(str(fake))
-            random.shuffle(options)
-        
-        q_text = template["question_text"].format(**flat_vars)
-        expl_text = template["explanation"].format(**flat_vars, ans=ans_val)
-        
-        svg_vars = flat_vars.copy()
-        if "params_override" in template:
-            for k, v in template["params_override"].items():
-                if isinstance(v, str) and v in flat_vars:
-                    svg_vars[k] = flat_vars[v]
-                else:
-                    svg_vars[k] = v
-
-        svg = SVGDrawer.draw(template.get("svg", "none"), **svg_vars)
-        
-        return {
-            "q": q_text,
-            "options": options,
-            "correct_ans": str(ans_val),
-            "expl": expl_text,
-            "svg": svg
-        }
-    except Exception as e:
-        return {"q": f"Error: {e}", "options": ["Error"], "correct_ans": "Error", "expl": "", "svg": ""}
+    random.shuffle(options)
+    
+    svg = SVGDrawer.draw(template.get("svg", "none"), **svg_vars)
+    
+    return {
+        "q": template["question_text"],
+        "options": options,
+        "correct_ans": template["answer_formula"],
+        "expl": template["explanation"],
+        "svg": svg
+    }
 
 # ==========================================
 # 3. APP 介面
 # ==========================================
 st.set_page_config(page_title="數學習題載入器", page_icon="📂")
-st.title("📂 國中數學習題載入器")
+st.title("📂 國中數學習題載入器 (V24.3 最終版)")
 
 if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
 if 'exam_results' not in st.session_state: st.session_state.exam_results = []
 if 'quiz_score' not in st.session_state: st.session_state.quiz_score = 0
 
-uploaded_file = st.file_uploader("上傳題庫檔 (.json)", type=['json'])
+uploaded_file = st.file_uploader("請上傳您的題庫檔 (questions.json)", type=['json'])
 
 if uploaded_file:
     try:
@@ -143,24 +92,18 @@ if uploaded_file:
         unit = st.selectbox("選擇單元", unit_options)
         
         if not st.session_state.exam_finished:
-            if st.button("🚀 生成試卷 (10題不重複)"):
-                questions = []
+            if st.button("🚀 生成試卷 (10題)"):
                 target_pool = all_questions if unit == "全範圍總複習" else data[unit]
-                seen_texts = set()
-                attempts = 0
-                needed = 10
-                pool_cycle = target_pool * (needed // len(target_pool) + 2)
-                random.shuffle(pool_cycle)
                 
-                for tmpl in pool_cycle:
-                    if len(questions) >= needed or attempts > 50: break
-                    for _ in range(5): 
-                        q = generate_question_from_template(tmpl)
-                        if q['q'] not in seen_texts and "Error" not in q['q']:
-                            seen_texts.add(q['q'])
-                            questions.append(q)
-                            break
-                    attempts += 1
+                # 隨機抽取 10 題
+                if len(target_pool) >= 10:
+                    selected_templates = random.sample(target_pool, 10)
+                else:
+                    selected_templates = random.choices(target_pool, k=10) # 題目不夠時重複抽
+                
+                questions = []
+                for tmpl in selected_templates:
+                    questions.append(generate_question_from_template(tmpl))
                 
                 st.session_state.quiz = questions
                 st.session_state.exam_finished = False
