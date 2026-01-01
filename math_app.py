@@ -3,7 +3,7 @@ import random
 import math
 
 # ==========================================
-# 1. 核心：雲端題庫製造機 (多樣化模板)
+# 1. 核心：雲端題庫製造機 (多樣化模板，保證不重複)
 # ==========================================
 @st.cache_data
 def create_cloud_database():
@@ -16,7 +16,7 @@ def create_cloud_database():
     }
 
     # ================= 3-1 證明與推理 (5種變化) =================
-    for _ in range(50):
+    for _ in range(50): # 變化 A: 全等性質
         prop = random.choice(["SSS", "SAS", "ASA", "AAS", "RHS"])
         database["3-1 證明與推理"].append({
             "q": f"若兩個三角形滿足「{prop}」對應相等，則它們的關係為何？",
@@ -26,7 +26,7 @@ def create_cloud_database():
             "svg": "geometry_sas"
         })
     
-    for _ in range(50):
+    for _ in range(50): # 變化 B: 外角定理
         a, b = random.randint(30, 80), random.randint(30, 80)
         database["3-1 證明與推理"].append({
             "q": f"△ABC 中，∠A={a}°，∠B={b}°，則 ∠C 的外角是多少度？",
@@ -36,7 +36,7 @@ def create_cloud_database():
             "svg": "none"
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 C: 大邊對大角
         database["3-1 證明與推理"].append({
             "q": "在 △ABC 中，若邊長 AB > AC > BC，則角度關係為何？",
             "options": ["∠C > ∠B > ∠A", "∠A > ∠B > ∠C", "∠A = ∠B = ∠C", "無法判斷"],
@@ -45,7 +45,7 @@ def create_cloud_database():
             "svg": "none"
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 D: 特殊四邊形性質
         shape_type = random.choice([
             ("菱形", "互相垂直平分"),
             ("矩形", "等長且互相平分"),
@@ -61,7 +61,7 @@ def create_cloud_database():
             "svg": "none"
         })
     
-    for _ in range(50):
+    for _ in range(50): # 變化 E: 內角和
         n = random.choice([5, 6, 8, 10, 12])
         ans_val = (n-2)*180
         database["3-1 證明與推理"].append({
@@ -73,7 +73,7 @@ def create_cloud_database():
         })
 
     # ================= 3-2 三心 (5種變化) =================
-    for _ in range(50):
+    for _ in range(50): # 變化 A: 重心長度
         m = random.randint(6, 30) * 3
         ag = int(m * 2 / 3)
         database["3-2 三角形的外心、內心與重心"].append({
@@ -85,7 +85,7 @@ def create_cloud_database():
             "svg_params": {"m": m}
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 B: 內心角度
         deg = random.choice([40, 50, 60, 70, 80])
         ans_val = 90 + deg // 2
         database["3-2 三角形的外心、內心與重心"].append({
@@ -97,7 +97,7 @@ def create_cloud_database():
             "svg_params": {"a": deg}
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 C: 直角三角形外心半徑
         triple = random.choice([(6,8,10), (5,12,13), (8,15,17), (9,12,15), (7,24,25)])
         a, b, c = triple
         r = c / 2
@@ -109,7 +109,7 @@ def create_cloud_database():
             "svg": "triangle_circumcenter"
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 D: 重心面積分割
         area = random.choice([12, 24, 30, 36, 60, 72])
         ans_area = int(area / 3)
         database["3-2 三角形的外心、內心與重心"].append({
@@ -121,7 +121,7 @@ def create_cloud_database():
             "svg_params": {"pair": ["重心","中線"]}
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 E: 三心定義
         q_data = random.choice([
             ("重心", "中線"), ("外心", "中垂線"), ("內心", "角平分線")
         ])
@@ -135,7 +135,7 @@ def create_cloud_database():
         })
 
     # ================= 4-1 因式分解 (5種變化) =================
-    for _ in range(50):
+    for _ in range(50): # 變化 A: 十字交乘 (兩根已知求方程式)
         r1, r2 = random.randint(1, 5), random.randint(-5, -1)
         database["4-1 因式分解法"].append({
             "q": f"解方程式 (x - {r1})(x - {r2}) = 0？",
@@ -146,7 +146,7 @@ def create_cloud_database():
             "svg_params": {"r1": r1, "r2": r2}
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 B: 提公因式
         k = random.randint(2, 9)
         database["4-1 因式分解法"].append({
             "q": f"解方程式 x² - {k}x = 0？",
@@ -157,7 +157,7 @@ def create_cloud_database():
             "svg_params": {"k": k}
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 C: 平方差公式
         k = random.randint(2, 9)
         ksq = k*k
         database["4-1 因式分解法"].append({
@@ -169,7 +169,7 @@ def create_cloud_database():
             "svg_params": {"k": k}
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 D: 根的定義
         k = random.randint(2, 5)
         database["4-1 因式分解法"].append({
             "q": f"若 x={k} 是方程式 x² + ax + b = 0 的一根，則下列敘述何者正確？",
@@ -179,7 +179,7 @@ def create_cloud_database():
             "svg": "none"
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 E: 完全平方式
         k = random.randint(1, 9)
         database["4-1 因式分解法"].append({
             "q": f"方程式 (x-{k})² = 0 有幾個解？",
@@ -191,7 +191,7 @@ def create_cloud_database():
         })
 
     # ================= 4-2 配方法 (5種變化) =================
-    for _ in range(50):
+    for _ in range(50): # 變化 A: 判別式計算
         b = random.choice([2, 4, 6, 8])
         c = random.randint(1, 3)
         d_val = b*b - 4*c
@@ -203,7 +203,7 @@ def create_cloud_database():
             "svg": "none"
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 B: 配方補數
         k = random.choice([6, 8, 10, 12, 14, 16, 18, 20])
         ans_sq = (k // 2) ** 2
         database["4-2 配方法與公式解"].append({
@@ -215,7 +215,7 @@ def create_cloud_database():
             "svg_params": {"k": k}
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 C: 根的性質
         d_state = random.choice([("D > 0", "兩相異實根"), ("D = 0", "重根"), ("D < 0", "無實根")])
         cond, res = d_state
         database["4-2 配方法與公式解"].append({
@@ -226,7 +226,7 @@ def create_cloud_database():
             "svg": "none"
         })
     
-    for _ in range(50):
+    for _ in range(50): # 變化 D: 公式解分母
         database["4-2 配方法與公式解"].append({
             "q": "一元二次方程式公式解中，分母是多少？",
             "options": ["2a", "a", "4a", "b"],
@@ -235,7 +235,7 @@ def create_cloud_database():
             "svg": "none"
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 E: 圖形交點
         database["4-2 配方法與公式解"].append({
             "q": "若方程式無實數解 (D < 0)，代表其圖形與 x 軸有幾個交點？",
             "options": ["0個", "1個", "2個", "無限多"],
@@ -245,7 +245,7 @@ def create_cloud_database():
         })
 
     # ================= 4-3 應用問題 (5種變化) =================
-    for _ in range(50):
+    for _ in range(50): # 變化 A: 正方形面積
         s = random.randint(5, 20)
         area = s * s
         database["4-3 應用問題"].append({
@@ -257,7 +257,7 @@ def create_cloud_database():
             "svg_params": {"s": s}
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 B: 落體運動
         t = random.randint(2, 6)
         h = 5 * t * t
         database["4-3 應用問題"].append({
@@ -268,7 +268,7 @@ def create_cloud_database():
             "svg": "none"
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 C: 兩數乘積
         n = random.randint(1, 10)
         n2 = n + 1
         prod = n * n2
@@ -281,7 +281,7 @@ def create_cloud_database():
             "svg_params": {"r1": n, "r2": n2}
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 D: 長方形面積
         w = random.randint(3, 8)
         l = w + 2
         area = w * l
@@ -293,7 +293,7 @@ def create_cloud_database():
             "svg": "none"
         })
 
-    for _ in range(50):
+    for _ in range(50): # 變化 E: 負數解判斷
         database["4-3 應用問題"].append({
             "q": "解應用問題時，若算出長度為 -5，應該如何處理？",
             "options": ["不合 (長度需為正)", "取絕對值", "直接當作答案", "重算"],
@@ -462,4 +462,24 @@ if st.session_state.exam_finished:
         is_right = item['correct']
         status = "✅ 正確" if is_right else "❌ 錯誤"
         
-        with st.expander(f"第 {i+1} 題解析 ({status})
+        with st.expander(f"第 {i+1} 題解析 ({status})"):
+            # 再次顯示圖形
+            svg_content = q.get('svg', 'none')
+            svg_params = q.get('svg_params', {})
+            if svg_content != 'none':
+                st.markdown(SVGDrawer.draw(svg_content, **svg_params), unsafe_allow_html=True)
+
+            st.write(f"**題目**：{q['q']}")
+            st.write(f"**您的答案**：{item['user']}")
+            st.write(f"**正確答案**：{q['correct_ans']}")
+            if not is_right:
+                st.error(f"💡 解析：{q['expl']}")
+            else:
+                st.info(f"💡 解析：{q['expl']}")
+    
+    st.divider()
+    if st.button("🔄 再來一次 (重新測驗)", use_container_width=True):
+        st.session_state.exam_finished = False
+        st.session_state.quiz = []
+        st.session_state.exam_results = []
+        st.rerun()
