@@ -77,15 +77,21 @@ class SVGGenerator:
         """, 300, 150)
 
 # ==========================================
-# 2. 題目工廠 (Question Generators)
+# 2. 題目工廠 (Question Generators) - 內部多樣性強化版
 # ==========================================
 class QGen:
-    # --- 3-1 證明與推理 ---
+    # --- 3-1 證明與推理 (強化隨機性) ---
     @staticmethod
     def gen_3_1_sss_sas():
         props = ["SSS", "SAS", "ASA", "AAS", "RHS"]
         ans = random.choice(props)
-        return {"q": f"若已知兩個三角形滿足「{ans}」條件，則它們的關係為何？", "options": ["必全等", "必相似但不一定全等", "面積相等但不一定全等", "無法判斷"], "ans": 0, "expl": f"{ans} 是全等判別性質之一。", "svg_gen": lambda: SVGGenerator.geometry_sas()}
+        # 增加題目敘述的變化
+        q_templates = [
+            f"若已知兩個三角形滿足「{ans}」條件，則它們的關係為何？",
+            f"兩三角形符合 {ans} 對應相等，則下列敘述何者正確？",
+            f"判別全等性質：若三組對應邊/角符合 {ans}，則兩三角形？"
+        ]
+        return {"q": random.choice(q_templates), "options": ["必全等", "必相似但不一定全等", "面積相等但不一定全等", "無法判斷"], "ans": 0, "expl": f"{ans} 是全等判別性質之一。", "svg_gen": lambda: SVGGenerator.geometry_sas()}
 
     @staticmethod
     def gen_3_1_angle_calc():
@@ -94,63 +100,106 @@ class QGen:
 
     @staticmethod
     def gen_3_1_side_angle():
-        return {"q": "若 $\\angle A > \\angle B$，則對邊關係？", "options": ["BC > AC", "BC < AC", "BC = AC", "無法判斷"], "ans": 0, "expl": "大角對大邊。", "svg_gen": None}
+        # [動態化] 隨機決定是給邊求角，還是給角求邊
+        if random.random() > 0.5:
+            return {"q": "在 $\\triangle ABC$ 中，若 $\\angle A > \\angle B > \\angle C$，則對邊長度關係？", "options": ["BC > AC > AB", "AC > BC > AB", "AB > AC > BC", "無法判斷"], "ans": 0, "expl": "大角對大邊，A最大故對邊BC最大。", "svg_gen": None}
+        else:
+            return {"q": "在 $\\triangle ABC$ 中，若邊長 $\\overline{AB} > \\overline{AC} > \\overline{BC}$，則角度關係？", "options": ["$\\angle C > \\angle B > \\angle A$", "$\\angle A > \\angle B > \\angle C$", "$\\angle A = \\angle B = \\angle C$", "無法判斷"], "ans": 0, "expl": "大邊對大角，AB最長對應角C最大。", "svg_gen": None}
 
     @staticmethod
     def gen_3_1_quad_prop():
-        q_map = {"菱形": "對角線互相垂直平分", "矩形": "對角線等長且互相平分", "平行四邊形": "對角線互相平分"}
+        q_map = {"菱形": "對角線互相垂直平分", "矩形": "對角線等長且互相平分", "平行四邊形": "對角線互相平分", "箏形": "對角線互相垂直"}
         shape = random.choice(list(q_map.keys()))
         return {"q": f"下列何者是「{shape}」的對角線性質？", "options": [q_map[shape], "對角線互相垂直且等長", "對角線只有一條平分", "無"], "ans": 0, "expl": f"{shape} 性質：{q_map[shape]}。", "svg_gen": None}
 
     @staticmethod
     def gen_3_1_isosceles():
-        return {"q": "等腰三角形的頂角平分線性質？", "options": ["垂直平分底邊", "只平分", "只垂直", "無"], "ans": 0, "expl": "三線合一。", "svg_gen": None}
+        # [修復] 內部隨機，避免重複題目
+        type_idx = random.randint(1, 4)
+        if type_idx == 1:
+            return {"q": "等腰三角形的「頂角平分線」具有什麼性質？", "options": ["垂直平分底邊", "只平分不垂直", "只垂直不平分", "無特殊性質"], "ans": 0, "expl": "三線合一性質。", "svg_gen": None}
+        elif type_idx == 2:
+            return {"q": "等腰三角形的「底角」性質為何？", "options": ["必相等", "必互補", "必互餘", "無關"], "ans": 0, "expl": "等邊對等角。", "svg_gen": None}
+        elif type_idx == 3:
+            angle = random.choice([40, 50, 70, 80])
+            ans = (180 - angle) // 2
+            return {"q": f"等腰三角形頂角為 {angle} 度，求底角？", "options": [f"{ans}", f"{angle}", f"{180-angle}", "90"], "ans": 0, "expl": f"(180-{angle})/2 = {ans}。", "svg_gen": None}
+        else:
+            angle = random.choice([40, 50, 65, 70])
+            ans = 180 - 2*angle
+            return {"q": f"等腰三角形底角為 {angle} 度，求頂角？", "options": [f"{ans}", f"{angle}", f"{90-angle}", "60"], "ans": 0, "expl": f"180 - 2*{angle} = {ans}。", "svg_gen": None}
 
-    # --- 3-2 三心 ---
+    # --- 3-2 三心 (強化隨機性) ---
     @staticmethod
     def gen_3_2_centroid_def():
-        return {"q": "三角形的「重心」是哪三條線的交點？", "options": ["中線", "角平分線", "中垂線", "高"], "ans": 0, "expl": "重心是三條中線交點。", "svg_gen": lambda: SVGGenerator.center_visual("centroid")}
+        q_list = [
+            ("三角形的「重心」是哪三條線的交點？", "中線"),
+            ("三條「中線」的交點稱為？", "重心"),
+            ("將三角形面積六等分的點是？", "重心")
+        ]
+        q, a = random.choice(q_list)
+        return {"q": q, "options": [a, "外心", "內心", "垂心"], "ans": 0, "expl": "重心性質。", "svg_gen": lambda: SVGGenerator.center_visual("centroid")}
     
     @staticmethod
     def gen_3_2_circum_def():
-        return {"q": "三角形的「外心」性質為何？", "options": ["到三頂點等距", "到三邊等距", "平分面積", "在三角形內部"], "ans": 0, "expl": "外心到三頂點等距。", "svg_gen": lambda: SVGGenerator.center_visual("circumcenter")}
+        q_list = [
+            ("三角形的「外心」性質為何？", "到三頂點等距"),
+            ("到三角形三個頂點距離相等的點是？", "外心"),
+            ("三邊中垂線的交點是？", "外心")
+        ]
+        q, a = random.choice(q_list)
+        return {"q": q, "options": [a, "到三邊等距", "重心", "內心"], "ans": 0, "expl": "外心性質。", "svg_gen": lambda: SVGGenerator.center_visual("circumcenter")}
     
     @staticmethod
     def gen_3_2_incenter_def():
-        return {"q": "三角形的「內心」性質為何？", "options": ["到三邊等距", "到三頂點等距", "平分面積", "在外部"], "ans": 0, "expl": "內心到三邊等距。", "svg_gen": lambda: SVGGenerator.center_visual("incenter")}
+        q_list = [
+            ("三角形的「內心」性質為何？", "到三邊等距"),
+            ("到三角形三邊垂直距離相等的點是？", "內心"),
+            ("三內角平分線的交點是？", "內心")
+        ]
+        q, a = random.choice(q_list)
+        return {"q": q, "options": [a, "到三頂點等距", "重心", "外心"], "ans": 0, "expl": "內心性質。", "svg_gen": lambda: SVGGenerator.center_visual("incenter")}
 
     @staticmethod
     def gen_3_2_centroid_calc():
-        median = random.choice([12, 15, 18, 24, 30])
+        median = random.choice([12, 15, 18, 24, 30, 36, 42]) # 更多數字
         ag = int(median * 2/3)
-        return {"q": f"若中線 AD 長為 {median}，G 為重心，則 $\\overline{{AG}}$ 長度為何？", "options": [f"{ag}", f"{median/2}", f"{median/3}", f"{ag+2}"], "ans": 0, "expl": f"重心性質：2/3 * {median} = {ag}。", "svg_gen": lambda: SVGGenerator.triangle_centroid_len(median)}
+        gd = int(median * 1/3)
+        # 隨機問 AG 或 GD
+        if random.random() > 0.5:
+            return {"q": f"若中線 AD 長為 {median}，G 為重心，則 $\\overline{{AG}}$ (頂點到重心) 長度？", "options": [f"{ag}", f"{gd}", f"{median/2}", f"{median}"], "ans": 0, "expl": f"重心性質：2/3 * {median} = {ag}。", "svg_gen": lambda: SVGGenerator.triangle_centroid_len(median)}
+        else:
+            return {"q": f"若中線 AD 長為 {median}，G 為重心，則 $\\overline{{GD}}$ (重心到邊) 長度？", "options": [f"{gd}", f"{ag}", f"{median/2}", f"{median}"], "ans": 0, "expl": f"重心性質：1/3 * {median} = {gd}。", "svg_gen": lambda: SVGGenerator.triangle_centroid_len(median)}
 
     @staticmethod
     def gen_3_2_circum_right():
-        triples = [(6,8,10), (5,12,13), (8,15,17), (10,24,26)]
+        triples = [(6,8,10), (5,12,13), (8,15,17), (10,24,26), (12,16,20), (9,12,15)]
         a, b, c = random.choice(triples)
         return {"q": f"直角三角形兩股長為 {a}, {b}，求外接圓半徑？", "options": [f"{c/2}", f"{c}", f"{a+b}", f"{c*2}"], "ans": 0, "expl": f"斜邊={c}。半徑={c}/2={c/2}。", "svg_gen": None}
 
     @staticmethod
     def gen_3_2_incenter_angle():
-        angle_a = random.randint(40, 80)
+        angle_a = random.randint(30, 85) # 更大範圍
         ans = 90 + angle_a // 2
         return {"q": f"I 為內心，$\\angle A = {angle_a}^\\circ$，求 $\\angle BIC$？", "options": [f"{ans}", f"{180-angle_a}", f"{90+angle_a}", f"{2*angle_a}"], "ans": 0, "expl": f"公式：$90 + {angle_a}/2 = {ans}$。", "svg_gen": lambda: SVGGenerator.triangle_center_angle("內心 I", ans)}
 
     @staticmethod
     def gen_3_2_circum_angle():
-        angle_a = random.randint(40, 70)
+        angle_a = random.randint(30, 80)
         ans = 2 * angle_a
         return {"q": f"O 為銳角外心，$\\angle A = {angle_a}^\\circ$，求 $\\angle BOC$？", "options": [f"{ans}", f"{90+angle_a/2}", f"{angle_a}", f"{180-angle_a}"], "ans": 0, "expl": f"圓心角是圓周角的 2 倍：$2 \\times {angle_a} = {ans}$。", "svg_gen": lambda: SVGGenerator.triangle_center_angle("外心 O", ans)}
 
     @staticmethod
     def gen_3_2_area_split():
-        area = random.choice([12, 24, 30, 36, 60])
+        area = random.choice([12, 18, 24, 30, 36, 42, 48, 60])
         return {"q": f"若 $\\triangle ABC$ 面積為 {area}，G 為重心，則 $\\triangle GAB$ 面積為何？", "options": [f"{area/3}", f"{area/6}", f"{area/2}", f"{area/4}"], "ans": 0, "expl": f"重心平分 3 等份。{area} / 3 = {area/3}。", "svg_gen": lambda: SVGGenerator.center_visual("centroid")}
 
     @staticmethod
     def gen_3_2_position_obtuse():
-        return {"q": "鈍角三角形的外心位置在？", "options": ["三角形外部", "三角形內部", "斜邊中點", "頂點"], "ans": 0, "expl": "鈍角在外。", "svg_gen": None}
+        if random.random() > 0.5:
+            return {"q": "鈍角三角形的外心位置在？", "options": ["三角形外部", "三角形內部", "斜邊中點", "頂點"], "ans": 0, "expl": "鈍角在外。", "svg_gen": None}
+        else:
+            return {"q": "直角三角形的外心位置在？", "options": ["斜邊中點", "三角形內部", "三角形外部", "直角頂點"], "ans": 0, "expl": "直角在斜邊中點。", "svg_gen": None}
 
     @staticmethod
     def gen_3_2_equilateral():
@@ -158,90 +207,96 @@ class QGen:
 
     @staticmethod
     def gen_3_2_inradius_right():
-        # [修復點] 補回之前遺漏的函式定義
-        triples = [(3,4,5), (5,12,13), (8,15,17)]
+        triples = [(3,4,5), (5,12,13), (8,15,17), (6,8,10)]
         a, b, c = random.choice(triples)
         r = int((a + b - c) / 2)
         return {"q": f"直角三角形兩股 {a}, {b}，斜邊 {c}，求內切圓半徑 r？", "options": [f"{r}", f"{r+1}", f"{r*2}", f"{c/2}"], "ans": 0, "expl": f"公式：$r = (a+b-c)/2 = ({a}+{b}-{c})/2 = {r}$。", "svg_gen": None}
 
-    # --- 4-1 因式分解法 ---
+    # --- 4-1 因式分解法 (參數化) ---
     @staticmethod
     def gen_4_1_solve_basic():
-        r1, r2 = random.randint(1,5), random.randint(-5,-1)
+        r1, r2 = random.randint(1,9), random.randint(-9,-1)
         return {"q": f"解 $(x-{r1})(x-{r2})=0$？", "options": [f"{r1}, {r2}", f"{-r1}, {-r2}", f"{r1}, {-r2}", "無解"], "ans": 0, "expl": f"x={r1} 或 x={r2}。", "svg_gen": lambda: SVGGenerator.roots_on_line(r1, r2)}
 
     @staticmethod
     def gen_4_1_solve_no_c():
-        k = random.randint(2, 9)
+        k = random.randint(2, 15)
         return {"q": f"解 $x^2 - {k}x = 0$？", "options": [f"0, {k}", f"{k}", "0", f"1, {k}"], "ans": 0, "expl": f"提 x：$x(x-{k})=0$。", "svg_gen": lambda: SVGGenerator.roots_on_line(0, k)}
 
     @staticmethod
     def gen_4_1_solve_sq_diff():
-        k = random.choice([4, 9, 16, 25, 36, 49])
+        k = random.choice([4, 9, 16, 25, 36, 49, 64, 81, 100])
         sq = int(math.sqrt(k))
         return {"q": f"解 $x^2 - {k} = 0$？", "options": [f"±{sq}", f"{sq}", f"{k}", "無解"], "ans": 0, "expl": f"$x^2={k}$，故 $x=\\pm{sq}$。", "svg_gen": lambda: SVGGenerator.roots_on_line(sq, -sq)}
 
     @staticmethod
     def gen_4_1_solve_perfect_sq():
-        k = random.randint(1, 9)
+        k = random.randint(1, 12)
         return {"q": f"解 $(x-{k})^2 = 0$？", "options": [f"{k} (重根)", f"-{k}", f"±{k}", "0"], "ans": 0, "expl": f"重根 x={k}。", "svg_gen": lambda: SVGGenerator.roots_on_line(k, k)}
 
     @staticmethod
     def gen_4_1_find_k_root():
-        k = random.randint(2, 5)
+        k = random.randint(2, 9)
         r_val = -k
         return {"q": f"若 $x={r_val}$ 是 $x^2 + kx = 0$ 的一根，求 k？", "options": [f"{k}", f"-{k}", "0", "1"], "ans": 0, "expl": f"代入求得 k={k}。", "svg_gen": None}
 
     @staticmethod
     def gen_4_1_reverse_roots():
-        return {"q": "若兩根為 2, -3，原方程式為？", "options": ["$(x-2)(x+3)=0$", "$(x+2)(x-3)=0$", "$x^2-6=0$", "無法求"], "ans": 0, "expl": "逆推：(x-2)(x+3)=0。", "svg_gen": None}
+        r1, r2 = random.randint(1,5), random.randint(1,5)
+        return {"q": f"若兩根為 {r1}, {-r2}，原方程式為？", "options": [f"$(x-{r1})(x+{r2})=0$", f"$(x+{r1})(x-{r2})=0$", "無法求", "$x^2=0$"], "ans": 0, "expl": f"逆推：(x-{r1})(x+{r2})=0。", "svg_gen": None}
 
-    # --- 4-2 配方法 ---
+    # --- 4-2 配方法 (參數化) ---
     @staticmethod
     def gen_4_2_discriminant_value():
-        return {"q": "方程式 $x^2 + 4x + 1 = 0$ 的判別式 D 值？", "options": ["12", "16", "0", "-4"], "ans": 0, "expl": "$D = 16 - 4 = 12$。", "svg_gen": None}
+        a = random.randint(1,3)
+        b = random.randint(2,6)
+        c = random.randint(-5,5)
+        D = b*b - 4*a*c
+        return {"q": f"方程式 ${a}x^2 + {b}x + ({c}) = 0$ 的判別式 D 值？", "options": [f"{D}", f"{D+1}", f"{D-1}", "0"], "ans": 0, "expl": f"$D = b^2-4ac = {b}^2 - 4({a})({c}) = {D}$。", "svg_gen": None}
 
     @staticmethod
     def gen_4_2_discriminant_type():
-        return {"q": "若判別式 D < 0，方程式的根？", "options": ["無解 (無實根)", "重根", "相異兩根", "無法判斷"], "ans": 0, "expl": "D<0 無實根。", "svg_gen": None}
+        if random.random() > 0.5:
+            return {"q": "若判別式 D < 0，方程式的根？", "options": ["無解 (無實根)", "重根", "相異兩根", "無法判斷"], "ans": 0, "expl": "D<0 無實根。", "svg_gen": None}
+        else:
+            return {"q": "若判別式 D = 0，方程式的根？", "options": ["重根", "無解", "相異兩根", "無法判斷"], "ans": 0, "expl": "D=0 重根。", "svg_gen": None}
 
     @staticmethod
     def gen_4_2_complete_square():
-        k = random.randint(1, 5) * 2
+        k = random.randint(1, 8) * 2
         return {"q": f"將 $x^2 + {k}x$ 配方需加上？", "options": [f"{(k//2)**2}", f"{k}", f"{k*2}", "1"], "ans": 0, "expl": f"加上 $({k}/2)^2$。", "svg_gen": lambda: SVGGenerator.area_square(k//2)}
 
     @staticmethod
     def gen_4_2_formula_def():
         return {"q": "一元二次方程式公式解中，根號內的是？", "options": ["$b^2-4ac$", "$b^2+4ac$", "$2a$", "$b-4ac$"], "ans": 0, "expl": "判別式 D = $b^2-4ac$。", "svg_gen": None}
 
-    # --- 4-3 應用問題 ---
+    # --- 4-3 應用問題 (參數化) ---
     @staticmethod
     def gen_4_3_word_product():
-        s = random.randint(3, 9)
+        s = random.randint(3, 12)
         prod = s * (s+1)
         return {"q": f"兩連續正整數積為 {prod}，求兩數？", "options": [f"{s}, {s+1}", f"{s-1}, {s}", "無解", "1, 2"], "ans": 0, "expl": f"{s} * {s+1} = {prod}。", "svg_gen": lambda: SVGGenerator.roots_on_line(s, s+1)}
 
     @staticmethod
     def gen_4_3_word_area():
-        side = random.randint(5, 12)
+        side = random.randint(5, 15)
         area = side*side
         return {"q": f"正方形面積 {area}，邊長？", "options": [f"{side}", f"{area/2}", f"{side*2}", f"{area}"], "ans": 0, "expl": f"$\\sqrt{{{area}}} = {side}$。", "svg_gen": lambda: SVGGenerator.area_square(side)}
 
     @staticmethod
     def gen_4_3_physics():
-        t = random.randint(2, 6)
-        return {"q": f"物體落下距離 $h=5t^2$，若 $h={5*t*t}$，求時間 t？", "options": [f"{t}", f"{t*2}", f"{t+5}", "10"], "ans": 0, "expl": f"{5*t*t} = 5t^2 => t={t}。", "svg_gen": None}
+        t = random.randint(2, 8)
+        h = 5 * t * t
+        return {"q": f"物體落下距離 $h=5t^2$，若 $h={h}$，求時間 t？", "options": [f"{t}", f"{t*2}", f"{t+5}", "10"], "ans": 0, "expl": f"{h} = 5t^2 => t^2={t*t} => t={t}。", "svg_gen": None}
 
 # ==========================================
-# 3. 智能組卷邏輯 (Router)
+# 3. 智能組卷邏輯 (Router & Anti-Duplication)
 # ==========================================
 def get_generators_for_unit(unit_name):
     """根據單元名稱回傳生成器列表"""
-    # [檢查點] 確保這裡列出的所有 function 都在 QGen 中定義了
     if "3-1" in unit_name:
         return [QGen.gen_3_1_sss_sas, QGen.gen_3_1_angle_calc, QGen.gen_3_1_side_angle, QGen.gen_3_1_quad_prop, QGen.gen_3_1_isosceles]
     elif "3-2" in unit_name:
-        # [修復] 包含了所有 11 個 3-2 題型生成器
         return [QGen.gen_3_2_centroid_def, QGen.gen_3_2_circum_def, QGen.gen_3_2_incenter_def, 
                 QGen.gen_3_2_centroid_calc, QGen.gen_3_2_circum_right, QGen.gen_3_2_incenter_angle, 
                 QGen.gen_3_2_circum_angle, QGen.gen_3_2_area_split, QGen.gen_3_2_position_obtuse, 
@@ -253,24 +308,34 @@ def get_generators_for_unit(unit_name):
     elif "4-3" in unit_name:
         return [QGen.gen_4_3_word_product, QGen.gen_4_3_word_area, QGen.gen_4_3_physics]
     else: # 總複習
-        return [QGen.gen_3_2_centroid_calc, QGen.gen_4_1_solve_basic, QGen.gen_4_3_word_area, QGen.gen_3_2_incenter_angle]
+        return [QGen.gen_3_2_centroid_calc, QGen.gen_4_1_solve_basic, QGen.gen_4_3_word_area, QGen.gen_3_2_incenter_angle, QGen.gen_3_1_isosceles]
 
 def generate_quiz(unit_name, count=10):
     generators = get_generators_for_unit(unit_name)
-    if len(generators) >= count:
-        selected_gens = random.sample(generators, count)
-    else:
-        selected_gens = generators * (count // len(generators) + 1)
-        random.shuffle(selected_gens)
-        selected_gens = selected_gens[:count]
+    
+    # 確保有足夠的生成器循環使用
+    selected_gens = generators * (count // len(generators) + 1)
+    random.shuffle(selected_gens)
+    selected_gens = selected_gens[:count]
     
     questions = []
+    seen_q_texts = set() # [關鍵] 用來檢查題目文字是否重複
+    
     for gen in selected_gens:
-        q = gen()
-        correct_opt = q['options'][q['ans']]
-        random.shuffle(q['options'])
-        q['ans'] = q['options'].index(correct_opt)
-        questions.append(q)
+        # 嘗試生成不重複的題目 (最多嘗試 5 次)
+        for _ in range(5):
+            q = gen()
+            if q['q'] not in seen_q_texts:
+                seen_q_texts.add(q['q'])
+                
+                # 打亂選項
+                correct_opt = q['options'][q['ans']]
+                random.shuffle(q['options'])
+                q['ans'] = q['options'].index(correct_opt)
+                
+                questions.append(q)
+                break
+    
     return questions
 
 def reset_exam():
@@ -280,7 +345,7 @@ def reset_exam():
     st.session_state.exam_finished = False
 
 def main():
-    st.set_page_config(page_title="國中數學：校驗修復版", page_icon="💯", layout="centered")
+    st.set_page_config(page_title="國中數學：防撞題修正版", page_icon="💯", layout="centered")
     
     if 'exam_started' not in st.session_state: st.session_state.exam_started = False
     if 'current_questions' not in st.session_state: st.session_state.current_questions = []
@@ -291,7 +356,7 @@ def main():
     
     units = ["3-1 證明與推理", "3-2 三角形的外心、內心與重心", "4-1 因式分解法", "4-2 配方法與公式解", "4-3 應用問題", "全範圍總複習"]
     selected_unit = st.sidebar.selectbox("請選擇練習單元", units, on_change=reset_exam)
-    st.sidebar.success("已修復所有函式對應問題，系統運行穩定！")
+    st.sidebar.success("系統已啟用「文字級去重」機制，保證題目絕對不重複！")
 
     st.title("💯 國中數學：考前衝刺版")
     st.markdown(f"#### 目前單元：{selected_unit}")
