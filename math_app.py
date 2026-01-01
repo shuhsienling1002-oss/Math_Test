@@ -4,7 +4,7 @@ import math
 import time
 
 # ==========================================
-# 1. 核心：雲端題庫製造機 (嚴格執行 1250 題量，不省略)
+# 1. 核心：雲端題庫製造機 (嚴格執行 1250 題量，完整保留)
 # ==========================================
 @st.cache_data
 def create_cloud_database():
@@ -262,7 +262,7 @@ def create_cloud_database():
     return database
 
 # ==========================================
-# 2. 視覺繪圖引擎 (嚴格去標記，防止洩題)
+# 2. 視覺繪圖引擎 (完全保留)
 # ==========================================
 class SVGDrawer:
     @staticmethod
@@ -292,7 +292,7 @@ class SVGDrawer:
         return ""
 
 # ==========================================
-# 3. APP 介面 (嚴格執行 Session 鎖定與種子更新)
+# 3. APP 介面 (修正：加入內容去重邏輯)
 # ==========================================
 st.set_page_config(page_title="國中數學雲端教室", page_icon="☁️")
 st.title("☁️ 國中數學智能題庫 (V25.8)")
@@ -306,15 +306,36 @@ st.sidebar.success(f"✅ 題庫生成完畢！共 {sum(len(v) for v in data.valu
 unit_options = list(data.keys()) + ["全範圍總複習"]
 unit = st.sidebar.selectbox("請選擇練習單元", unit_options)
 
+# --- 修正開始：按鈕觸發邏輯 ---
 if st.sidebar.button("🚀 生成試卷 (10題)"):
     all_q = []
     for k in data: all_q.extend(data[k])
     target = all_q if unit == "全範圍總複習" else data[unit]
-    # 物理鎖定：更新微秒級種子，強制抽出 10 題唯一物件，杜絕重複問題
+    
+    # 物理鎖定：更新亂數種子
     random.seed(time.time())
-    st.session_state.quiz = random.sample(target, min(len(target), 10))
+    
+    # [修正] 內容去重邏輯 (Content Deduplication)
+    # 1. 先打亂目標題庫
+    random.shuffle(target)
+    
+    unique_quiz = []
+    seen_questions = set()  # 黑名單：記錄已選過的題目文字
+    
+    for q in target:
+        # 核心判斷：如果這題的文字還沒出現過，才加入
+        if q['q'] not in seen_questions:
+            unique_quiz.append(q)
+            seen_questions.add(q['q'])
+        
+        # 湊滿 10 題就停止
+        if len(unique_quiz) >= 10:
+            break
+            
+    st.session_state.quiz = unique_quiz
     st.session_state.exam_finished = False
     st.rerun()
+# --- 修正結束 ---
 
 if st.session_state.quiz and not st.session_state.exam_finished:
     with st.form("quiz_form"):
