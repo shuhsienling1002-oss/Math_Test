@@ -4,7 +4,7 @@ import math
 import time
 
 # ==========================================
-# 1. 核心：雲端題庫製造機 (V3.0 多態變異版)
+# 1. 核心：雲端題庫製造機 (V4.0 終極多態版 - 模板最大化)
 # ==========================================
 @st.cache_data
 def create_cloud_database():
@@ -18,269 +18,492 @@ def create_cloud_database():
         "4-3 應用問題": []
     }
 
-    # ================= 3-1 證明與推理 (引入邏輯陷阱與多重題型) =================
-    for _ in range(50):
-        # 變異點 1: 混合全等性質與「錯誤」性質
-        q_type = random.choice(["valid", "invalid", "application"])
+    # ---------------------------------------------------------
+    # 單元 3-1: 證明與推理 (擴充至 12 種邏輯模板)
+    # ---------------------------------------------------------
+    for _ in range(50): # 產生 50 題，每次隨機從下列模板抽一種
+        t_type = random.randint(1, 12)
         
-        if q_type == "valid":
+        if t_type == 1: # 全等性質判斷
             prop = random.choice(["SSS", "SAS", "ASA", "AAS", "RHS"])
             database["3-1 證明與推理"].append({
-                "q": f"已知兩個三角形滿足「{prop}」條件，請問它們的關係？",
-                "options": ["必全等", "面積相等但不全等", "相似但不全等", "無法判斷"],
-                "ans": "必全等",
-                "expl": f"{prop} 是五大三角形全等性質之一。",
-                "svg": "geometry_sas"
+                "q": f"已知兩個三角形滿足「{prop}」條件，則它們？",
+                "options": ["必全等", "不一定全等", "面積相等但不全等", "相似"],
+                "ans": "必全等", 
+                "expl": f"{prop} 為三角形全等性質。", "svg": "geometry_sas"
             })
-        elif q_type == "invalid":
-            # 專門出陷阱題：SSA, AAA
-            fake_prop = random.choice(["SSA (兩邊一對角)", "AAA (三內角對應相等)"])
+        elif t_type == 2: # 假全等陷阱
+            prop = random.choice(["SSA", "AAA"])
             database["3-1 證明與推理"].append({
-                "q": f"若兩個三角形滿足「{fake_prop}」，則下列敘述何者正確？",
-                "options": ["不一定全等", "必全等", "必不全等", "面積必相等"],
-                "ans": "不一定全等",
-                "expl": f"{fake_prop} 不是全等性質。AAA 只能證明相似；SSA 可能形成兩種不同三角形。",
-                "svg": "none"
+                "q": f"若兩三角形滿足「{prop}」對應相等，則？",
+                "options": ["不一定全等", "必全等", "必不全等", "形狀不同"],
+                "ans": "不一定全等", 
+                "expl": "SSA 可能形成兩種三角形；AAA 僅能證明相似。", "svg": "none"
             })
-        else:
-            # 應用題：中垂線性質
+        elif t_type == 3: # 中垂線性質
+            p_name = random.choice(["P", "Q", "M"])
             database["3-1 證明與推理"].append({
-                "q": "若 P 點在線段 AB 的垂直平分線上，則下列何者必成立？",
-                "options": ["PA = PB", "PA > PB", "PA < PB", "PA ⊥ PB"],
-                "ans": "PA = PB",
-                "expl": "中垂線性值：線上任一點到線段兩端點等距離。",
-                "svg": "none"
+                "q": f"若 {p_name} 點在線段 AB 的垂直平分線上，則下列何者正確？",
+                "options": [f"{p_name}A = {p_name}B", f"{p_name}A > {p_name}B", f"{p_name}A ⊥ AB", "無法判斷"],
+                "ans": f"{p_name}A = {p_name}B", 
+                "expl": "中垂線性值：線上任一點到兩端點等距離。", "svg": "none"
             })
-
-    for _ in range(50):
-        # 變異點 2: 幾何不等式 (邊角關係逆轉)
-        mode = random.choice(["angle_to_side", "side_to_angle", "triangle_inequality"])
-        
-        if mode == "angle_to_side":
+        elif t_type == 4: # 角平分線性質
             database["3-1 證明與推理"].append({
-                "q": "△ABC 中，∠A=80°, ∠B=60°, ∠C=40°，求最長邊？",
-                "options": ["BC", "AC", "AB", "無法判斷"],
-                "ans": "BC",
-                "expl": "大角對大邊：∠A 最大，故其對邊 BC 最長。",
-                "svg": "none"
+                "q": "若 P 點在 ∠A 的角平分線上，則 P 點到哪裡的距離相等？",
+                "options": ["∠A 的兩邊", "∠A 的頂點", "對邊中點", "無法判斷"],
+                "ans": "∠A 的兩邊", 
+                "expl": "角平分線性值：線上任一點到角兩邊距離相等。", "svg": "none"
             })
-        elif mode == "side_to_angle":
+        elif t_type == 5: # 大角對大邊
+            angles = [random.randint(60, 100), random.randint(40, 59)]
+            angles.append(180 - sum(angles))
+            mapping = {angles[0]:"BC", angles[1]:"AC", angles[2]:"AB"}
+            max_angle = max(angles)
             database["3-1 證明與推理"].append({
-                "q": "△ABC 中，AB=5, BC=8, AC=6，求最小角？",
-                "options": ["∠C", "∠A", "∠B", "無法判斷"],
-                "ans": "∠C",
-                "expl": "小邊對小角：AB=5 最短，故對角 ∠C 最小。",
-                "svg": "none"
+                "q": f"△ABC 中，∠A={angles[0]}°, ∠B={angles[1]}°, ∠C={angles[2]}°，求最長邊？",
+                "options": [mapping[max_angle], "無法判斷", "三邊等長", "AB"],
+                "ans": mapping[max_angle], 
+                "expl": "大角對大邊。", "svg": "none"
             })
-        else:
-            # 三角形三邊不等式
-            s1, s2 = random.randint(3,10), random.randint(3,10)
+        elif t_type == 6: # 三角形兩邊之和
+            s1, s2 = random.randint(5, 10), random.randint(5, 10)
             database["3-1 證明與推理"].append({
-                "q": f"三角形兩邊長為 {s1}, {s2}，則第三邊 x 的範圍？",
+                "q": f"三角形兩邊長為 {s1}, {s2}，第三邊長 x 的範圍？",
                 "options": [f"{abs(s1-s2)} < x < {s1+s2}", f"x > {s1+s2}", f"x < {abs(s1-s2)}", f"x = {s1+s2}"],
-                "ans": f"{abs(s1-s2)} < x < {s1+s2}",
-                "expl": "三角形任兩邊之和大於第三邊，任兩邊之差小於第三邊。",
-                "svg": "none"
+                "ans": f"{abs(s1-s2)} < x < {s1+s2}", 
+                "expl": "兩邊之和大於第三邊，兩邊之差小於第三邊。", "svg": "none"
+            })
+        elif t_type == 7: # 外角定理
+            a, b = random.randint(30, 70), random.randint(30, 70)
+            database["3-1 證明與推理"].append({
+                "q": f"△ABC 中，∠A={a}°，∠B={b}°，則 ∠C 的外角？",
+                "options": [str(a+b), str(180-a-b), "180", "90"],
+                "ans": str(a+b), 
+                "expl": "外角等於不相鄰兩內角和。", "svg": "none"
+            })
+        elif t_type == 8: # 多邊形內角和
+            n = random.choice([5, 6, 8, 10, 12])
+            database["3-1 證明與推理"].append({
+                "q": f"正 {n} 邊形的內角總和？",
+                "options": [str((n-2)*180), str(n*180), "360", "720"],
+                "ans": str((n-2)*180), 
+                "expl": "內角和 = (n-2)×180。", "svg": "none"
+            })
+        elif t_type == 9: # 多邊形外角和
+            n = random.randint(5, 15)
+            database["3-1 證明與推理"].append({
+                "q": f"{n} 邊形的一組外角和是多少度？",
+                "options": ["360", "180", "720", "不一定"],
+                "ans": "360", 
+                "expl": "任意凸多邊形的外角和皆為 360 度。", "svg": "none"
+            })
+        elif t_type == 10: # 平行四邊形判別
+            database["3-1 證明與推理"].append({
+                "q": "下列何者「無法」判別四邊形 ABCD 為平行四邊形？",
+                "options": ["一組對邊平行且另一組對邊相等", "兩組對邊分別平行", "兩組對角分別相等", "對角線互相平分"],
+                "ans": "一組對邊平行且另一組對邊相等", 
+                "expl": "一組平行另一組相等可能是「等腰梯形」。", "svg": "none"
+            })
+        elif t_type == 11: # 特殊四邊形對角線
+            shape = random.choice([("菱形", "互相垂直"), ("矩形", "等長"), ("正方形", "互相垂直且等長")])
+            database["3-1 證明與推理"].append({
+                "q": f"「{shape[0]}」的對角線具有什麼性質？",
+                "options": [shape[1], "無特殊性質", "互相平行", "長度必為整數"],
+                "ans": shape[1], 
+                "expl": f"{shape[0]}對角線性質：{shape[1]}。", "svg": "none"
+            })
+        else: # 畢氏定理逆運算 (直角判別)
+            sides = random.choice([(3,4,5), (5,12,13), (8,15,17), (7,24,25)])
+            database["3-1 證明與推理"].append({
+                "q": f"三角形三邊長為 {sides[0]}, {sides[1]}, {sides[2]}，則此三角形為？",
+                "options": ["直角三角形", "銳角三角形", "鈍角三角形", "等腰三角形"],
+                "ans": "直角三角形", 
+                "expl": f"{sides[0]}² + {sides[1]}² = {sides[2]}²，符合畢氏定理。", "svg": "none"
             })
 
-    # ================= 3-2 外心 (引入座標與直角坐標系) =================
+    # ---------------------------------------------------------
+    # 單元 3-2: 外心 (擴充至 8 種邏輯模板)
+    # ---------------------------------------------------------
     for _ in range(50):
-        # 變異點 3: 混合定義、座標、半徑計算
-        q_cat = random.choice(["def", "coord", "radius"])
+        t_type = random.randint(1, 8)
         
-        if q_cat == "def":
+        if t_type == 1: # 定義
             database["3-2 三角形的外心"].append({
-                "q": "若 O 為 △ABC 外心，則 OA, OB, OC 的長度關係？",
-                "options": ["OA = OB = OC", "OA > OB > OC", "OA + OB = OC", "無特定關係"],
-                "ans": "OA = OB = OC",
-                "expl": "外心到三頂點等距離 (即外接圓半徑)。",
-                "svg": "triangle_circumcenter"
+                "q": "三角形的外心是哪三條線的交點？",
+                "options": ["中垂線", "角平分線", "中線", "高"],
+                "ans": "中垂線", "expl": "外心是三邊垂直平分線交點。", "svg": "none"
             })
-        elif q_cat == "coord":
-            # 座標平面上的外心
-            k = random.randint(2, 6) * 2
+        elif t_type == 2: # 距離性質
             database["3-2 三角形的外心"].append({
-                "q": f"直角坐標平面上，A(0,{k}), B({k},0), O(0,0)，求 △ABO 的外心座標？",
-                "options": [f"({k//2}, {k//2})", f"({k}, {k})", "(0, 0)", f"({k//3}, {k//3})"],
-                "ans": f"({k//2}, {k//2})",
-                "expl": "直角三角形外心在斜邊中點。斜邊 AB 中點為 ((0+k)/2, (k+0)/2)。",
-                "svg": "none"
+                "q": "外心到三角形哪裡的距離相等？",
+                "options": ["三頂點", "三邊", "三中點", "重心"],
+                "ans": "三頂點", "expl": "外心到三頂點距離相等 (外接圓半徑)。", "svg": "triangle_circumcenter"
             })
-        else:
-            # 鈍角三角形外心
+        elif t_type == 3: # 直角三角形半徑
+            c = random.choice([10, 13, 15, 17, 20, 25, 26])
             database["3-2 三角形的外心"].append({
-                "q": "鈍角三角形的外心位於三角形的？",
-                "options": ["外部", "內部", "邊上", "頂點"],
-                "ans": "外部",
-                "expl": "銳角在內部，直角在斜邊中點，鈍角在外部。",
-                "svg": "none"
+                "q": f"直角三角形斜邊長為 {c}，求外接圓半徑 R？",
+                "options": [str(c/2), str(c), str(c*2), str(c/3)],
+                "ans": str(c/2), "expl": "直角三角形外接圓半徑 = 斜邊的一半。", "svg": "none"
+            })
+        elif t_type == 4: # 位置判別
+            tri = random.choice([("銳角", "內部"), ("直角", "斜邊中點"), ("鈍角", "外部")])
+            database["3-2 三角形的外心"].append({
+                "q": f"「{tri[0]}三角形」的外心位於？",
+                "options": [tri[1], "頂點上", "重心上", "不一定"],
+                "ans": tri[1], "expl": f"{tri[0]}三角形外心在{tri[1]}。", "svg": "none"
+            })
+        elif t_type == 5: # 角度計算 (圓心角)
+            angle_a = random.randint(50, 80)
+            database["3-2 三角形的外心"].append({
+                "q": f"O 為銳角 △ABC 外心，若 ∠A={angle_a}°，求 ∠BOC？",
+                "options": [str(angle_a*2), str(angle_a), str(180-angle_a), str(90+angle_a/2)],
+                "ans": str(angle_a*2), "expl": "圓心角 ∠BOC = 2 × 圓周角 ∠A。", "svg": "none"
+            })
+        elif t_type == 6: # 座標幾何
+            k = random.randint(2, 8) * 2
+            database["3-2 三角形的外心"].append({
+                "q": f"直角坐標上 A(0,{k}), B({k},0), O(0,0)，求 △ABO 外心？",
+                "options": [f"({k//2},{k//2})", f"({k},{k})", "(0,0)", f"({k//3},{k//3})"],
+                "ans": f"({k//2},{k//2})", "expl": "直角三角形外心為斜邊中點。", "svg": "none"
+            })
+        elif t_type == 7: # 等腰三角形外心
+            database["3-2 三角形的外心"].append({
+                "q": "等腰三角形的外心位於哪條線上？",
+                "options": ["頂角平分線(底邊中垂線)", "底邊", "腰", "外部"],
+                "ans": "頂角平分線(底邊中垂線)", "expl": "等腰三角形具有對稱軸，外心必在對稱軸上。", "svg": "none"
+            })
+        else: # 外接圓面積
+            r = random.randint(3, 10)
+            database["3-2 三角形的外心"].append({
+                "q": f"若三角形外心到頂點距離為 {r}，求外接圓面積？",
+                "options": [f"{r*r}π", f"{2*r}π", f"{r}π", f"{r*r}"],
+                "ans": f"{r*r}π", "expl": f"半徑 R={r}，面積 = πR²。", "svg": "none"
             })
 
-    # ================= 3-3 內心 (引入面積公式與角度) =================
+    # ---------------------------------------------------------
+    # 單元 3-3: 內心 (擴充至 8 種邏輯模板)
+    # ---------------------------------------------------------
     for _ in range(50):
-        q_cat = random.choice(["angle", "area_formula", "dist_prop"])
-        
-        if q_cat == "angle":
-            deg = random.choice([40, 60, 80])
+        t_type = random.randint(1, 8)
+
+        if t_type == 1: # 定義
             database["3-3 三角形的內心"].append({
-                "q": f"I 為 △ABC 內心，∠A={deg}°，求 ∠BIC？",
-                "options": [str(90 + deg//2), str(180-deg), str(90+deg), str(deg//2)],
-                "ans": str(90 + deg//2),
-                "expl": "∠BIC = 90° + (1/2)∠A。",
-                "svg": "triangle_incenter",
-                "svg_params": {"a": deg}
+                "q": "三角形的內心是哪三條線的交點？",
+                "options": ["角平分線", "中垂線", "中線", "高"],
+                "ans": "角平分線", "expl": "內心是三內角平分線交點。", "svg": "none"
             })
-        elif q_cat == "area_formula":
-            # 內切圓半徑與面積關係: Area = r * s
+        elif t_type == 2: # 距離性質
+            database["3-3 三角形的內心"].append({
+                "q": "內心到三角形哪裡的距離相等？",
+                "options": ["三邊", "三頂點", "三中點", "外部"],
+                "ans": "三邊", "expl": "內心到三邊距離相等 (內切圓半徑)。", "svg": "triangle_incenter"
+            })
+        elif t_type == 3: # 角度公式
+            deg = random.choice([40, 50, 60, 70, 80])
+            database["3-3 三角形的內心"].append({
+                "q": f"I 為內心，∠A={deg}°，求 ∠BIC？",
+                "options": [str(90+deg//2), str(180-deg), str(90+deg), str(deg*2)],
+                "ans": str(90+deg//2), "expl": "∠BIC = 90° + ∠A/2。", "svg": "triangle_incenter", "svg_params": {"a": deg}
+            })
+        elif t_type == 4: # 面積公式 A = rs/2
+            s = random.randint(10, 30) # 周長
             r = random.randint(2, 5)
-            s_perim = random.randint(10, 20) * 2 # 周長
-            area = r * (s_perim // 2)
+            area = s * r // 2
             database["3-3 三角形的內心"].append({
-                "q": f"△ABC 周長為 {s_perim}，內切圓半徑為 {r}，求 △ABC 面積？",
-                "options": [str(area), str(area*2), str(area//2), str(s_perim*r)],
-                "ans": str(area),
-                "expl": "三角形面積 = 內切圓半徑 × 周長的一半 (A = rs)。",
-                "svg": "none"
+                "q": f"三角形周長 {s}，內切圓半徑 {r}，求面積？",
+                "options": [str(area), str(s*r), str(area*2), str(s+r)],
+                "ans": str(area), "expl": "面積 = (周長 × 內切圓半徑) ÷ 2。", "svg": "none"
             })
-        else:
+        elif t_type == 5: # 直角三角形內半徑公式
+            a, b, c = random.choice([(3,4,5), (5,12,13), (8,15,17)])
+            r = (a + b - c) // 2
             database["3-3 三角形的內心"].append({
-                "q": "若 I 為內心，則 I 點到哪裡的距離等於內切圓半徑？",
-                "options": ["三邊", "三頂點", "三中線", "重心"],
-                "ans": "三邊",
-                "expl": "內心到三邊距離相等，此距離即為內切圓半徑。",
-                "svg": "none"
+                "q": f"直角三角形三邊 {a}, {b}, {c}，求內切圓半徑？",
+                "options": [str(r), str(r+1), str(a+b), str(c/2)],
+                "ans": str(r), "expl": "直角三角形內半徑 r = (兩股和 - 斜邊) / 2。", "svg": "none"
+            })
+        elif t_type == 6: # 面積比
+            database["3-3 三角形的內心"].append({
+                "q": "若 I 為 △ABC 內心，則 △IAB, △IBC, △ICA 的面積比等於？",
+                "options": ["三邊長比 (AB:BC:CA)", "1:1:1", "高的比", "無法判斷"],
+                "ans": "三邊長比 (AB:BC:CA)", "expl": "因為高相等(皆為半徑)，面積比 = 底邊比。", "svg": "none"
+            })
+        elif t_type == 7: # 正三角形特殊性
+            database["3-3 三角形的內心"].append({
+                "q": "正三角形的內心、外心、重心有何關係？",
+                "options": ["三心重合", "不重合", "只有內外心重合", "只有重外心重合"],
+                "ans": "三心重合", "expl": "正多邊形的內心、外心、重心皆在同一點。", "svg": "none"
+            })
+        else: # 內心作圖
+            database["3-3 三角形的內心"].append({
+                "q": "尺規作圖找內心，需要做什麼？",
+                "options": ["做兩內角的角平分線", "做兩邊的中垂線", "做兩邊的中線", "做兩邊的高"],
+                "ans": "做兩內角的角平分線", "expl": "內心為角平分線交點。", "svg": "none"
             })
 
-    # ================= 3-4 重心 (引入物理性質與中線計算) =================
+    # ---------------------------------------------------------
+    # 單元 3-4: 重心 (擴充至 8 種邏輯模板)
+    # ---------------------------------------------------------
     for _ in range(50):
-        q_cat = random.choice(["length_ratio", "area_split", "coord_avg"])
-        
-        if q_cat == "length_ratio":
-            m = random.randint(3, 10) * 3
+        t_type = random.randint(1, 8)
+
+        if t_type == 1: # 定義
             database["3-4 三角形的重心"].append({
-                "q": f"G 為重心，若 AG = {m}，求中線 AD 全長？",
-                "options": [str(int(m * 1.5)), str(m), str(m*2), str(m*3)],
-                "ans": str(int(m * 1.5)),
-                "expl": f"AG 佔中線的 2/3。故中線長 = {m} × (3/2) = {int(m*1.5)}。",
-                "svg": "triangle_centroid",
-                "svg_params": {"m": m}
+                "q": "三角形的重心是哪三條線的交點？",
+                "options": ["中線", "中垂線", "角平分線", "高"],
+                "ans": "中線", "expl": "重心是三邊中線交點。", "svg": "none"
             })
-        elif q_cat == "area_split":
-            area = random.choice([12, 24, 36])
+        elif t_type == 2: # 長度比 2:1
+            m = random.randint(3, 12) * 3
             database["3-4 三角形的重心"].append({
-                "q": f"△ABC 面積 {area}，G 為重心，則 △GBC 面積？",
+                "q": f"G 為重心，中線 AD 長為 {m}，求 AG？",
+                "options": [str(m*2//3), str(m//3), str(m), str(m//2)],
+                "ans": str(m*2//3), "expl": "重心到頂點距離 = 2/3 中線長。", "svg": "triangle_centroid", "svg_params": {"m": m}
+            })
+        elif t_type == 3: # 長度比 1:2 (反向)
+            gd = random.randint(2, 8)
+            database["3-4 三角形的重心"].append({
+                "q": f"G 為重心，D 為 BC 中點。若 GD={gd}，求 AG？",
+                "options": [str(gd*2), str(gd), str(gd*3), str(gd/2)],
+                "ans": str(gd*2), "expl": "AG = 2 × GD。", "svg": "none"
+            })
+        elif t_type == 4: # 面積 3 等分
+            area = random.randint(4, 12) * 3
+            database["3-4 三角形的重心"].append({
+                "q": f"△ABC 面積 {area}，G 為重心，求 △GAB 面積？",
                 "options": [str(area//3), str(area//2), str(area//6), str(area)],
-                "ans": str(area//3),
-                "expl": "重心與三頂點連線，將大三角形分割為三個等面積的小三角形。",
-                "svg": "none"
+                "ans": str(area//3), "expl": "重心與三頂點連線將面積三等分。", "svg": "none"
             })
-        else:
-            # 重心座標公式
-            x1, x2, x3 = 0, 3, 6
+        elif t_type == 5: # 面積 6 等分
+            area = random.randint(4, 12) * 6
             database["3-4 三角形的重心"].append({
-                "q": f"A({x1},0), B({x2},6), C({x3},0)，求 △ABC 重心 G 的 x 座標？",
-                "options": [str((x1+x2+x3)//3), str(x1+x2+x3), "0", "1"],
-                "ans": str((x1+x2+x3)//3),
-                "expl": "重心座標 = 三頂點座標相加除以 3。",
-                "svg": "none"
+                "q": f"△ABC 面積 {area}，三中線將其分割為 6 個小三角形，每個面積為？",
+                "options": [str(area//6), str(area//3), str(area//2), str(area)],
+                "ans": str(area//6), "expl": "三中線將三角形分割為 6 個等積小三角形。", "svg": "none"
+            })
+        elif t_type == 6: # 坐標公式
+            x1, x2, x3 = random.sample(range(0, 12), 3)
+            gx = round((x1+x2+x3)/3, 1)
+            # 簡化為整數題型
+            if (x1+x2+x3)%3 == 0:
+                gx = (x1+x2+x3)//3
+                database["3-4 三角形的重心"].append({
+                    "q": f"三頂點 x 座標分別為 {x1}, {x2}, {x3}，求重心 x 座標？",
+                    "options": [str(gx), str(x1+x2+x3), str(gx*2), "0"],
+                    "ans": str(gx), "expl": "重心座標為三頂點座標平均。", "svg": "none"
+                })
+            else:
+                database["3-4 三角形的重心"].append({
+                    "q": "重心的座標如何計算？",
+                    "options": ["三頂點座標相加除以 3", "三頂點座標相加除以 2", "三邊中點相加", "無法計算"],
+                    "ans": "三頂點座標相加除以 3", "expl": "重心是頂點的算術平均數。", "svg": "none"
+                })
+        elif t_type == 7: # 直角三角形重心
+            database["3-4 三角形的重心"].append({
+                "q": "直角三角形重心到斜邊中點的距離，是斜邊長度的幾倍？",
+                "options": ["1/6", "1/3", "1/2", "2/3"],
+                "ans": "1/6", 
+                "expl": "斜邊中線長=1/2斜邊。重心到中點佔中線1/3。故 (1/2)*(1/3) = 1/6。", "svg": "none"
+            })
+        else: # 物理性質
+            database["3-4 三角形的重心"].append({
+                "q": "若將均勻三角形板子頂在「重心」處，板子會？",
+                "options": ["保持平衡", "向一邊傾倒", "旋轉", "斷裂"],
+                "ans": "保持平衡", "expl": "重心是物體重量的中心。", "svg": "none"
             })
 
-    # ================= 4-1 因式分解 (引入十字交乘與乘法公式) =================
+    # ---------------------------------------------------------
+    # 單元 4-1: 因式分解 (擴充至 8 種邏輯模板)
+    # ---------------------------------------------------------
     for _ in range(50):
-        q_cat = random.choice(["common_factor", "diff_square", "cross_mult"])
-        
-        if q_cat == "common_factor":
+        t_type = random.randint(1, 8)
+
+        if t_type == 1: # 提公因式
             k = random.randint(2, 9)
             database["4-1 因式分解法"].append({
-                "q": f"解 x² = {k}x？",
-                "options": [f"0 或 {k}", f"{k}", "0", f"±{k}"],
-                "ans": f"0 或 {k}",
-                "expl": f"移項得 x² - {k}x = 0，提公因式 x(x-{k})=0。",
-                "svg": "roots_0_k",
-                "svg_params": {"k_label": "k", "k": k}
+                "q": f"因式分解 x² + {k}x？",
+                "options": [f"x(x+{k})", f"x(x-{k})", f"(x+{k})²", f"x²"],
+                "ans": f"x(x+{k})", "expl": "提公因式 x。", "svg": "roots_0_k", "svg_params": {"k_label": "k", "k": -k}
             })
-        elif q_cat == "diff_square":
+        elif t_type == 2: # 平方差
             k = random.randint(2, 9)
             database["4-1 因式分解法"].append({
-                "q": f"解 x² - {k*k} = 0？",
-                "options": [f"±{k}", f"{k}", f"{k*k}", "無解"],
-                "ans": f"±{k}",
-                "expl": f"平方差公式：(x+{k})(x-{k})=0。",
-                "svg": "none"
+                "q": f"因式分解 x² - {k*k}？",
+                "options": [f"(x+{k})(x-{k})", f"(x-{k})²", f"(x+{k})²", "無法分解"],
+                "ans": f"(x+{k})(x-{k})", "expl": "平方差公式 a²-b²=(a+b)(a-b)。", "svg": "none"
             })
-        else:
-            # 簡單十字交乘 x^2 + (a+b)x + ab = 0
-            a, b = random.randint(1,4), random.randint(1,4)
+        elif t_type == 3: # 和的平方
+            k = random.randint(2, 9)
             database["4-1 因式分解法"].append({
-                "q": f"因式分解 x² + {a+b}x + {a*b} = 0 的解？",
-                "options": [f"{-a}, {-b}", f"{a}, {b}", f"{a}, {-b}", "無解"],
-                "ans": f"{-a}, {-b}",
-                "expl": f"原式 = (x+{a})(x+{b}) = 0。",
-                "svg": "none"
+                "q": f"因式分解 x² + {2*k}x + {k*k}？",
+                "options": [f"(x+{k})²", f"(x-{k})²", f"(x+{k})(x-{k})", f"x(x+{2*k})"],
+                "ans": f"(x+{k})²", "expl": "完全平方式 (a+b)² = a²+2ab+b²。", "svg": "none"
+            })
+        elif t_type == 4: # 差的平方
+            k = random.randint(2, 9)
+            database["4-1 因式分解法"].append({
+                "q": f"因式分解 x² - {2*k}x + {k*k}？",
+                "options": [f"(x-{k})²", f"(x+{k})²", f"(x+{k})(x-{k})", f"x(x-{2*k})"],
+                "ans": f"(x-{k})²", "expl": "完全平方式 (a-b)² = a²-2ab+b²。", "svg": "none"
+            })
+        elif t_type == 5: # 十字交乘 (兩根為正)
+            a, b = random.randint(1, 4), random.randint(1, 4)
+            database["4-1 因式分解法"].append({
+                "q": f"方程式 x² - {a+b}x + {a*b} = 0 的解？",
+                "options": [f"{a}, {b}", f"{-a}, {-b}", f"{a}, {-b}", "無解"],
+                "ans": f"{a}, {b}", "expl": f"(x-{a})(x-{b})=0，故 x={a} 或 {b}。", "svg": "none"
+            })
+        elif t_type == 6: # 十字交乘 (一正一負)
+            a, b = random.randint(1, 5), random.randint(1, 5)
+            # (x-a)(x+b) = x^2 + (b-a)x - ab
+            database["4-1 因式分解法"].append({
+                "q": f"方程式 x² + {b-a}x - {a*b} = 0 的解？",
+                "options": [f"{a}, {-b}", f"{-a}, {b}", f"{a}, {b}", "無解"],
+                "ans": f"{a}, {-b}", "expl": f"(x-{a})(x+{b})=0，故 x={a} 或 {-b}。", "svg": "none"
+            })
+        elif t_type == 7: # 根的定義
+            k = random.randint(1, 5)
+            database["4-1 因式分解法"].append({
+                "q": f"若 {k} 是方程式 x² + ax + 5 = 0 的一根，則？",
+                "options": [f"將 x={k} 代入等號成立", f"將 x=-{k} 代入等號成立", "a=0", "無法判斷"],
+                "ans": f"將 x={k} 代入等號成立", "expl": "根的定義即為代入後方程式成立。", "svg": "none"
+            })
+        else: # 零積性質
+            database["4-1 因式分解法"].append({
+                "q": "若 (x-A)(x-B) = 0，則 x 的值？",
+                "options": ["A 或 B", "A 且 B", "A+B", "A-B"],
+                "ans": "A 或 B", "expl": "兩數相乘為 0，則其中一數必為 0。", "svg": "roots_line_hidden"
             })
 
-    # ================= 4-2 配方法 (引入判別式與完全平方式) =================
+    # ---------------------------------------------------------
+    # 單元 4-2: 配方法 (擴充至 8 種邏輯模板)
+    # ---------------------------------------------------------
     for _ in range(50):
-        q_cat = random.choice(["complete_square", "discriminant", "formula_concept"])
-        
-        if q_cat == "complete_square":
-            k = random.choice([4, 6, 8, 10])
+        t_type = random.randint(1, 8)
+
+        if t_type == 1: # 配方補項
+            k = random.choice([4, 6, 8, 10, 12])
             database["4-2 配方法與公式解"].append({
-                "q": f"x² - {k}x + □ 是一個完全平方式，□ = ？",
+                "q": f"x² + {k}x + □ 成為完全平方式，□ = ？",
                 "options": [str((k//2)**2), str(k), str(k*2), str(k**2)],
-                "ans": str((k//2)**2),
-                "expl": "常數項應為 (一次項係數一半) 的平方。",
-                "svg": "area_square_k"
+                "ans": str((k//2)**2), "expl": "補項 = (一次項係數一半)的平方。", "svg": "area_square_k"
             })
-        elif q_cat == "discriminant":
+        elif t_type == 2: # 判別式 D 計算
+            b, c = random.randint(2, 5), random.randint(1, 3)
+            # x^2 + bx + c
+            d = b*b - 4*c
             database["4-2 配方法與公式解"].append({
-                "q": "若一元二次方程式有「重根」，則判別式 D 的值？",
+                "q": f"x² + {b}x + {c} = 0 的判別式 D = ？",
+                "options": [str(d), str(b*b+4*c), str(b*b), "0"],
+                "ans": str(d), "expl": "D = b² - 4ac。", "svg": "none"
+            })
+        elif t_type == 3: # 判別式性質 (兩相異實根)
+            database["4-2 配方法與公式解"].append({
+                "q": "若判別式 D > 0，則方程式有？",
+                "options": ["兩相異實根", "重根", "無實根", "三個根"],
+                "ans": "兩相異實根", "expl": "D > 0 表兩相異實根。", "svg": "none"
+            })
+        elif t_type == 4: # 判別式性質 (重根)
+            database["4-2 配方法與公式解"].append({
+                "q": "若方程式有重根，則判別式 D？",
                 "options": ["D = 0", "D > 0", "D < 0", "D = 1"],
-                "ans": "D = 0",
-                "expl": "D > 0 兩相異實根；D = 0 重根；D < 0 無實根。",
-                "svg": "none"
+                "ans": "D = 0", "expl": "重根時，頂點在 x 軸上，D = 0。", "svg": "none"
             })
-        else:
-            # 公式解形式
+        elif t_type == 5: # 判別式性質 (無解)
             database["4-2 配方法與公式解"].append({
-                "q": "利用公式解求 ax²+bx+c=0，其分子部分為？",
-                "options": ["-b ± √D", "b ± √D", "-b ± D", "2a"],
-                "ans": "-b ± √D",
-                "expl": "公式解 x = (-b ± √(b²-4ac)) / 2a。",
-                "svg": "none"
+                "q": "若方程式無實根，則判別式 D？",
+                "options": ["D < 0", "D > 0", "D = 0", "D >= 0"],
+                "ans": "D < 0", "expl": "D < 0 表圖形與 x 軸無交點。", "svg": "none"
+            })
+        elif t_type == 6: # 公式解形式
+            database["4-2 配方法與公式解"].append({
+                "q": "一元二次方程式的公式解 x = ？",
+                "options": ["(-b ± √D) / 2a", "(b ± √D) / 2a", "(-b ± D) / 2a", "-b / 2a"],
+                "ans": "(-b ± √D) / 2a", "expl": "公式解定義。", "svg": "none"
+            })
+        elif t_type == 7: # 頂點形式
+            h, k = random.randint(1, 5), random.randint(1, 5)
+            database["4-2 配方法與公式解"].append({
+                "q": f"方程式 (x-{h})² = {k} 的解？",
+                "options": [f"{h} ± √{k}", f"{-h} ± √{k}", f"{h} ± {k}", "無解"],
+                "ans": f"{h} ± √{k}", "expl": "開根號後移項：x - h = ±√k => x = h ± √k。", "svg": "none"
+            })
+        else: # 係數影響
+            database["4-2 配方法與公式解"].append({
+                "q": "方程式 ax² + bx + c = 0 中，若 a > 0，則拋物線開口？",
+                "options": ["向上", "向下", "向左", "向右"],
+                "ans": "向上", "expl": "二次項係數為正，開口向上。", "svg": "none"
             })
 
-    # ================= 4-3 應用問題 (引入多情境) =================
+    # ---------------------------------------------------------
+    # 單元 4-3: 應用問題 (擴充至 8 種邏輯模板)
+    # ---------------------------------------------------------
     for _ in range(50):
-        q_cat = random.choice(["number_problem", "geometry_problem", "physics_problem"])
-        
-        if q_cat == "number_problem":
+        t_type = random.randint(1, 8)
+
+        if t_type == 1: # 正方形面積
+            s = random.randint(5, 15)
+            database["4-3 應用問題"].append({
+                "q": f"正方形面積為 {s*s}，求邊長？",
+                "options": [str(s), str(s*2), str(s*s), str(s+4)],
+                "ans": str(s), "expl": "邊長 = √面積。", "svg": "area_square"
+            })
+        elif t_type == 2: # 長方形周長反推
+            x = random.randint(3, 10) # 寬
+            # 長 = x+2, 面積 = x(x+2)
+            area = x*(x+2)
+            database["4-3 應用問題"].append({
+                "q": f"長方形長比寬多 2，面積為 {area}，求寬？",
+                "options": [str(x), str(x+2), str(area), str(2*x)],
+                "ans": str(x), "expl": "設寬 x，x(x+2)=面積，解 x。", "svg": "area_square"
+            })
+        elif t_type == 3: # 連續整數
             n = random.randint(1, 10)
+            prod = n*(n+1)
             database["4-3 應用問題"].append({
-                "q": f"一個正數比其平方少 {n*(n-1)}，求此數？",
-                "options": [str(n), str(n+1), str(n-1), "0"],
-                "ans": str(n),
-                "expl": f"設數為 x，x² - x = {n*(n-1)}，解得 x={n} (負不合)。",
-                "svg": "none"
+                "q": f"兩連續正整數積為 {prod}，求兩數和？",
+                "options": [str(2*n+1), str(n), str(n+1), str(prod)],
+                "ans": str(2*n+1), "expl": f"數為 {n}, {n+1}，和為 {2*n+1}。", "svg": "none"
             })
-        elif q_cat == "geometry_problem":
-            w = random.randint(3, 8)
+        elif t_type == 4: # 物理拋體
+            t = random.randint(2, 6)
+            h = 5*t*t
             database["4-3 應用問題"].append({
-                "q": f"長方形長比寬多 3，面積為 {w*(w+3)}，求周長？",
-                "options": [str(2*(w + w+3)), str(w*(w+3)), str(w), str(w+3)],
-                "ans": str(2*(w + w+3)),
-                "expl": f"寬={w}, 長={w+3}, 周長=2*(長+寬)。",
-                "svg": "area_square"
+                "q": f"物體落下距離 h=5t²。若落下 {h} 公尺，需時多久？",
+                "options": [str(t), str(t*2), str(t*5), "10"],
+                "ans": str(t), "expl": f"5t²={h} => t²={t*t} => t={t}。", "svg": "none"
             })
-        else:
-            # 物理拋體
-            t = random.randint(2, 5)
+        elif t_type == 5: # 梯形面積
+            # (上底+下底)*高/2. 設上底 x, 下底 x+2, 高 4
+            x = random.randint(3, 8)
+            area = (2*x + 2) * 2 # (x + x+2)*4/2 = (2x+2)*2
             database["4-3 應用問題"].append({
-                "q": f"一球從大樓拋下，距離公式 h = 5t² + 10t。若 h={5*t*t + 10*t}，求時間 t？",
-                "options": [str(t), str(t+1), "1", "10"],
-                "ans": str(t),
-                "expl": "代入公式解一元二次方程式，取正根。",
-                "svg": "none"
+                "q": f"梯形高為 4，下底比上底多 2，面積 {area}，求上底？",
+                "options": [str(x), str(x+2), str(area), "4"],
+                "ans": str(x), "expl": "代入梯形面積公式逆算。", "svg": "none"
+            })
+        elif t_type == 6: # 邏輯判斷 (負不合)
+            database["4-3 應用問題"].append({
+                "q": "計算長方形邊長時算出 x = 5 或 -3，應取？",
+                "options": ["5", "-3", "兩者皆可", "無解"],
+                "ans": "5", "expl": "邊長長度必須為正數，負數不合。", "svg": "none"
+            })
+        elif t_type == 7: # 數字問題 (倒數)
+            # 某數 + 倒數 = 2.5 (2 + 1/2)
+            database["4-3 應用問題"].append({
+                "q": "某數與其倒數之和為 2.5，求此數 (整數解)？",
+                "options": ["2", "0.5", "1", "3"],
+                "ans": "2", "expl": "x + 1/x = 2.5 => 2x² - 5x + 2 = 0 => x=2 或 1/2。", "svg": "none"
+            })
+        else: # 畢氏定理應用
+            # 直角三角形一股 3, 斜邊 5, 求另一股
+            tri = random.choice([(3,4,5), (5,12,13), (6,8,10)])
+            database["4-3 應用問題"].append({
+                "q": f"梯子長 {tri[2]} 公尺，靠在牆上，梯腳離牆 {tri[0]} 公尺，求梯頂高度？",
+                "options": [str(tri[1]), str(tri[2]), str(tri[0]+tri[2]), str(tri[2]-tri[0])],
+                "ans": str(tri[1]), "expl": "畢氏定理：c² - a² = b²。", "svg": "none"
             })
 
     return database
@@ -319,7 +542,7 @@ class SVGDrawer:
 # 3. APP 介面 (保留去重邏輯)
 # ==========================================
 st.set_page_config(page_title="國中數學雲端教室", page_icon="☁️")
-st.title("☁️ 國中數學智能題庫 (V3.0 多態變異版)")
+st.title("☁️ 國中數學智能題庫 (V4.0 終極多態版)")
 
 if 'quiz' not in st.session_state: st.session_state.quiz = []
 if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
