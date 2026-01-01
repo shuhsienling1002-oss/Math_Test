@@ -137,19 +137,16 @@ def create_cloud_database():
     # ================= 4-1 因式分解 (5種變化) =================
     for _ in range(50):
         r1, r2 = random.randint(1, 5), random.randint(-5, -1)
-        # --- 核心修正區：處理方程式顯示邏輯 ---
-        # 處理第一個括號 (x - r1)
-        s1 = f"(x - {r1})"
-        # 處理第二個括號 (x - r2)，若 r2 為負數如 -3，顯示 (x + 3)
-        s2 = f"(x + {abs(r2)})" if r2 < 0 else f"(x - {r2})"
-        
+        # 修正：處理負號顯示格式
+        term1 = f"(x - {r1})"
+        term2 = f"(x + {abs(r2)})" if r2 < 0 else f"(x - {r2})"
         database["4-1 因式分解法"].append({
-            "q": f"解方程式 {s1}{s2} = 0？",
+            "q": f"解方程式 {term1}{term2} = 0？",
             "options": [f"{r1} 或 {r2}", f"{-r1} 或 {-r2}", f"{r1} 或 {-r2}", "無解"],
             "ans": f"{r1} 或 {r2}",
             "expl": f"令括號為 0，可得 x={r1} 或 x={r2}。",
-            "svg": "roots_line",
-            "svg_params": {"r1": "a", "r2": "b"} # --- 核心修正區：改用代號防止圖形洩題 ---
+            "svg": "roots_line_hidden", # 修正為隱藏數值版
+            "svg_params": {"r1_label": "a", "r2_label": "b", "r1": r1, "r2": r2}
         })
 
     for _ in range(50):
@@ -192,8 +189,8 @@ def create_cloud_database():
             "options": ["1個 (重根)", "2個相異解", "無解", "無限多"],
             "ans": "1個 (重根)",
             "expl": f"完全平方式為重根，視為 1 個解 (x={k})。",
-            "svg": "roots_line",
-            "svg_params": {"r1": k, "r2": k}
+            "svg": "roots_line_hidden",
+            "svg_params": {"r1_label": "a", "r2_label": "a", "r1": k, "r2": k}
         })
 
     # ================= 4-2 配方法 (5種變化) =================
@@ -283,8 +280,8 @@ def create_cloud_database():
             "options": [f"{n}, {n2}", f"{n-1}, {n}", f"{n+1}, {n+2}", "無解"],
             "ans": f"{n}, {n2}",
             "expl": f"驗算：{n} × {n2} = {prod}。",
-            "svg": "roots_line",
-            "svg_params": {"r1": n, "r2": n2}
+            "svg": "roots_line_hidden",
+            "svg_params": {"r1_label": "n", "r2_label": "n+1", "r1": n, "r2": n2}
         })
 
     for _ in range(50):
@@ -330,23 +327,19 @@ class SVGDrawer:
             return base.format(f'<path d="M150,30 L50,170 L250,170 Z" fill="none" stroke="black"/><text x="150" y="20">A</text><text x="40" y="170">B</text><text x="260" y="170">C</text><circle cx="150" cy="120" r="4" fill="orange"/><text x="150" y="110" fill="orange">I</text><text x="20" y="50">∠A={a}°</text>')
         elif svg_type == "center_def_dynamic":
             return base.format('<path d="M150,30 L50,170 L250,170 Z" fill="none" stroke="black"/><line x1="150" y1="30" x2="150" y2="170" stroke="red" stroke-dasharray="4"/><line x1="50" y1="170" x2="200" y2="100" stroke="red" stroke-dasharray="4"/><text x="150" y="123" fill="blue" font-weight="bold">Center</text>')
-        elif svg_type == "roots_line":
+        elif svg_type == "roots_line_hidden": # 修正：將數值改為未知數標籤
             r1, r2 = kwargs.get('r1', 0), kwargs.get('r2', 0)
-            # --- 核心修正區：處理座標顯示，若是代號則顯示在對應位置 ---
-            def get_x(val):
-                if val == "a": return 110
-                if val == "b": return 190
-                return 150 + (int(val) * 12)
-            
-            return base.format(f'<line x1="10" y1="50" x2="290" y2="50" stroke="black"/><text x="150" y="40">0</text><circle cx="{get_x(r1)}" cy="50" r="5" fill="red"/><text x="{get_x(r1)}" y="80" fill="red" text-anchor="middle">{r1}</text><circle cx="{get_x(r2)}" cy="50" r="5" fill="red"/><text x="{get_x(r2)}" y="80" fill="red" text-anchor="middle">{r2}</text>')
+            l1, l2 = kwargs.get('r1_label', 'a'), kwargs.get('r2_label', 'b')
+            mx = lambda v: 150 + v*12
+            return base.format(f'<line x1="10" y1="50" x2="290" y2="50" stroke="black"/><text x="150" y="40">0</text><circle cx="{mx(r1)}" cy="50" r="5" fill="red"/><text x="{mx(r1)}" y="80" fill="red" text-anchor="middle">{l1}</text><circle cx="{mx(r2)}" cy="50" r="5" fill="red"/><text x="{mx(r2)}" y="80" fill="red" text-anchor="middle">{l2}</text>')
         elif svg_type == "roots_0_k":
             k = kwargs.get('k', 0)
             mx = lambda v: 150 + v*12
-            return base.format(f'<line x1="10" y1="50" x2="290" y2="50" stroke="black"/><text x="150" y="40">0</text><circle cx="{mx(0)}" cy="50" r="5" fill="red"/><circle cx="{mx(k)}" cy="50" r="5" fill="red"/><text x="{mx(k)}" y="80" fill="red">{k}</text>')
+            return base.format(f'<line x1="10" y1="50" x2="290" y2="50" stroke="black"/><text x="150" y="40">0</text><circle cx="{mx(0)}" cy="50" r="5" fill="red"/><circle cx="{mx(k)}" cy="50" r="5" fill="red"/><text x="{mx(k)}" y="80" fill="red">k</text>')
         elif svg_type == "roots_sq":
             k = kwargs.get('k', 0)
             mx = lambda v: 150 + v*12
-            return base.format(f'<line x1="10" y1="50" x2="290" y2="50" stroke="black"/><text x="150" y="40">0</text><circle cx="{mx(k)}" cy="50" r="5" fill="red"/><text x="{mx(k)}" y="80" fill="red">{k}</text><circle cx="{mx(-k)}" cy="50" r="5" fill="red"/><text x="{mx(-k)}" y="80" fill="red">-{k}</text>')
+            return base.format(f'<line x1="10" y1="50" x2="290" y2="50" stroke="black"/><text x="150" y="40">0</text><circle cx="{mx(k)}" cy="50" r="5" fill="red"/><text x="{mx(k)}" y="80" fill="red">k</text><circle cx="{mx(-k)}" cy="50" r="5" fill="red"/><text x="{mx(-k)}" y="80" fill="red">-k</text>')
         elif svg_type == "area_square":
             s = kwargs.get('s', 10)
             return base.format(f'<rect x="100" y="50" width="100" height="100" fill="#bbdefb" stroke="black"/><text x="150" y="100" text-anchor="middle">Area={s*s}</text><text x="150" y="170" text-anchor="middle">邊長=?</text>')
@@ -359,13 +352,11 @@ class SVGDrawer:
 # 3. 考卷生成邏輯
 # ==========================================
 def generate_question_from_template(template):
-    # 複製變數以防污染
     variables = template.get("variables", {}).copy()
     svg_vars = variables.copy()
     if "svg_params" in template:
         svg_vars.update(template["svg_params"])
 
-    # 選項處理
     options = template["options"].copy()
     random.shuffle(options)
     
@@ -385,44 +376,36 @@ def generate_question_from_template(template):
 st.set_page_config(page_title="國中數學雲端教室", page_icon="☁️")
 st.title("☁️ 國中數學智能題庫 (V25.1)")
 
-# 初始化狀態
 if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
 if 'exam_results' not in st.session_state: st.session_state.exam_results = []
 if 'quiz_score' not in st.session_state: st.session_state.quiz_score = 0
 if 'quiz' not in st.session_state: st.session_state.quiz = []
 
-# 【核心步驟】程式啟動時，直接在雲端生成 1000+ 題
 with st.spinner('正在雲端重構 25 種不同題型...'):
     data = create_cloud_database()
 
 st.sidebar.success(f"✅ 題庫生成完畢！\n共 {sum(len(v) for v in data.values())} 題。\n已排除重複模板。")
 
-# 【新增】重置狀態的函式 (解決連動問題)
 def reset_exam():
     st.session_state.exam_finished = False
     st.session_state.quiz = []
     st.session_state.exam_results = []
     st.session_state.quiz_score = 0
 
-# 選擇單元 (綁定 on_change)
 unit_options = list(data.keys()) + ["全範圍總複習"]
 unit = st.sidebar.selectbox("請選擇練習單元", unit_options, on_change=reset_exam)
 
-# 生成按鈕
 if not st.session_state.exam_finished:
     if st.button("🚀 生成試卷 (10題)", use_container_width=True):
         all_questions = []
         for key in data: all_questions.extend(data[key])
-        
         target_pool = all_questions if unit == "全範圍總複習" else data[unit]
         
-        # 隨機抽取，確保不重複
         if len(target_pool) >= 10:
             selected_questions = random.sample(target_pool, 10)
         else:
             selected_questions = random.choices(target_pool, k=10)
         
-        # 隨機打亂選項
         for q in selected_questions:
             random.shuffle(q['options'])
 
@@ -430,13 +413,11 @@ if not st.session_state.exam_finished:
         st.session_state.exam_finished = False
         st.rerun()
 
-# 顯示考卷
 if st.session_state.quiz and not st.session_state.exam_finished:
     with st.form("exam_form"):
         user_answers = []
         for i, q in enumerate(st.session_state.quiz):
             st.markdown(f"**第 {i+1} 題：**")
-            # 處理 SVG 參數
             svg_content = q.get('svg', 'none')
             svg_params = q.get('svg_params', {})
             if svg_content != 'none':
@@ -461,7 +442,6 @@ if st.session_state.quiz and not st.session_state.exam_finished:
             st.session_state.exam_finished = True
             st.rerun()
 
-# 顯示結果
 if st.session_state.exam_finished:
     final_score = st.session_state.quiz_score
     if final_score == 100: st.success(f"## 💯 總分：{final_score} 分 (太神啦！)")
@@ -474,7 +454,6 @@ if st.session_state.exam_finished:
         status = "✅ 正確" if is_right else "❌ 錯誤"
         
         with st.expander(f"第 {i+1} 題解析 ({status})"):
-            # 再次顯示圖形
             svg_content = q.get('svg', 'none')
             svg_params = q.get('svg_params', {})
             if svg_content != 'none':
