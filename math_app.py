@@ -4,6 +4,7 @@ import math
 
 # ==========================================
 # 1. 視覺繪圖引擎 (SVG Generator)
+# [特色] 包含完整的 A, B, C, D, G, O, I 頂點標示
 # ==========================================
 class SVGGenerator:
     @staticmethod
@@ -13,8 +14,11 @@ class SVGGenerator:
     @staticmethod
     def geometry_triangle(type_label):
         return SVGGenerator._base_svg(f"""
-            <path d="M50,150 L250,150 L150,20 Z" fill="#e3f2fd" stroke="blue" stroke-width="2"/>
-            <text x="150" y="180" text-anchor="middle" font-weight="bold" fill="black">{type_label}</text>
+            <path d="M150,20 L50,180 L250,180 Z" fill="#e3f2fd" stroke="blue" stroke-width="2"/>
+            <text x="150" y="15" text-anchor="middle" font-weight="bold">A</text>
+            <text x="40" y="180" text-anchor="end" font-weight="bold">B</text>
+            <text x="260" y="180" text-anchor="start" font-weight="bold">C</text>
+            <text x="150" y="110" text-anchor="middle" font-weight="bold" fill="black" font-size="14">{type_label}</text>
         """, 300, 200)
 
     @staticmethod
@@ -22,6 +26,9 @@ class SVGGenerator:
         color = "green" if "外心" in angle_type else "orange"
         return SVGGenerator._base_svg(f"""
             <path d="M150,30 L50,170 L250,170 Z" fill="none" stroke="black" stroke-width="2"/>
+            <text x="150" y="20" text-anchor="middle" font-weight="bold">A</text>
+            <text x="40" y="170" text-anchor="end" font-weight="bold">B</text>
+            <text x="260" y="170" text-anchor="start" font-weight="bold">C</text>
             <circle cx="150" cy="120" r="4" fill="{color}"/>
             <line x1="150" y1="120" x2="50" y2="170" stroke="{color}" stroke-dasharray="4"/>
             <line x1="150" y1="120" x2="250" y2="170" stroke="{color}" stroke-dasharray="4"/>
@@ -34,10 +41,13 @@ class SVGGenerator:
         return SVGGenerator._base_svg(f"""
             <path d="M150,20 L50,180 L250,180 Z" fill="none" stroke="black" stroke-width="2"/>
             <line x1="150" y1="20" x2="150" y2="180" stroke="red" stroke-width="2"/>
-            <circle cx="150" cy="126" r="4" fill="blue"/>
-            <text x="160" y="126" fill="blue" font-weight="bold">G</text>
-            <text x="180" y="80" fill="red">?</text>
-            <text x="100" y="100" fill="black">中線長 {median_len}</text>
+            <circle cx="150" cy="126" r="5" fill="blue"/>
+            <text x="150" y="15" text-anchor="middle" font-weight="bold">A</text>
+            <text x="40" y="180" text-anchor="end" font-weight="bold">B</text>
+            <text x="260" y="180" text-anchor="start" font-weight="bold">C</text>
+            <text x="150" y="195" text-anchor="middle" font-weight="bold" fill="red">D</text>
+            <text x="165" y="126" fill="blue" font-weight="bold">G</text>
+            <text x="20" y="50" fill="black" font-size="12">AD = {median_len}</text>
         """, 300, 200)
 
     @staticmethod
@@ -62,11 +72,26 @@ class SVGGenerator:
     @staticmethod
     def center_visual(type="centroid"):
         if type == "centroid":
-            return SVGGenerator._base_svg("""<path d="M150,30 L50,170 L250,170 Z" fill="none" stroke="black"/><line x1="150" y1="30" x2="150" y2="170" stroke="red" stroke-dasharray="4"/><line x1="50" y1="170" x2="200" y2="100" stroke="red" stroke-dasharray="4"/><circle cx="150" cy="123" r="4" fill="blue"/><text x="160" y="123" fill="blue" font-weight="bold">重心</text>""", 300, 200)
+            return SVGGenerator._base_svg("""
+            <path d="M150,30 L50,170 L250,170 Z" fill="none" stroke="black"/>
+            <text x="150" y="20" text-anchor="middle">A</text><text x="40" y="170" text-anchor="end">B</text><text x="260" y="170" text-anchor="start">C</text>
+            <line x1="150" y1="30" x2="150" y2="170" stroke="red" stroke-dasharray="4"/>
+            <line x1="50" y1="170" x2="200" y2="100" stroke="red" stroke-dasharray="4"/>
+            <circle cx="150" cy="123" r="4" fill="blue"/><text x="160" y="123" fill="blue" font-weight="bold">G</text>
+            """, 300, 200)
         elif type == "circumcenter":
-            return SVGGenerator._base_svg("""<circle cx="150" cy="100" r="80" fill="none" stroke="green"/><polygon points="150,20 80,140 220,140" fill="none" stroke="black"/><circle cx="150" cy="100" r="4" fill="green"/><text x="150" y="115" fill="green" font-weight="bold">外心</text>""", 300, 200)
+            return SVGGenerator._base_svg("""
+            <circle cx="150" cy="100" r="80" fill="none" stroke="green"/>
+            <path d="M150,20 L80,140 L220,140 Z" fill="none" stroke="black"/>
+            <text x="150" y="15" text-anchor="middle">A</text><text x="70" y="140" text-anchor="end">B</text><text x="230" y="140" text-anchor="start">C</text>
+            <circle cx="150" cy="100" r="4" fill="green"/><text x="150" y="115" fill="green" font-weight="bold">O</text>
+            """, 300, 200)
         elif type == "incenter":
-            return SVGGenerator._base_svg("""<polygon points="150,20 50,170 250,170" fill="none" stroke="black"/><circle cx="150" cy="120" r="50" fill="none" stroke="orange"/><circle cx="150" cy="120" r="4" fill="orange"/><text x="150" y="110" fill="orange" font-weight="bold">內心</text>""", 300, 200)
+            return SVGGenerator._base_svg("""
+            <path d="M150,20 L50,170 L250,170 Z" fill="none" stroke="black"/>
+            <text x="150" y="15" text-anchor="middle">A</text><text x="40" y="170" text-anchor="end">B</text><text x="260" y="170" text-anchor="start">C</text>
+            <circle cx="150" cy="120" r="50" fill="none" stroke="orange"/><circle cx="150" cy="120" r="4" fill="orange"/><text x="150" y="110" fill="orange" font-weight="bold">I</text>
+            """, 300, 200)
 
     @staticmethod
     def geometry_sas():
@@ -77,11 +102,10 @@ class SVGGenerator:
         """, 300, 150)
 
 # ==========================================
-# 2. 題目工廠 (QGen) - 補齊所有題型
+# 2. 題目工廠 (QGen) - 29種題型全數保留
 # ==========================================
 class QGen:
     # ---------------- 3-1 證明與推理 ----------------
-    # [觀念題]
     @staticmethod
     def q31_concept_congruence():
         props = ["SSS", "SAS", "ASA", "AAS", "RHS"]
@@ -94,7 +118,6 @@ class QGen:
         shape = random.choice(list(q_map.keys()))
         return {"q": f"關於「{shape}」的對角線性質，下列何者正確？", "options": [q_map[shape], "對角線只有一條平分", "對角線無特殊性質", "以上皆非"], "ans": 0, "expl": f"{shape} 性質：{q_map[shape]}。", "svg_gen": None}
 
-    # [一般計算題]
     @staticmethod
     def q31_calc_angle():
         in1, in2 = random.randint(30, 80), random.randint(30, 80)
@@ -106,13 +129,11 @@ class QGen:
         ans = (180 - deg) // 2
         return {"q": f"等腰三角形頂角為 {deg} 度，求其底角？", "options": [f"{ans}", f"{deg}", f"{180-deg}", "60"], "ans": 0, "expl": f"(180-{deg})/2 = {ans}", "svg_gen": None}
 
-    # [情境題]
     @staticmethod
     def q31_story_bridge():
         return {"q": "工程師設計大橋結構時，常利用三角形的哪種全等性質來確保結構穩固不變形 (三邊長固定則形狀固定)？", "options": ["SSS", "AAA", "SSA", "以上皆非"], "ans": 0, "expl": "SSS 性質確保了三角形結構的唯一性與穩定性。", "svg_gen": lambda: SVGGenerator.geometry_sas()}
 
     # ---------------- 3-2 三心 (完整補齊) ----------------
-    # [觀念題]
     @staticmethod
     def q32_concept_def():
         q_list = [("三中線交點", "重心"), ("三中垂線交點", "外心"), ("三內角平分線交點", "內心")]
@@ -127,7 +148,6 @@ class QGen:
     def q32_concept_equilateral():
         return {"q": "哪一種三角形的重心、外心、內心會重合在同一點？", "options": ["正三角形", "等腰三角形", "直角三角形", "任意三角形"], "ans": 0, "expl": "正三角形性質：三心合一。", "svg_gen": None}
 
-    # [一般計算題]
     @staticmethod
     def q32_calc_centroid_len():
         median = random.choice([12, 18, 24, 30])
@@ -148,13 +168,11 @@ class QGen:
 
     @staticmethod
     def q32_calc_inradius_right():
-        # [補回] 內切圓半徑計算
         triples = [(3,4,5), (5,12,13), (8,15,17)]
         a, b, c = random.choice(triples)
         r = int((a + b - c) / 2)
         return {"q": f"直角三角形兩股 {a}, {b}，求內切圓半徑？", "options": [f"{r}", f"{r+1}", f"{c/2}", f"{c}"], "ans": 0, "expl": f"直角三角形內半徑 = (兩股和-斜邊)/2 = ({a}+{b}-{c})/2 = {r}。", "svg_gen": None}
 
-    # [情境題]
     @staticmethod
     def q32_story_firestation():
         return {"q": "三個村莊 A, B, C 想要蓋一座消防局，且消防局到三個村莊的直線距離要相等。請問工程師應選在哪一點？", "options": ["外心", "內心", "重心", "垂心"], "ans": 0, "expl": "到三頂點等距 => 外心。", "svg_gen": lambda: SVGGenerator.center_visual("circumcenter")}
@@ -163,8 +181,7 @@ class QGen:
     def q32_story_balance():
         return {"q": "美術課剪了一個三角形紙板，小明想用指尖頂住紙板讓它保持平衡不掉落，他該頂在哪裡？", "options": ["重心", "外心", "內心", "頂點"], "ans": 0, "expl": "重心是物理上的重量中心。", "svg_gen": lambda: SVGGenerator.center_visual("centroid")}
 
-    # ---------------- 4-1 因式分解法 (完整補齊) ----------------
-    # [觀念題]
+    # ---------------- 4-1 因式分解法 ----------------
     @staticmethod
     def q41_concept_root_meaning():
         k = random.randint(1, 5)
@@ -174,7 +191,6 @@ class QGen:
     def q41_concept_reverse_roots():
         return {"q": "若一元二次方程式的兩根互為相反數 (如 3, -3)，則該方程式缺哪一項？", "options": ["一次項 (x項)", "常數項", "二次項", "無法判斷"], "ans": 0, "expl": "兩根和為0，故一次項係數為0。", "svg_gen": None}
 
-    # [一般計算題]
     @staticmethod
     def q41_calc_solve_basic():
         r1, r2 = random.randint(1,5), random.randint(-5,-1)
@@ -192,14 +208,12 @@ class QGen:
         r_val = -k
         return {"q": f"若 $x={r_val}$ 是方程式 $x^2 + kx = 0$ 的一根，則 k 值為何？", "options": [f"{k}", f"-{k}", "0", "1"], "ans": 0, "expl": f"代入求得 k={k}。", "svg_gen": None}
 
-    # [情境題]
     @staticmethod
     def q41_story_number():
         r1, r2 = 3, -2
         return {"q": "小華心裡想兩個數，其中一個減 3，另一個加 2，兩者相乘剛好是 0。請問這兩個數可能是？", "options": ["3 或 -2", "-3 或 2", "3 或 2", "0"], "ans": 0, "expl": "$(x-3)(x+2)=0$。", "svg_gen": None}
 
-    # ---------------- 4-2 配方法 (觀念+計算) ----------------
-    # [觀念題]
+    # ---------------- 4-2 配方法 ----------------
     @staticmethod
     def q42_concept_discriminant():
         return {"q": "若一元二次方程式的判別式 $D < 0$，代表圖形與 x 軸的關係？", "options": ["沒有交點", "交於兩點", "切於一點", "重合"], "ans": 0, "expl": "D<0 無實根，圖形懸空不相交。", "svg_gen": None}
@@ -208,7 +222,6 @@ class QGen:
     def q42_concept_formula_def():
         return {"q": "一元二次方程式公式解中，根號內的是？", "options": ["$b^2-4ac$", "$b^2+4ac$", "$2a$", "$b-4ac$"], "ans": 0, "expl": "判別式 D = $b^2-4ac$。", "svg_gen": None}
 
-    # [一般計算題]
     @staticmethod
     def q42_calc_discriminant_val():
         return {"q": "求 $x^2 + 4x + 1 = 0$ 的判別式 D？", "options": ["12", "16", "0", "-4"], "ans": 0, "expl": "$D = 4^2 - 4(1)(1) = 12$。", "svg_gen": None}
@@ -218,23 +231,19 @@ class QGen:
         k = 6
         return {"q": "將 $x^2 + 6x$ 配方需加上多少？", "options": ["9", "36", "3", "6"], "ans": 0, "expl": "$(6/2)^2 = 9$。", "svg_gen": lambda: SVGGenerator.area_square(3)}
 
-    # [情境題]
     @staticmethod
     def q42_story_path():
         return {"q": "棒球飛行的軌跡是一個二次函數，若判別式 D > 0，代表球的高度與某個水平線有幾個交點？", "options": ["2個", "1個", "0個", "無限多"], "ans": 0, "expl": "D>0 代表有兩個相異實根（交點）。", "svg_gen": None}
 
     # ---------------- 4-3 應用問題 ----------------
-    # [觀念題]
     @staticmethod
     def q43_concept_setup():
         return {"q": "解應用問題時，若算出邊長為 -5，應該如何處理？", "options": ["不合 (邊長需為正)", "取絕對值", "直接當作答案", "重算"], "ans": 0, "expl": "幾何長度必須大於 0。", "svg_gen": None}
 
-    # [一般計算題]
     @staticmethod
     def q43_calc_number():
         return {"q": "某數 x 的平方等於 3x，求 x？", "options": ["0 或 3", "3", "0", "9"], "ans": 0, "expl": "$x^2=3x \\Rightarrow x(x-3)=0$。", "svg_gen": lambda: SVGGenerator.roots_on_line(0, 3)}
 
-    # [情境題]
     @staticmethod
     def q43_story_garden():
         side = random.randint(5, 12)
@@ -251,10 +260,6 @@ class QGen:
 # 3. 智能組卷邏輯 (Router)
 # ==========================================
 def get_generators_for_unit(unit_name):
-    """
-    分類混合：
-    Concept (觀念), Calculation (計算), Story (情境)
-    """
     if "3-1" in unit_name:
         return [QGen.q31_concept_congruence, QGen.q31_concept_quad, 
                 QGen.q31_calc_angle, QGen.q31_calc_isosceles, 
@@ -277,14 +282,11 @@ def get_generators_for_unit(unit_name):
                 QGen.q43_story_garden, QGen.q43_story_physics]
     else: # 總複習
         all_funcs = []
-        # 混合抽樣
         all_funcs.extend([QGen.q32_story_firestation, QGen.q43_story_garden, QGen.q31_calc_angle, QGen.q41_calc_solve_basic])
         return all_funcs
 
 def generate_quiz(unit_name, count=10):
     generators = get_generators_for_unit(unit_name)
-    
-    # 題型循環填充
     selected_gens = generators * (count // len(generators) + 1)
     random.shuffle(selected_gens)
     selected_gens = selected_gens[:count]
@@ -297,7 +299,6 @@ def generate_quiz(unit_name, count=10):
             q = gen()
             if q['q'] not in seen_q_texts:
                 seen_q_texts.add(q['q'])
-                # 打亂選項
                 correct_opt = q['options'][q['ans']]
                 random.shuffle(q['options'])
                 q['ans'] = q['options'].index(correct_opt)
@@ -312,7 +313,7 @@ def reset_exam():
     st.session_state.exam_finished = False
 
 def main():
-    st.set_page_config(page_title="國中數學：全題型混合版", page_icon="💯", layout="centered")
+    st.set_page_config(page_title="國中數學：黃金混合完整版", page_icon="💯", layout="centered")
     
     if 'exam_started' not in st.session_state: st.session_state.exam_started = False
     if 'current_questions' not in st.session_state: st.session_state.current_questions = []
@@ -323,13 +324,13 @@ def main():
     
     units = ["3-1 證明與推理", "3-2 三角形的外心、內心與重心", "4-1 因式分解法", "4-2 配方法與公式解", "4-3 應用問題", "全範圍總複習"]
     selected_unit = st.sidebar.selectbox("請選擇練習單元", units, on_change=reset_exam)
-    st.sidebar.success("已包含：\n1. 觀念題 (定義/判別)\n2. 計算題 (基礎運算)\n3. 情境題 (生活應用)")
+    st.sidebar.success("系統已整合：\n1. 觀念題\n2. 計算題\n3. 情境題\n並採用防撞題機制。")
 
     st.title("💯 國中數學：全方位練習版")
     st.markdown(f"#### 目前單元：{selected_unit}")
 
     if not st.session_state.exam_started:
-        st.info("💡 系統將混合生成「觀念、計算、情境」三種題型。")
+        st.info("💡 點擊按鈕，系統將生成 10 題「觀念、計算、情境」混合的試卷。")
         if st.button("🚀 生成試卷", use_container_width=True):
             st.session_state.exam_finished = False 
             st.session_state.exam_results = {} 
