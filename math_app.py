@@ -51,13 +51,10 @@ class SVGDrawer:
 def generate_question_from_template(template):
     variables = {}
     
-    # 1. 變數隨機化
     if "variables" in template:
         for var_name, range_list in template["variables"].items():
             if not range_list: continue
-            
             first_val = range_list[0]
-            # 判斷變數類型 (修正: 支援字串與列表)
             if isinstance(first_val, str) or isinstance(first_val, list):
                 variables[var_name] = random.choice(range_list)
             elif isinstance(first_val, (int, float)):
@@ -66,7 +63,6 @@ def generate_question_from_template(template):
                 else:
                     variables[var_name] = random.choice(range_list)
 
-    # 2. 處理 list 變數展開
     flat_vars = variables.copy()
     for k, v in variables.items():
         if isinstance(v, list):
@@ -74,7 +70,6 @@ def generate_question_from_template(template):
             for i, val in enumerate(v):
                 flat_vars[f"{k}_{i}"] = val
     
-    # 額外計算
     safe_env = {"math": math, "int": int, "abs": abs, **flat_vars}
     if "calc_extra" in template:
         for k, expr in template["calc_extra"].items():
@@ -83,10 +78,8 @@ def generate_question_from_template(template):
                 safe_env[k] = flat_vars[k]
             except: pass
 
-    # 3. 計算答案
     try:
         ans_val = eval(str(template["answer_formula"]), {"__builtins__": {}}, safe_env)
-        
         options = [str(ans_val)]
         if "wrong_formulas" in template:
             for form in template["wrong_formulas"]:
@@ -107,7 +100,6 @@ def generate_question_from_template(template):
         q_text = template["question_text"].format(**flat_vars)
         expl_text = template["explanation"].format(**flat_vars, ans=ans_val)
         
-        # 處理 SVG 參數覆蓋
         svg_vars = flat_vars.copy()
         if "params_override" in template:
             for k, v in template["params_override"].items():
@@ -126,14 +118,17 @@ def generate_question_from_template(template):
             "svg": svg
         }
     except Exception as e:
-        return {"q": f"生成錯誤: {e}", "options": ["Error"], "correct_ans": "Error", "expl": "", "svg": ""}
+        return {"q": f"Error: {e}", "options": ["Error"], "correct_ans": "Error", "expl": "", "svg": ""}
 
 # ==========================================
-# 3. APP 介面 (修正：清楚標示對錯)
+# 3. APP 介面
 # ==========================================
 st.set_page_config(page_title="數學習題載入器", page_icon="📂")
-st.title("📂 國中數學習題載入器 (V24.2 UI Fix)")
-st.info("請上傳 `questions.json` 題庫檔。")
+st.title("📂 國中數學習題載入器")
+
+if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
+if 'exam_results' not in st.session_state: st.session_state.exam_results = []
+if 'quiz_score' not in st.session_state: st.session_state.quiz_score = 0
 
 uploaded_file = st.file_uploader("上傳題庫檔 (.json)", type=['json'])
 
@@ -147,58 +142,79 @@ if uploaded_file:
         unit_options = list(data.keys()) + ["全範圍總複習"]
         unit = st.selectbox("選擇單元", unit_options)
         
-        if st.button("🚀 生成試卷 (10題不重複)"):
-            questions = []
-            target_pool = all_questions if unit == "全範圍總複習" else data[unit]
-            seen_texts = set()
-            attempts = 0
-            
-            needed = 10
-            pool_cycle = target_pool * (needed // len(target_pool) + 2)
-            random.shuffle(pool_cycle)
-            
-            for tmpl in pool_cycle:
-                if len(questions) >= needed or attempts > 50: break
-                for _ in range(5): 
-                    q = generate_question_from_template(tmpl)
-                    if q['q'] not in seen_texts and "Error" not in q['q']:
-                        seen_texts.add(q['q'])
-                        questions.append(q)
-                        break
-                attempts += 1
-            
-            st.session_state.quiz = questions
-            st.session_state.exam_finished = False
-            st.rerun()
+        if not st.session_state.exam_finished:
+            if st.button("🚀 生成試卷 (10題不重複)"):
+                questions = []
+                target_pool = all_questions if unit == "全範圍總複習" else data[unit]
+                seen_texts = set()
+                attempts = 0
+                needed = 10
+                pool_cycle = target_pool * (needed // len(target_pool) + 2)
+                random.shuffle(pool_cycle)
+                
+                for tmpl in pool_cycle:
+                    if len(questions) >= needed or attempts > 50: break
+                    for _ in range(5): 
+                        q = generate_question_from_template(tmpl)
+                        if q['q'] not in seen_texts and "Error" not in q['q']:
+                            seen_texts.add(q['q'])
+                            questions.append(q)
+                            break
+                    attempts += 1
+                
+                st.session_state.quiz = questions
+                st.session_state.exam_finished = False
+                st.rerun()
             
     except Exception as e:
         st.error(f"檔案讀取失敗: {e}")
 
-if 'quiz' in st.session_state and st.session_state.quiz:
-    with st.form("exam"):
-        score = 0
-        results = []
+if 'quiz' in st.session_state and st.session_state.quiz and not st.session_state.exam_finished:
+    with st.form("exam_form"):
+        user_answers = []
         for i, q in enumerate(st.session_state.quiz):
             st.markdown(f"**第 {i+1} 題：**")
             if q['svg']: st.markdown(q['svg'], unsafe_allow_html=True)
             st.markdown(f"### {q['q']}")
-            user_ans = st.radio(f"q_{i}", q['options'], label_visibility="collapsed")
+            ans = st.radio(f"q_{i}", q['options'], key=f"ans_{i}", label_visibility="collapsed")
             st.divider()
-            results.append((q, user_ans))
-            if user_ans == q['correct_ans']: score += 1
+            user_answers.append(ans)
             
         if st.form_submit_button("✅ 交卷"):
-            st.markdown(f"## 得分：{score * 10} 分")
-            for i, (q, user_ans) in enumerate(results):
-                # [修正] 這裡增加了對錯判斷與標示
-                is_correct = (user_ans == q['correct_ans'])
-                status = "✅ 正確" if is_correct else "❌ 錯誤"
-                
-                with st.expander(f"第 {i+1} 題詳解 ({status})"):
-                    st.write(f"**題目**：{q['q']}")
-                    st.write(f"**您的答案**：{user_ans}")
-                    st.write(f"**正確答案**：{q['correct_ans']}")
-                    if not is_correct:
-                        st.error(f"💡 解析：{q['expl']}")
-                    else:
-                        st.success(f"💡 解析：{q['expl']}")
+            score = 0
+            results = []
+            for i, q in enumerate(st.session_state.quiz):
+                u_ans = user_answers[i]
+                is_correct = (u_ans == q['correct_ans'])
+                if is_correct: score += 1
+                results.append({"q": q, "user": u_ans, "correct": is_correct})
+            
+            st.session_state.quiz_score = score * 10
+            st.session_state.exam_results = results
+            st.session_state.exam_finished = True
+            st.rerun()
+
+if st.session_state.exam_finished:
+    st.success(f"## 總分：{st.session_state.quiz_score} 分")
+    
+    for i, item in enumerate(st.session_state.exam_results):
+        q = item['q']
+        is_right = item['correct']
+        status = "✅ 正確" if is_right else "❌ 錯誤"
+        
+        with st.expander(f"第 {i+1} 題詳解 ({status})"):
+            if q['svg']: st.markdown(q['svg'], unsafe_allow_html=True)
+            st.write(f"**題目**：{q['q']}")
+            st.write(f"**您的答案**：{item['user']}")
+            st.write(f"**正確答案**：{q['correct_ans']}")
+            if not is_right:
+                st.error(f"💡 解析：{q['expl']}")
+            else:
+                st.info(f"💡 解析：{q['expl']}")
+    
+    st.divider()
+    if st.button("🔄 再來一次 (重新測驗)", use_container_width=True):
+        st.session_state.exam_finished = False
+        st.session_state.quiz = []
+        st.session_state.exam_results = []
+        st.rerun()
