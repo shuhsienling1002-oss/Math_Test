@@ -43,7 +43,7 @@ class SVGGenerator:
 
     @staticmethod
     def geometry_sas():
-        """畫出兩個三角形示意全等性質"""
+        """畫出全等性質示意圖"""
         return f"""<svg width="300" height="150" xmlns="http://www.w3.org/2000/svg"><path d="M20,120 L80,120 L50,40 Z" fill="none" stroke="black" stroke-width="2"/><text x="50" y="140" text-anchor="middle">A</text><path d="M150,120 L210,120 L180,40 Z" fill="none" stroke="black" stroke-width="2"/><text x="180" y="140" text-anchor="middle">B</text><text x="115" y="80" text-anchor="middle" font-weight="bold" fill="blue">全等?</text></svg>"""
 
     @staticmethod
@@ -52,111 +52,74 @@ class SVGGenerator:
         return f"""<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><path d="M100,20 L20,180 L180,180 Z" fill="none" stroke="black" stroke-width="2"/><line x1="100" y1="20" x2="100" y2="180" stroke="red" stroke-width="1" stroke-dasharray="4"/><line x1="20" y1="180" x2="140" y2="100" stroke="red" stroke-width="1" stroke-dasharray="4"/><line x1="180" y1="180" x2="60" y2="100" stroke="red" stroke-width="1" stroke-dasharray="4"/><circle cx="100" cy="126" r="4" fill="blue"/><text x="110" y="126" fill="blue" font-weight="bold">G (重心)</text></svg>"""
 
 # ==========================================
-# 2. 滿血版題庫 (Full Content with Updates)
+# 2. 特化版題庫 (Expanded DB)
 # ==========================================
 MATH_DB = {
-    # ======= 七年級 =======
-    "7上：整數運算與絕對值": [
-        {"q": "【圖解】數線上 -5 到 3 的距離？", "options": ["8", "2", "-8", "-2"], "ans": 0, "diff": "簡單", "svg_gen": lambda: SVGGenerator.number_line(-5, 3), "expl": "距離 = $3 - (-5) = 8$。"},
-        {"q": "計算 $(-8) + 12 + (-5)$？", "options": ["-1", "1", "25", "-25"], "ans": 0, "diff": "簡單", "expl": "$4 + (-5) = -1$。"},
-        {"q": "若 $|a| = 5$，且 $a$ 在原點左邊，則 $a$ 是？", "options": ["-5", "5", "0", "25"], "ans": 0, "diff": "簡單", "svg_gen": lambda: SVGGenerator.number_line(-5, 0), "expl": "原點左邊為負數，故為 -5。"},
-        {"q": "絕對值小於 4 的「整數」有幾個？", "options": ["7", "6", "3", "無限多"], "ans": 0, "diff": "中等", "expl": "$-3, -2, -1, 0, 1, 2, 3$，共 7 個。"}
+    # ================= 考前衝刺：第三章 三心 (九上) =================
+    "【衝刺】3-1：證明與推理": [
+        {"q": "下列哪一個條件「無法」確定兩個三角形全等？", "options": ["AAA", "SAS", "SSS", "AAS"], "ans": 0, "diff": "簡單", "expl": "AAA (三個角對應相等) 只能保證相似（形狀一樣），不能保證大小一樣（全等）。例如正三角形有大有小，但角度都是60度。"},
+        {"q": "【圖解】參考圖形，若兩三角形三邊長對應相等，是根據何種性質全等？", "options": ["SSS", "SAS", "ASA", "RHS"], "ans": 0, "diff": "簡單", "svg_gen": lambda: SVGGenerator.geometry_sas(), "expl": "三邊對應相等，即 Side-Side-Side (SSS) 全等性質。"},
+        {"q": "等腰三角形的「頂角平分線」，具有下列哪些性質？(多選概念)", "options": ["平分底邊且垂直底邊", "平分底邊但不垂直", "垂直底邊但不平分", "以上皆非"], "ans": 0, "diff": "中等", "expl": "等腰三角形性質：頂角平分線、底邊中線、底邊中垂線，三線合一。"},
+        {"q": "若 $\\triangle ABC \\cong \\triangle DEF$，且 $\\angle A=60^\\circ, \\angle B=50^\\circ$，則 $\\angle F=$？", "options": ["70度", "60度", "50度", "180度"], "ans": 0, "diff": "簡單", "expl": "$\\angle C = 180 - 60 - 50 = 70$。因為對應角相等，$\\angle F = \\angle C = 70^\\circ$。"},
+        {"q": "直角三角形中，斜邊上的中線長度等於？", "options": ["斜邊長的一半", "斜邊長", "一股長", "兩股和"], "ans": 0, "diff": "中等", "expl": "直角三角形外心在斜邊中點，故外接圓半徑 = 斜邊中線 = 斜邊/2。"},
+        {"q": "在 $\\triangle ABC$ 中，若 $\\angle A > \\angle B$，則對邊長度關係為何？", "options": ["$\\overline{BC} > \\overline{AC}$", "$\\overline{BC} < \\overline{AC}$", "$\\overline{BC} = \\overline{AC}$", "無法判斷"], "ans": 0, "diff": "簡單", "expl": "大角對大邊性質。$\\angle A$ 的對邊是 $\\overline{BC}$，$\\angle B$ 的對邊是 $\\overline{AC}$。"},
+        {"q": "四邊形中，兩雙對邊分別等長，則此四邊形必為？", "options": ["平行四邊形", "菱形", "梯形", "箏形"], "ans": 0, "diff": "中等", "expl": "兩雙對邊等長是平行四邊形的判別性質之一。"},
+        {"q": "關於「外角定理」：三角形任一外角，等於？", "options": ["兩內對角之和", "兩內對角之差", "相鄰內角", "180度"], "ans": 0, "diff": "簡單", "expl": "外角等於不相鄰的兩個內角和。"}
     ],
-    "7上：分數與指數": [
-        {"q": "計算 $\\frac{1}{2} - \\frac{2}{3}$？", "options": ["-1/6", "1/6", "-1", "1"], "ans": 0, "diff": "簡單", "expl": "通分：$\\frac{3}{6} - \\frac{4}{6} = -\\frac{1}{6}$。"},
-        {"q": "科學記號 $3.5 \\times 10^{-4}$ 小數點後第幾位開始不為 0？", "options": ["4", "3", "5", "10"], "ans": 0, "diff": "中等", "expl": "$-4$ 次方代表小數點後第 4 位。"},
-        {"q": "計算 $(-1)^5 \\times (-1)^4$？", "options": ["-1", "1", "2", "-2"], "ans": 0, "diff": "簡單", "expl": "$-1 \\times 1 = -1$。"}
-    ],
-    "7上：一元一次方程式": [
-        {"q": "解 $3x - 5 = 10$？", "options": ["5", "15", "3", "5/3"], "ans": 0, "diff": "簡單", "expl": "$3x = 15 \\Rightarrow x = 5$。"},
-        {"q": "甲比乙大 10 歲，和為 50，求乙？", "options": ["20", "30", "15", "25"], "ans": 0, "diff": "中等", "expl": "設乙 $x$，甲 $x+10$。$2x+10=50 \\Rightarrow 2x=40 \\Rightarrow x=20$。"},
-        {"q": "化簡 $2(x-3) - (x+1)$？", "options": ["$x-7$", "$x-5$", "$x-4$", "$2x-7$"], "ans": 0, "diff": "中等", "expl": "$2x-6-x-1 = x-7$。"}
-    ],
-    "7下：二元一次聯立方程式": [
-        {"q": "解 $\\begin{cases} x+y=4 \\\\ x-y=2 \\end{cases}$，求 x？", "options": ["3", "1", "2", "4"], "ans": 0, "diff": "簡單", "expl": "相加得 $2x=6 \\Rightarrow x=3$。"},
-        {"q": "若 $2x + 3y = 12$，且 $x, y$ 為正整數，有幾組解？", "options": ["1", "2", "3", "無限多"], "ans": 0, "diff": "困難", "expl": "當 $x=3, y=2$ (僅此一組正整數解)。"}
-    ],
-    "7下：直角坐標與圖形": [
-        {"q": "【圖解】點 (-3, 4) 在第幾象限？", "options": ["二", "一", "三", "四"], "ans": 0, "diff": "簡單", "svg_gen": lambda: SVGGenerator.coordinate_point(-3, 4), "expl": "左上為第二象限。"},
-        {"q": "【圖解】直線 $y = -2x + 1$ 的圖形走勢？", "options": ["左上右下", "右上左下", "水平", "垂直"], "ans": 0, "diff": "中等", "svg_gen": lambda: SVGGenerator.linear_func(-2, 1), "expl": "斜率 -2 小於 0，故為左上右下。"}
-    ],
-    "7下：比例與不等式": [
-        {"q": "若 $3:x = 2:6$，求 x？", "options": ["9", "4", "1", "18"], "ans": 0, "diff": "簡單", "expl": "$2x = 18 \\Rightarrow x = 9$。"},
-        {"q": "解不等式 $-2x > 6$？", "options": ["$x < -3$", "$x > -3$", "$x < 3$", "$x > 3$"], "ans": 0, "diff": "中等", "expl": "除以負數，開口方向要改變。"}
-    ],
-
-    # ======= 八年級 =======
-    "8上：乘法公式與多項式": [
-        {"q": "展開 $(x+3)^2$？", "options": ["$x^2+6x+9$", "$x^2+9$", "$x^2+3x+9$", "$x^2+6x+6$"], "ans": 0, "diff": "簡單", "expl": "$a^2 + 2ab + b^2$。"},
-        {"q": "計算 $102 \\times 98$？", "options": ["9996", "10004", "9999", "10000"], "ans": 0, "diff": "中等", "expl": "$(100+2)(100-2) = 100^2 - 4 = 9996$。"}
-    ],
-    "8上：平方根與畢氏定理": [
-        {"q": "【圖解】直角三角形股為 6, 8，斜邊？", "options": ["10", "14", "12", "100"], "ans": 0, "diff": "簡單", "svg_gen": lambda: SVGGenerator.triangle_label(6, 8, "?"), "expl": "$\\sqrt{36+64} = 10$。"},
-        {"q": "計算 $\\sqrt{12}$？", "options": ["$2\\sqrt{3}$", "$3\\sqrt{2}$", "6", "4"], "ans": 0, "diff": "簡單", "expl": "$\\sqrt{4 \\times 3} = 2\\sqrt{3}$。"}
-    ],
-    "8上：因式分解": [
-        {"q": "分解 $x^2 - 16$？", "options": ["$(x+4)(x-4)$", "$(x-4)^2$", "$(x+4)^2$", "$(x-8)(x+2)$"], "ans": 0, "diff": "簡單", "expl": "平方差公式。"},
-        {"q": "分解 $x^2 + 3x + 2$？", "options": ["$(x+1)(x+2)$", "$(x+3)(x+1)$", "$(x-1)(x-2)$", "無法分解"], "ans": 0, "diff": "中等", "expl": "十字交乘：1x2=2, 1+2=3。"}
-    ],
-    # --- 考前特化：八上第四章 一元二次方程式 ---
-    "8上-4-1：因式分解法解方程式": [
-        {"q": "解方程式 $(x-2)(x+3) = 0$ 的根？", "options": ["2 或 -3", "-2 或 3", "2 或 3", "-2 或 -3"], "ans": 0, "diff": "簡單", "expl": "兩數相乘為0，則其中一數必為0。$x-2=0$ 或 $x+3=0$。"},
-        {"q": "方程式 $x^2 - 5x = 0$ 的解？", "options": ["0 或 5", "5", "0", "1 或 5"], "ans": 0, "diff": "簡單", "expl": "提公因式：$x(x-5)=0$，故 $x=0$ 或 $x=5$。"},
-        {"q": "若 $x=1$ 是方程式 $x^2 + kx + 2 = 0$ 的一根，則 k = ？", "options": ["-3", "3", "-2", "1"], "ans": 0, "diff": "中等", "expl": "將 $x=1$ 代入：$1 + k + 2 = 0 \\Rightarrow k = -3$。"},
-        {"q": "解 $x^2 - 9 = 0$？", "options": ["3 或 -3", "3", "9", "81"], "ans": 0, "diff": "簡單", "expl": "因式分解 $(x+3)(x-3)=0$ 或移項 $x^2=9$。"},
-        {"q": "解方程式 $x^2 + 6x + 9 = 0$？", "options": ["-3 (重根)", "3 (重根)", "3 或 -3", "9"], "ans": 0, "diff": "中等", "expl": "完全平方式：$(x+3)^2 = 0 \\Rightarrow x = -3$ (重根)。"}
-    ],
-    "8上-4-2：配方法與公式解": [
-        {"q": "一元二次方程式 $ax^2 + bx + c = 0$ 的公式解為？", "options": ["$\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$", "$\\frac{-b \\pm \\sqrt{b^2+4ac}}{2a}$", "$\\frac{b \\pm \\sqrt{b^2-4ac}}{2a}$", "$\\frac{-b \\pm \\sqrt{b^2-4ac}}{a}$"], "ans": 0, "diff": "簡單", "expl": "這是必背公式！判別式是 $b^2-4ac$。"},
-        {"q": "判別方程式 $x^2 + x + 1 = 0$ 的解的情形？", "options": ["無解 (無實數解)", "相異兩根", "重根", "無法判斷"], "ans": 0, "diff": "中等", "expl": "判別式 $D = b^2 - 4ac = 1^2 - 4(1)(1) = -3 < 0$，故無實數解。"},
-        {"q": "若要將 $x^2 + 6x$ 配成完全平方式，需加上多少？", "options": ["9", "6", "3", "36"], "ans": 0, "diff": "簡單", "expl": "加上中間項係數一半的平方：$(6/2)^2 = 3^2 = 9$。"},
-        {"q": "解 $(x-1)^2 = 5$？", "options": ["$1 \\pm \\sqrt{5}$", "$\\pm \\sqrt{5}$", "$1 + \\sqrt{5}$", "6"], "ans": 0, "diff": "中等", "expl": "直接開根號：$x-1 = \\pm\\sqrt{5} \\Rightarrow x = 1 \\pm \\sqrt{5}$。"},
-        {"q": "方程式 $x^2 - 4x + 4 = 0$ 的判別式值為？", "options": ["0", "4", "8", "-4"], "ans": 0, "diff": "簡單", "expl": "$(-4)^2 - 4(1)(4) = 16 - 16 = 0$。"}
-    ],
-    "8上-4-3：應用問題": [
-        {"q": "兩連續正偶數的乘積為 48，求此兩數？", "options": ["6, 8", "4, 12", "8, 10", "-6, -8"], "ans": 0, "diff": "簡單", "expl": "設小數為 $x$，則 $x(x+2)=48$。驗算 $6 \\times 8 = 48$。"},
-        {"q": "正方形面積為 100 平方公分，邊長增加 x 後面積變為 144，求 x？", "options": ["2", "4", "12", "10"], "ans": 0, "diff": "中等", "expl": "原邊長 10。新邊長 $10+x$。$(10+x)^2 = 144 \\Rightarrow 10+x=12 \\Rightarrow x=2$。"},
-        {"q": "長方形長比寬多 3，面積 40，求寬？", "options": ["5", "8", "4", "10"], "ans": 0, "diff": "中等", "expl": "設寬 $x$，長 $x+3$。$x(x+3)=40 \Rightarrow x^2+3x-40=0 \Rightarrow (x+8)(x-5)=0$。邊長取正，$x=5$。"},
-        {"q": "某數的平方等於該數的 3 倍，求某數？", "options": ["0 或 3", "3", "0", "9"], "ans": 0, "diff": "中等", "expl": "$x^2 = 3x \Rightarrow x^2 - 3x = 0 \Rightarrow x(x-3)=0$。"}
-    ],
-    "8下：等差數列": [
-        {"q": "數列 1, 3, 5, 7, ... 第 10 項？", "options": ["19", "20", "21", "17"], "ans": 0, "diff": "簡單", "expl": "$a_{10} = 1 + 9 \\times 2 = 19$。"}
-    ],
-    "8下：幾何圖形": [
-        {"q": "正三角形的一個內角幾度？", "options": ["60", "90", "45", "180"], "ans": 0, "diff": "簡單", "expl": "180 除以 3。"}
-    ],
-
-    # ======= 九年級 =======
-    "9上：相似形與比例": [
-        {"q": "兩相似三角形邊長比 1:3，面積比？", "options": ["1:9", "1:3", "1:6", "3:1"], "ans": 0, "diff": "簡單", "expl": "面積比為邊長平方比。"},
-        {"q": "地圖比例尺 1:1000，圖上 5cm 代表實際？", "options": ["50m", "500m", "5m", "5000cm"], "ans": 0, "diff": "中等", "expl": "5000 cm = 50 m。"}
-    ],
-    "9上：圓的性質": [
-        {"q": "【圖解】一圓半徑 5，弦心距 3，弦長？", "options": ["8", "4", "10", "6"], "ans": 0, "diff": "困難", "svg_gen": lambda: SVGGenerator.triangle_label("?", 3, 5), "expl": "半弦長 = $\\sqrt{5^2-3^2}=4$。弦長 = $4 \\times 2 = 8$。"},
-        {"q": "切線與過切點的半徑夾角？", "options": ["90度", "45度", "60度", "180度"], "ans": 0, "diff": "簡單", "expl": "切線垂直半徑。"}
-    ],
-    # --- 考前特化：九上第三章 外心、內心與重心 ---
-    "9上-3-1：證明與推理": [
-        {"q": "【圖解】若兩三角形三邊對應相等 (SSS)，則兩三角形？", "options": ["全等", "相似但不全等", "面積相等但不全等", "無關"], "ans": 0, "diff": "簡單", "svg_gen": lambda: SVGGenerator.geometry_sas(), "expl": "SSS 是全等性質之一。"},
-        {"q": "下列何者「不是」全等三角形的判別性質？", "options": ["AAA", "SAS", "ASA", "SSS"], "ans": 0, "diff": "中等", "expl": "AAA (角角角) 只能保證相似 (形狀一樣)，大小不一定一樣。"},
-        {"q": "在 $\Delta ABC$ 中，若 $\angle A > \angle B$，則對邊關係？", "options": ["BC > AC", "BC < AC", "BC = AC", "無法判斷"], "ans": 0, "diff": "簡單", "expl": "大角對大邊，$\angle A$ 對邊 $BC$ 大於 $\angle B$ 對邊 $AC$。"},
-        {"q": "等腰三角形的兩底角？", "options": ["相等", "互補", "互餘", "無關"], "ans": 0, "diff": "簡單", "expl": "等腰三角形性質：等邊對等角。"},
-        {"q": "直角三角形斜邊上的中線長等於？", "options": ["斜邊的一半", "斜邊", "一股長", "無法確定"], "ans": 0, "diff": "中等", "expl": "直角三角形外心在斜邊中點，故中線長 = 半徑 = 斜邊一半。"}
-    ],
-    "9上-3-2：三角形的外心、內心與重心": [
+    "【衝刺】3-2：三角形的外心、內心與重心": [
         {"q": "【圖解】三角形的「重心」是哪三條線的交點？", "options": ["中線", "角平分線", "中垂線", "高"], "ans": 0, "diff": "簡單", "svg_gen": lambda: SVGGenerator.triangle_centroid(), "expl": "重心 (G) 是三條中線的交點。"},
-        {"q": "【圖解】重心到頂點的距離是到對邊中點距離的幾倍？", "options": ["2倍", "1.5倍", "3倍", "1倍"], "ans": 0, "diff": "簡單", "svg_gen": lambda: SVGGenerator.triangle_centroid(), "expl": "重心性質：頂點到重心 : 重心到中點 = 2 : 1。"},
-        {"q": "三角形的「外心」到哪裡等距離？", "options": ["三頂點", "三邊", "重心", "垂心"], "ans": 0, "diff": "中等", "expl": "外心是外接圓圓心，半徑相等，故到三頂點等距。"},
-        {"q": "三角形的「內心」到哪裡等距離？", "options": ["三邊", "三頂點", "重心", "垂心"], "ans": 0, "diff": "中等", "expl": "內心是內切圓圓心，半徑相等，故到三邊垂直距離相等。"},
-        {"q": "鈍角三角形的外心位置在？", "options": ["三角形外部", "三角形內部", "斜邊上", "頂點上"], "ans": 0, "diff": "中等", "expl": "銳角在內，直角在邊(斜邊中點)，鈍角在外。"},
-        {"q": "正三角形的重心、外心、內心位置？", "options": ["重合 (同一點)", "在同一直線上", "形成三角形", "無關"], "ans": 0, "diff": "簡單", "expl": "正三角形三心(含垂心)合一。"}
+        {"q": "三角形的「外心」到哪裡等距離？", "options": ["三頂點", "三邊", "重心", "垂心"], "ans": 0, "diff": "中等", "expl": "外心是外接圓圓心，半徑相等，故到三個頂點距離相等 (OA=OB=OC)。"},
+        {"q": "三角形的「內心」到哪裡等距離？", "options": ["三邊", "三頂點", "重心", "垂心"], "ans": 0, "diff": "中等", "expl": "內心是內切圓圓心，半徑相等，故到三邊的垂直距離相等。"},
+        {"q": "鈍角三角形的外心位置在？", "options": ["三角形外部", "三角形內部", "斜邊上", "頂點上"], "ans": 0, "diff": "中等", "expl": "口訣：銳角在內，直角在邊(斜邊中點)，鈍角在外。"},
+        {"q": "【圖解】重心到頂點的距離，是重心到對邊中點距離的幾倍？", "options": ["2倍", "1.5倍", "3倍", "1倍"], "ans": 0, "diff": "簡單", "svg_gen": lambda: SVGGenerator.triangle_centroid(), "expl": "重心性質：頂點到重心 : 重心到中點 = 2 : 1。"},
+        {"q": "直角三角形兩股為 6, 8，則外接圓半徑 R 為？", "options": ["5", "10", "4", "3"], "ans": 0, "diff": "中等", "svg_gen": lambda: SVGGenerator.triangle_label(6, 8, "?"), "expl": "斜邊 = $\\sqrt{6^2+8^2}=10$。外心在斜邊中點，故半徑 $R = 10/2 = 5$。"},
+        {"q": "正三角形的重心、外心、內心位置關係？", "options": ["重合 (同一點)", "在同一直線上", "形成三角形", "無關"], "ans": 0, "diff": "簡單", "expl": "正三角形非常完美，四心(含垂心)合一。"},
+        {"q": "若 I 為 $\\triangle ABC$ 的內心，且 $\\angle A = 70^\\circ$，則 $\\angle BIC = ？$", "options": ["$125^\\circ$", "$110^\\circ$", "$140^\\circ$", "$90^\\circ$"], "ans": 0, "diff": "困難", "expl": "內心角度公式：$\\angle BIC = 90^\\circ + \\frac{1}{2}\\angle A = 90 + 35 = 125^\\circ$。"},
+        {"q": "重心將三角形面積切分成幾等份？", "options": ["6", "3", "4", "2"], "ans": 0, "diff": "簡單", "expl": "三中線將面積切成 6 塊面積相等的小三角形。"},
+        {"q": "若 O 為 $\\triangle ABC$ 外心，$\\angle BOC = 100^\\circ$，則 $\\angle A$ 可能為？", "options": ["50度或130度", "50度", "100度", "80度"], "ans": 0, "diff": "困難", "expl": "若 A 在優弧上，$\\angle A = \\frac{1}{2} \\angle BOC = 50^\\circ$。若 A 在劣弧上(鈍角)，$\\angle A = 180 - 50 = 130^\\circ$。"}
     ],
-    "9下：二次函數": [
-        {"q": "【圖解】拋物線 $y = x^2$ 開口？", "options": ["向上", "向下", "向左", "向右"], "ans": 0, "diff": "簡單", "svg_gen": lambda: SVGGenerator.parabola(1, 0), "expl": "係數正，開口向上。"},
-        {"q": "【圖解】函數 $y = -2(x-1)^2 + 3$ 的頂點？", "options": ["(1, 3)", "(-1, 3)", "(1, -3)", "(-1, -3)"], "ans": 0, "diff": "中等", "svg_gen": lambda: SVGGenerator.parabola(-2, 3), "expl": "頂點式 $(h, k)$，此處為 $(1, 3)$。"}
+
+    # ================= 考前衝刺：第四章 一元二次方程式 (八上) =================
+    "【衝刺】4-1：因式分解法解方程式": [
+        {"q": "解方程式 $(x-3)(x+4) = 0$ 的根？", "options": ["3 或 -4", "-3 或 4", "3 或 4", "-3 或 -4"], "ans": 0, "diff": "簡單", "expl": "兩數相乘為0，必有一數為0。$x-3=0 \\Rightarrow x=3$；$x+4=0 \\Rightarrow x=-4$。"},
+        {"q": "方程式 $x^2 - 7x = 0$ 的解？", "options": ["0 或 7", "7", "0", "1 或 7"], "ans": 0, "diff": "簡單", "expl": "提公因式 x：$x(x-7)=0$，故 $x=0$ 或 $x=7$。"},
+        {"q": "若 $x=2$ 是方程式 $x^2 - kx + 6 = 0$ 的一根，則 k = ？", "options": ["5", "-5", "3", "-3"], "ans": 0, "diff": "中等", "expl": "將 $x=2$ 代入：$4 - 2k + 6 = 0 \\Rightarrow 10 = 2k \\Rightarrow k = 5$。"},
+        {"q": "解 $x^2 - 25 = 0$？", "options": ["5 或 -5", "5", "25", "625"], "ans": 0, "diff": "簡單", "expl": "平方差分解 $(x+5)(x-5)=0$，或直接移項開根號。"},
+        {"q": "解方程式 $x^2 - 10x + 25 = 0$？", "options": ["5 (重根)", "-5 (重根)", "5 或 -5", "25"], "ans": 0, "diff": "中等", "expl": "完全平方式：$(x-5)^2 = 0 \\Rightarrow x = 5$ (重根)。"},
+        {"q": "方程式 $(x-1)(x+2) = 4$ 的解？", "options": ["2 或 -3", "1 或 -2", "3 或 -2", "無解"], "ans": 0, "diff": "困難", "expl": "陷阱題！不能直接看括號。需展開整理：$x^2+x-2=4 \\Rightarrow x^2+x-6=0 \\Rightarrow (x+3)(x-2)=0$，解為 -3, 2。"},
+        {"q": "若兩根為 3, -2，則原方程式可能為？", "options": ["$(x-3)(x+2)=0$", "$(x+3)(x-2)=0$", "$x^2+x-6=0$", "$x^2-6=0$"], "ans": 0, "diff": "中等", "expl": "逆推回去：$(x-3)(x+2)=0$。"}
     ],
-    "9下：統計與機率": [
-        {"q": "【圖解】袋中 3 紅 2 白，抽紅球機率？", "options": ["3/5", "2/5", "1/5", "1/2"], "ans": 0, "diff": "簡單", "svg_gen": lambda: SVGGenerator.probability_balls(3, 2), "expl": "紅球3顆，總數5顆。"}
+    "【衝刺】4-2：配方法與公式解": [
+        {"q": "一元二次方程式 $ax^2 + bx + c = 0$ 的公式解為？", "options": ["$\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$", "$\\frac{-b \\pm \\sqrt{b^2+4ac}}{2a}$", "$\\frac{b \\pm \\sqrt{b^2-4ac}}{2a}$", "$\\frac{-b \\pm \\sqrt{b^2-4ac}}{a}$"], "ans": 0, "diff": "簡單", "expl": "這是必背公式！根號內為判別式 $D = b^2-4ac$。"},
+        {"q": "判別方程式 $x^2 + x + 5 = 0$ 的解的情形？", "options": ["無解 (無實數解)", "相異兩根", "重根", "無法判斷"], "ans": 0, "diff": "中等", "expl": "判別式 $D = b^2 - 4ac = 1^2 - 4(1)(5) = 1 - 20 = -19 < 0$，故無實數解。"},
+        {"q": "若要將 $x^2 + 8x$ 配成完全平方式，需加上多少？", "options": ["16", "8", "4", "64"], "ans": 0, "diff": "簡單", "expl": "加上中間項係數一半的平方：$(8/2)^2 = 4^2 = 16$。"},
+        {"q": "解 $(x+2)^2 = 7$？", "options": ["$-2 \\pm \\sqrt{7}$", "$2 \\pm \\sqrt{7}$", "$\\pm \\sqrt{7}$", "5"], "ans": 0, "diff": "中等", "expl": "直接開根號：$x+2 = \\pm\\sqrt{7} \\Rightarrow x = -2 \\pm \\sqrt{7}$。"},
+        {"q": "方程式 $x^2 - 4x + 4 = 0$ 的判別式值為？", "options": ["0", "4", "8", "-4"], "ans": 0, "diff": "簡單", "expl": "$D = (-4)^2 - 4(1)(4) = 16 - 16 = 0$ (重根)。"},
+        {"q": "若方程式有重根，則判別式 D 的值？", "options": ["D = 0", "D > 0", "D < 0", "D = 1"], "ans": 0, "diff": "簡單", "expl": "D=0 重根；D>0 相異兩根；D<0 無解。"},
+        {"q": "利用公式解解 $2x^2 - 3x - 1 = 0$？", "options": ["$\\frac{3 \\pm \\sqrt{17}}{4}$", "$\\frac{-3 \\pm \\sqrt{17}}{4}$", "$\\frac{3 \\pm \\sqrt{13}}{4}$", "無解"], "ans": 0, "diff": "困難", "expl": "$a=2, b=-3, c=-1$。$x = \\frac{-(-3) \\pm \\sqrt{(-3)^2 - 4(2)(-1)}}{2(2)} = \\frac{3 \\pm \\sqrt{9+8}}{4} = \\frac{3 \\pm \\sqrt{17}}{4}$。"}
+    ],
+    "【衝刺】4-3：應用問題": [
+        {"q": "兩連續正偶數的乘積為 48，求此兩數？", "options": ["6, 8", "4, 12", "8, 10", "-6, -8"], "ans": 0, "diff": "簡單", "expl": "設小數為 $x$，大數 $x+2$。$x(x+2)=48$。驗算 $6 \\times 8 = 48$。"},
+        {"q": "正方形面積為 100 平方公分，邊長增加 x 後面積變為 144，求 x？", "options": ["2", "4", "12", "10"], "ans": 0, "diff": "中等", "expl": "原邊長 $\\sqrt{100}=10$。新面積 144 邊長為 12。$10+x=12 \\Rightarrow x=2$。"},
+        {"q": "長方形長比寬多 3，面積 40，求寬？", "options": ["5", "8", "4", "10"], "ans": 0, "diff": "中等", "expl": "設寬 $x$，長 $x+3$。$x(x+3)=40 \\Rightarrow x^2+3x-40=0 \\Rightarrow (x+8)(x-5)=0$。邊長取正，$x=5$。"},
+        {"q": "某數的平方等於該數的 3 倍，求某數？", "options": ["0 或 3", "3", "0", "9"], "ans": 0, "diff": "中等", "expl": "$x^2 = 3x \\Rightarrow x^2 - 3x = 0 \\Rightarrow x(x-3)=0$，故 0 或 3。"},
+        {"q": "一個梯形上底 x，下底 x+2，高 4，面積 20，求 x？", "options": ["4", "3", "5", "6"], "ans": 0, "diff": "中等", "expl": "面積公式：$\\frac{(x + x+2) \\times 4}{2} = 20 \\Rightarrow (2x+2) \\times 2 = 20 \\Rightarrow 4x+4=20 \\Rightarrow 4x=16 \\Rightarrow x=4$。"},
+        {"q": "一物體從高空落下，距離 $h = 5t^2$，若落下距離為 125 公尺，需幾秒？", "options": ["5", "25", "10", "15"], "ans": 0, "diff": "簡單", "expl": "$125 = 5t^2 \\Rightarrow t^2 = 25 \\Rightarrow t=5$ (時間取正)。"}
+    ],
+
+    # ======= 其他單元 (保留供總複習) =======
+    "國一：整數與代數": [
+        {"q": "【圖解】數線上 -5 到 3 的距離？", "options": ["8", "2", "-8", "-2"], "ans": 0, "diff": "簡單", "svg_gen": lambda: SVGGenerator.number_line(-5, 3), "expl": "距離 = 大數 - 小數 = $3 - (-5) = 8$。"},
+        {"q": "計算 $(-15) + 8 - (-5)$ 的值？", "options": ["-2", "-12", "2", "-28"], "ans": 0, "diff": "簡單", "expl": "$-15 + 8 + 5 = -2$。"},
+        {"q": "解 $3x - 5 = 10$？", "options": ["5", "15", "3", "1"], "ans": 0, "diff": "簡單", "expl": "$3x=15 \\Rightarrow x=5$。"}
+    ],
+    "國二：乘法公式與數列": [
+        {"q": "展開 $(x+3)^2$？", "options": ["$x^2+6x+9$", "$x^2+9$", "$x^2+3x+9$", "$x^2+6x+6$"], "ans": 0, "diff": "簡單", "expl": "$a^2+2ab+b^2$。"},
+        {"q": "數列 1, 3, 5, 7 ... 第 10 項？", "options": ["19", "20", "21", "17"], "ans": 0, "diff": "簡單", "expl": "$1 + 9 \\times 2 = 19$。"}
+    ],
+    "國三：幾何證明與統計": [
+        {"q": "【圖解】參考圖形，若邊長放大 2 倍，面積放大幾倍？", "options": ["4倍", "2倍", "8倍", "不變"], "ans": 0, "diff": "簡單", "svg_gen": lambda: SVGGenerator.geometry_sas(), "expl": "面積比是邊長比的平方 ($2^2=4$)。"},
+        {"q": "投擲硬幣 3 次，出現「三正」的機率？", "options": ["1/8", "1/2", "3/8", "1/4"], "ans": 0, "diff": "中等", "expl": "$(1/2)^3 = 1/8$。"}
     ]
 }
 
@@ -178,18 +141,17 @@ def main():
     if 'exam_finished' not in st.session_state: st.session_state.exam_finished = False
 
     st.sidebar.title("💯 數學考前衝刺")
-    st.sidebar.caption("針對 108 課綱段考範圍特化")
+    st.sidebar.info("針對「一元二次方程式」與「三角形三心」進行細分與題庫擴充。")
     
     unit_options = list(MATH_DB.keys())
     selected_unit = st.sidebar.selectbox("請選擇練習單元", unit_options, on_change=reset_exam)
-    st.sidebar.success(f"目前選擇：{selected_unit}")
-    st.sidebar.info("💡 每個單元包含 5-10 題精選題，系統會隨機出題！")
-
+    
     st.title("💯 國中數學：考前衝刺特化版")
     st.markdown(f"#### 目前單元：{selected_unit}")
 
     if not st.session_state.exam_started:
-        st.info(f"準備好挑戰 **{selected_unit}** 了嗎？")
+        st.info(f"準備練習：**{selected_unit}**")
+        st.write("系統將隨機抽出題目進行測驗，請多刷幾次！")
         if st.button("🚀 開始測驗", use_container_width=True):
             st.session_state.exam_finished = False 
             st.session_state.exam_results = {} 
@@ -204,7 +166,7 @@ def main():
 
     else:
         total_q = len(st.session_state.current_questions)
-        st.progress(0, text=f"進度：0/{total_q}")
+        st.progress(0, text=f"題目：{total_q} 題")
 
         with st.form("math_exam_form"):
             questions = st.session_state.current_questions
@@ -212,7 +174,7 @@ def main():
                 st.markdown(f"**第 {idx+1} 題：**")
                 if q.get("svg_gen"):
                     st.markdown(q["svg_gen"](), unsafe_allow_html=True)
-                    st.caption("👆 請參考上方圖形作答")
+                    st.caption("👆 請參考圖形作答")
                 st.markdown(f"### {q['q']}")
                 st.radio("選項", q['options'], key=f"q_{idx}", index=None, label_visibility="collapsed")
                 st.divider()
