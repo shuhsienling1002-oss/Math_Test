@@ -1,0 +1,324 @@
+{
+  "3-1 證明與推理": [
+    {
+      "question_text": "若已知兩個三角形滿足「{prop}」條件，則它們的關係為何？",
+      "variables": { "prop": ["SSS", "SAS", "ASA", "AAS", "RHS"] },
+      "answer_formula": "'必全等'",
+      "fixed_options": ["必全等", "必相似但不一定全等", "面積相等但不一定全等", "無法判斷"],
+      "explanation": "{prop} 是全等判別性質之一，可以確定兩三角形全等。",
+      "svg": "geometry_sas"
+    },
+    {
+      "question_text": "三角形 ABC 中，若 ∠A={a}°，∠B={b}°，則 ∠C 的外角是多少度？",
+      "variables": { "a": [30, 80], "b": [30, 80] },
+      "answer_formula": "a + b",
+      "wrong_formulas": ["180 - (a + b)", "180", "90"],
+      "explanation": "根據外角定理，外角等於不相鄰兩內角和：{a} + {b} = {ans}。",
+      "svg": "none"
+    },
+    {
+      "question_text": "在 △ABC 中，若 ∠A > ∠B > ∠C，則下列邊長關係何者正確？",
+      "variables": {},
+      "answer_formula": "'BC > AC > AB'",
+      "fixed_options": ["BC > AC > AB", "AB > AC > BC", "AC > BC > AB", "無法判斷"],
+      "explanation": "大角對大邊：∠A (最大) 對邊 BC，∠C (最小) 對邊 AB。",
+      "svg": "none"
+    },
+    {
+      "question_text": "在 △ABC 中，若邊長 AB > AC > BC，則角度關係為何？",
+      "variables": {},
+      "answer_formula": "'∠C > ∠B > ∠A'",
+      "fixed_options": ["∠C > ∠B > ∠A", "∠A > ∠B > ∠C", "∠A = ∠B = ∠C", "無法判斷"],
+      "explanation": "大邊對大角：AB (最大) 對角 ∠C，BC (最小) 對角 ∠A。",
+      "svg": "none"
+    },
+    {
+      "question_text": "下列何者是「{shape}」必具備的對角線性質？",
+      "variables": { "shape": ["菱形", "矩形", "平行四邊形", "箏形"] },
+      "answer_formula": "'互相垂直平分' if shape=='菱形' else ('等長且互相平分' if shape=='矩形' else ('互相垂直' if shape=='箏形' else '互相平分'))",
+      "wrong_formulas": ["'只有一條平分'", "'無特殊性質'", "'以上皆非'"],
+      "explanation": "{shape} 的性質為：{ans}。",
+      "svg": "none"
+    },
+    {
+      "question_text": "等腰三角形的「頂角平分線」具有什麼性質？",
+      "variables": {},
+      "answer_formula": "'垂直平分底邊'",
+      "fixed_options": ["垂直平分底邊", "只平分不垂直", "只垂直不平分", "無特殊性質"],
+      "explanation": "等腰三角形三線合一：頂角平分線同時是底邊中垂線。",
+      "svg": "none"
+    },
+    {
+      "question_text": "等腰三角形頂角為 {deg} 度，求其底角？",
+      "variables": { "deg": [40, 50, 70, 80] },
+      "answer_formula": "int((180 - deg) / 2)",
+      "wrong_formulas": ["deg", "180 - deg", "90"],
+      "explanation": "(180 - {deg}) / 2 = {ans}。",
+      "svg": "none"
+    },
+    {
+      "question_text": "工程師設計大橋結構時，常利用三角形的哪種全等性質來確保結構穩固？",
+      "variables": {},
+      "answer_formula": "'SSS'",
+      "fixed_options": ["SSS", "AAA", "SSA", "以上皆非"],
+      "explanation": "SSS 性質確保了三角形結構的唯一性與穩定性。",
+      "svg": "geometry_sas"
+    }
+  ],
+  "3-2 三角形的外心、內心與重心": [
+    {
+      "question_text": "三角形的「{name}」是哪三條線的交點？",
+      "variables": { "pair": [["重心","中線"], ["外心","中垂線"], ["內心","角平分線"]] },
+      "answer_formula": "pair[1]",
+      "fixed_options": ["中線", "中垂線", "角平分線", "高"],
+      "explanation": "{pair_0} 是三條{ans}的交點。",
+      "svg": "center_def_dynamic"
+    },
+    {
+      "question_text": "關於「鈍角三角形」的外心位置，下列何者正確？",
+      "variables": {},
+      "answer_formula": "'在三角形外部'",
+      "fixed_options": ["在三角形外部", "在三角形內部", "在邊上", "在頂點"],
+      "explanation": "銳角在內，直角在邊，鈍角在外。",
+      "svg": "none"
+    },
+    {
+      "question_text": "哪一種三角形的重心、外心、內心會重合在同一點？",
+      "variables": {},
+      "answer_formula": "'正三角形'",
+      "fixed_options": ["正三角形", "等腰三角形", "直角三角形", "任意三角形"],
+      "explanation": "正三角形非常完美，三心合一。",
+      "svg": "none"
+    },
+    {
+      "question_text": "若中線 AD 長為 {m}，G 為重心，求 AG (頂點到重心) 的長度？",
+      "variables": { "m": [12, 15, 18, 24, 30] },
+      "answer_formula": "int(m * 2 / 3)",
+      "wrong_formulas": ["int(m / 2)", "int(m / 3)", "m"],
+      "explanation": "重心性質：頂點到重心佔中線長度的 2/3。{m} × 2/3 = {ans}。",
+      "svg": "triangle_centroid"
+    },
+    {
+      "question_text": "若中線 AD 長為 {m}，G 為重心，求 GD (重心到邊) 的長度？",
+      "variables": { "m": [12, 15, 18, 24, 30] },
+      "answer_formula": "int(m * 1 / 3)",
+      "wrong_formulas": ["int(m * 2 / 3)", "int(m / 2)", "m"],
+      "explanation": "重心性質：重心到邊佔中線長度的 1/3。{m} × 1/3 = {ans}。",
+      "svg": "triangle_centroid"
+    },
+    {
+      "question_text": "直角三角形兩股長為 {triple_0}, {triple_1}，求外接圓半徑？",
+      "variables": { "triple": [[6,8,10], [5,12,13], [8,15,17], [10,24,26]] },
+      "answer_formula": "triple[2] / 2",
+      "wrong_formulas": ["triple[2]", "triple[0] + triple[1]"],
+      "explanation": "斜邊為 {triple_2}。直角三角形外心在斜邊中點，半徑 = {triple_2} / 2 = {ans}。",
+      "svg": "triangle_circumcenter"
+    },
+    {
+      "question_text": "I 為內心，若 ∠A = {a}°，求 ∠BIC？",
+      "variables": { "a": [40, 50, 60, 70, 80] },
+      "answer_formula": "90 + int(a / 2)",
+      "wrong_formulas": ["180 - a", "90 + a", "2 * a"],
+      "explanation": "內心角度公式：90 + A/2 = 90 + {a}/2 = {ans}。",
+      "svg": "triangle_incenter"
+    },
+    {
+      "question_text": "O 為銳角三角形外心，若 ∠A = {a}°，求 ∠BOC？",
+      "variables": { "a": [40, 50, 60, 70] },
+      "answer_formula": "2 * a",
+      "wrong_formulas": ["90 + int(a / 2)", "a", "180 - a"],
+      "explanation": "外心角度(圓心角)是圓周角的2倍：2 × {a} = {ans}。",
+      "svg": "triangle_circumcenter"
+    },
+    {
+      "question_text": "若 △ABC 面積為 {area}，G 為重心，則 △GAB 的面積為何？",
+      "variables": { "area": [12, 24, 30, 36, 60] },
+      "answer_formula": "int(area / 3)",
+      "wrong_formulas": ["int(area / 6)", "int(area / 2)", "int(area / 4)"],
+      "explanation": "重心與三頂點連線將面積平分 3 等份。{area} / 3 = {ans}。",
+      "svg": "center_def_dynamic",
+      "params_override": {"pair": ["重心","中線"]}
+    },
+    {
+      "question_text": "直角三角形兩股 {triple_0}, {triple_1}，斜邊 {triple_2}，求內切圓半徑？",
+      "variables": { "triple": [[3,4,5], [5,12,13], [8,15,17], [6,8,10]] },
+      "answer_formula": "int((triple[0] + triple[1] - triple[2]) / 2)",
+      "wrong_formulas": ["int((triple[0] + triple[1] - triple[2]) / 2) + 1", "triple[2] / 2", "triple[2]"],
+      "explanation": "內半徑 r = (兩股和 - 斜邊)/2 = ({triple_0}+{triple_1}-{triple_2})/2 = {ans}。",
+      "svg": "none"
+    },
+    {
+      "question_text": "三個村莊 A, B, C 想要蓋一座共用的消防局，且到三個村莊距離相等，應選在哪一點？",
+      "variables": {},
+      "answer_formula": "'外心'",
+      "fixed_options": ["外心", "內心", "重心", "垂心"],
+      "explanation": "到三頂點等距是外心的性質。",
+      "svg": "triangle_circumcenter"
+    },
+    {
+      "question_text": "美術課剪了一個三角形紙板，小明想用指尖頂住紙板讓它保持平衡不掉落，他該頂在哪裡？",
+      "variables": {},
+      "answer_formula": "'重心'",
+      "fixed_options": ["重心", "外心", "內心", "頂點"],
+      "explanation": "重心是物理上的重量中心。",
+      "svg": "triangle_centroid",
+      "params_override": {"m": "?"}
+    }
+  ],
+  "4-1 因式分解法": [
+    {
+      "question_text": "解方程式 (x - {r1})(x - {r2}) = 0？",
+      "variables": { "r1": [1, 9], "r2": [-9, -1] },
+      "answer_formula": "str(r1) + ' 或 ' + str(r2)",
+      "wrong_formulas": ["str(-r1) + ' 或 ' + str(-r2)", "str(r1) + ' 或 ' + str(-r2)"],
+      "explanation": "令括號內為 0，可得 x={r1} 或 x={r2}。",
+      "svg": "roots_line"
+    },
+    {
+      "question_text": "解方程式 x² - {k}x = 0？",
+      "variables": { "k": [2, 9] },
+      "answer_formula": "'0 或 ' + str(k)",
+      "wrong_formulas": ["str(k)", "'0'", "'1 或 ' + str(k)"],
+      "explanation": "提 x：x(x-{k})=0，故 x=0 或 {k}。",
+      "svg": "roots_0_k"
+    },
+    {
+      "question_text": "解方程式 x² - {ksq} = 0？",
+      "variables": { "k": [3, 9] },
+      "answer_formula": "'±' + str(k)",
+      "wrong_formulas": ["str(k)", "str(ksq)", "'無解'"],
+      "explanation": "x²={ksq} → x=±{k}。",
+      "calc_extra": {"ksq": "k*k"},
+      "svg": "roots_sq"
+    },
+    {
+      "question_text": "方程式 (x-{k})² = 0 有幾個解？",
+      "variables": { "k": [1, 9] },
+      "answer_formula": "'1個 (重根)'",
+      "fixed_options": ["1個 (重根)", "2個相異解", "無解", "無限多"],
+      "explanation": "完全平方式為重根，視為 1 個解 (x={k})。",
+      "svg": "roots_line",
+      "params_override": {"r1": "k", "r2": "k"}
+    },
+    {
+      "question_text": "若 x={k} 是方程式 x² + ax + b = 0 的一根，則下列何者必成立？",
+      "variables": { "k": [2, 9] },
+      "answer_formula": "'將 ' + str(k) + ' 代入方程式等號成立'",
+      "wrong_formulas": ["'將 -' + str(k) + ' 代入方程式等號成立'", "'a 必為正數'", "'b 必為負數'"],
+      "explanation": "方程式的根定義：代入後使等號成立。",
+      "svg": "none"
+    },
+    {
+      "question_text": "已知 x={r_val} 是方程式 x² + kx = 0 的一個解，請問係數 k 是多少？",
+      "variables": { "k": [2, 9] },
+      "answer_formula": "k",
+      "wrong_formulas": ["-k", "0", "1"],
+      "calc_extra": {"r_val": "-k"},
+      "explanation": "代入 x={r_val}：({r_val})² + k({r_val}) = 0 → {k*k} - {k}k = 0 → k={k}。",
+      "svg": "none"
+    },
+    {
+      "question_text": "若方程式的兩根互為相反數 (例如 3, -3)，則該方程式缺哪一項？",
+      "variables": {},
+      "answer_formula": "'一次項 (x項)'",
+      "fixed_options": ["一次項 (x項)", "常數項", "二次項", "無法判斷"],
+      "explanation": "兩根和為 0，根據根與係數關係，一次項係數必為 0。",
+      "svg": "none"
+    },
+    {
+      "question_text": "小明想兩個數，一個減 {k1}，一個加 {k2}，相乘為 0。這兩個數可能是？",
+      "variables": { "k1": [2, 5], "k2": [3, 6] },
+      "answer_formula": "str(k1) + ' 或 ' + str(-k2)",
+      "fixed_options": ["{k1} 或 -{k2}", "-{k1} 或 {k2}", "{k1} 或 {k2}", "0"],
+      "explanation": "方程式 (x-{k1})(x+{k2})=0，故 x={k1} 或 x=-{k2}。",
+      "svg": "none"
+    }
+  ],
+  "4-2 配方法與公式解": [
+    {
+      "question_text": "求 x² + 4x + 1 = 0 的判別式 D？",
+      "variables": {},
+      "answer_formula": "12",
+      "fixed_options": ["12", "16", "0", "-4"],
+      "explanation": "D = b²-4ac = 16 - 4 = 12。",
+      "svg": "none"
+    },
+    {
+      "question_text": "若一元二次方程式的判別式 D < 0，代表圖形與 x 軸的關係？",
+      "variables": {},
+      "answer_formula": "'沒有交點'",
+      "fixed_options": ["沒有交點", "交於兩點", "切於一點", "重合"],
+      "explanation": "D<0 無實根，圖形懸空不相交。",
+      "svg": "none"
+    },
+    {
+      "question_text": "將 x² + {k}x 配成完全平方式，需加上？",
+      "variables": { "k": [6, 8, 10, 12] },
+      "answer_formula": "int((k/2)**2)",
+      "wrong_formulas": ["k", "k*2", "1"],
+      "explanation": "加上 (一次項係數一半)² = ({k}/2)² = {ans}。",
+      "svg": "area_square_k"
+    },
+    {
+      "question_text": "背誦公式解：分母是多少？",
+      "variables": {},
+      "answer_formula": "'2a'",
+      "fixed_options": ["2a", "a", "2", "4a"],
+      "explanation": "公式解分母為 2a。",
+      "svg": "none"
+    },
+    {
+      "question_text": "棒球飛行的軌跡是一個二次函數，若判別式 D > 0，代表球的高度與某個水平線有幾個交點？",
+      "variables": {},
+      "answer_formula": "'2個'",
+      "fixed_options": ["2個", "1個", "0個", "無限多"],
+      "explanation": "D>0 代表有兩個相異實根（交點）。",
+      "svg": "none"
+    }
+  ],
+  "4-3 應用問題": [
+    {
+      "question_text": "解應用問題時，若算出邊長為 -5，應該如何處理？",
+      "variables": {},
+      "answer_formula": "'不合 (邊長需為正)'",
+      "fixed_options": ["不合 (邊長需為正)", "取絕對值", "直接當作答案", "重算"],
+      "explanation": "幾何長度必須大於 0。",
+      "svg": "none"
+    },
+    {
+      "question_text": "某數 x 的平方等於 {k}x，求 x？",
+      "variables": { "k": [2, 3, 5, 7] },
+      "answer_formula": "'0 或 ' + str(k)",
+      "fixed_options": ["0 或 {k}", "{k}", "0", "1"],
+      "explanation": "x² - {k}x = 0 → x(x-{k}) = 0。",
+      "svg": "roots_0_k"
+    },
+    {
+      "question_text": "某正方形農地面積為 {s}*{s} (即 {s}的平方) 平方公尺，求邊長？",
+      "variables": { "s": [5, 15] },
+      "answer_formula": "s",
+      "wrong_formulas": ["s*2", "s*s"],
+      "explanation": "邊長 = 開根號面積 = {s}。",
+      "svg": "area_square"
+    },
+    {
+      "question_text": "圖書館架上有兩本連續編號的書，將它們的編號相乘得到 {prod}，請問這兩本書的編號是？",
+      "variables": { "s": [3, 12] },
+      "answer_formula": "str(s) + ', ' + str(s+1)",
+      "wrong_formulas": ["str(s-1) + ', ' + str(s)", "'無解'", "'1, 2'"],
+      "calc_extra": {"prod": "s*(s+1)"},
+      "explanation": "驗算：{s} × {s+1} = {prod}。",
+      "svg": "roots_line",
+      "params_override": {"r1": "s", "r2": "s+1"}
+    },
+    {
+      "question_text": "物體落下距離公式 h=5t²。若落下 {h} 公尺，需時幾秒？",
+      "variables": { "t": [2, 5] },
+      "answer_formula": "t",
+      "wrong_formulas": ["t*2", "t*5"],
+      "explanation": "將高度代入公式逆推：{h} = 5t² → t²={tsq} → t={ans}。",
+      "calc_extra": {"h": "5*t*t", "tsq": "t*t"},
+      "svg": "none"
+    }
+  ]
+}
