@@ -126,8 +126,10 @@ def create_dataset():
         q_type = random.randint(1, 4)
         q_data = None
         if q_type == 1: # 角度 BIC (範圍擴大)
-            a = random.randint(10, 100); ans = 90 + a//2
-            q_data = {"type_id": 1, "q": f"I 為內心，若 ∠A={a}°，求 ∠BIC？", "options": [str(ans), str(90+a), str(180-a), str(180-ans)], "ans": str(ans), "expl": "90+A/2", "svg": "triangle_incenter_angle", "params": {"a":a}}
+            # [修正] 改用除法 /，並使用 :g 格式化，保留小數點 (如 95.5)
+            a = random.randint(10, 100); val = 90 + a / 2
+            ans = f"{val:g}"
+            q_data = {"type_id": 1, "q": f"I 為內心，若 ∠A={a}°，求 ∠BIC？", "options": [ans, str(90+a), str(180-a), f"{180-val:g}"], "ans": ans, "expl": "90+A/2", "svg": "triangle_incenter_angle", "params": {"a":a}}
         elif q_type == 2: # 面積求r (範圍擴大)
             s=random.randint(10, 100); r=random.randint(2, 15); area=s*r//2
             q_data = {"type_id": 2, "q": f"三角形周長 {s}，面積 {area}，求內切圓半徑？", "options": [str(r), str(s), str(area//s), str(r*2)], "ans": str(r), "expl": "rs/2", "svg": "triangle_incenter_concept", "params": {}}
